@@ -1,0 +1,160 @@
+// Prisma Schema — Connexode Virtual Internship Platform
+// Generated for PostgreSQL
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ── Enums ────────────────────────────────────────────────────
+
+enum Role {
+  STUDENT
+  MENTOR
+  ADMIN
+}
+
+enum SubmissionStatus {
+  PENDING
+  REVIEWING
+  APPROVED
+  REJECTED
+}
+
+enum EnrollmentStatus {
+  ACTIVE
+  COMPLETED
+  DROPPED
+}
+
+// ── Models ───────────────────────────────────────────────────
+
+model User {
+  id          String   @id @default(cuid())
+  name        String
+  username    String   @unique
+  email       String   @unique
+  role        Role     @default(STUDENT)
+  points      Int      @default(0)
+  avatarUrl   String?
+  bio         String?
+  linkedinUrl String?
+  githubUrl   String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  enrollments Enrollment[]
+  submissions Submission[]
+  badges      UserBadge[]
+
+  @@map("users")
+}
+
+model Track {
+  id            String   @id @default(cuid())
+  title         String
+  slug          String   @unique
+  description   String
+  icon          String   // Lucide icon name
+  color         String   // Hex color for UI
+  durationWeeks Int
+  isPublished   Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Relations
+  weeklyTasks WeeklyTask[]
+  enrollments Enrollment[]
+
+  @@map("tracks")
+}
+
+model WeeklyTask {
+  id             String   @id @default(cuid())
+  trackId        String
+  weekNo         Int
+  dayNo          Int
+  title          String
+  taskDetails    String   @db.Text
+  instructions   Json     // String[] stored as JSON array
+  estimatedHours Float    @default(3)
+  points         Int      @default(100)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  // Relations
+  track       Track        @relation(fields: [trackId], references: [id], onDelete: Cascade)
+  submissions Submission[]
+
+  @@unique([trackId, weekNo, dayNo])
+  @@map("weekly_tasks")
+}
+
+model Submission {
+  id          String           @id @default(cuid())
+  userId      String
+  taskId      String
+  githubUrl   String
+  liveUrl     String?
+  status      SubmissionStatus @default(PENDING)
+  feedback    String?          @db.Text
+  submittedAt DateTime         @default(now())
+  reviewedAt  DateTime?
+  updatedAt   DateTime         @updatedAt
+
+  // Relations
+  user User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  task WeeklyTask @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, taskId]) // One submission per task per user
+  @@map("submissions")
+}
+
+model Badge {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String
+  icon        String   // Lucide icon name
+  color       String   // Hex color
+  createdAt   DateTime @default(now())
+
+  // Relations
+  users UserBadge[]
+
+  @@map("badges")
+}
+
+model UserBadge {
+  userId    String
+  badgeId   String
+  earnedAt  DateTime @default(now())
+
+  // Relations
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  badge Badge @relation(fields: [badgeId], references: [id], onDelete: Cascade)
+
+  @@id([userId, badgeId])
+  @@map("user_badges")
+}
+
+model Enrollment {
+  id          String           @id @default(cuid())
+  userId      String
+  trackId     String
+  status      EnrollmentStatus @default(ACTIVE)
+  enrolledAt  DateTime         @default(now())
+  completedAt DateTime?
+  updatedAt   DateTime         @updatedAt
+
+  // Relations
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  track Track @relation(fields: [trackId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, trackId]) // One enrollment per track per user
+  @@map("enrollments")
+}
