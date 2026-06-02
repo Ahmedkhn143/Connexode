@@ -17,19 +17,38 @@ interface TaskListProps {
   weekNo?: number;
 }
 
-export default function TaskList({ weekNo = 1 }: TaskListProps) {
+export default function TaskList({ weekNo }: TaskListProps) {
+  const activeWeek = weekNo ?? MOCK_USER.currentWeek;
   const tasks = WEEKLY_TASKS.filter(
-    (t) => t.weekNo === weekNo && t.trackId === MOCK_USER.enrolledTrackId
+    (t) => t.weekNo === activeWeek && t.trackId === MOCK_USER.enrolledTrackId
   );
+  const completedCount = tasks.filter((t) => t.status === "APPROVED").length;
+
+  if (!tasks.length) {
+    return (
+      <div className="rounded-2xl border border-white/8 bg-white/4 p-6 backdrop-blur-xl">
+        <div className="mb-4 flex items-center justify-between">
+          <h2 className="font-display text-lg font-bold text-white">
+            Week {activeWeek} — Day-by-Day Tasks
+          </h2>
+          <span className="text-xs text-slate-500">0/0 completed</span>
+        </div>
+        <div className="rounded-xl border border-white/6 bg-white/4 p-4 text-sm text-slate-400">
+          Tasks for this week will unlock soon. Check the 8-week roadmap to preview
+          what is coming next.
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="rounded-2xl border border-white/8 bg-white/4 p-6 backdrop-blur-xl">
       <div className="mb-5 flex items-center justify-between">
         <h2 className="font-display text-lg font-bold text-white">
-          Week {weekNo} — Day-by-Day Tasks
+          Week {activeWeek} — Day-by-Day Tasks
         </h2>
         <span className="text-xs text-slate-500">
-          {tasks.filter((t) => t.status === "APPROVED").length}/{tasks.length} completed
+          {completedCount}/{tasks.length} completed
         </span>
       </div>
 

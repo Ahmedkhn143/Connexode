@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import StatsRow from "@/components/dashboard/StatsRow";
 import PhaseProgress from "@/components/dashboard/PhaseProgress";
 import TaskList from "@/components/dashboard/TaskList";
-import { MOCK_USER, TRACKS, SUBMISSIONS } from "@/lib/mock-data";
+import TrackRoadmap from "@/components/dashboard/TrackRoadmap";
+import { MOCK_USER, TRACKS, SUBMISSIONS, WEEKLY_TASKS } from "@/lib/mock-data";
 import { BadgeCheck, GitBranch } from "lucide-react";
 import Link from "next/link";
 
@@ -12,7 +13,18 @@ export const metadata: Metadata = {
 
 export default function DashboardPage() {
   const track = TRACKS.find((t) => t.id === MOCK_USER.enrolledTrackId)!;
-  const latestSubmission = SUBMISSIONS.filter((s) => s.status === "PENDING")[0];
+  const currentWeek = MOCK_USER.currentWeek;
+  const weekTasks = WEEKLY_TASKS.filter(
+    (t) => t.trackId === MOCK_USER.enrolledTrackId && t.weekNo === currentWeek
+  );
+  const continueTask =
+    weekTasks.find((t) => t.status === "IN_PROGRESS") ??
+    weekTasks.find((t) => t.status === "SUBMITTED") ??
+    weekTasks.find((t) => t.status !== "LOCKED") ??
+    weekTasks[0];
+  const pendingCount = SUBMISSIONS.filter(
+    (s) => s.userId === MOCK_USER.id && s.status === "PENDING"
+  ).length;
 
   return (
     <div className="mx-auto max-w-5xl space-y-6">
@@ -43,20 +55,27 @@ export default function DashboardPage() {
             </p>
           </div>
           <div className="flex flex-col items-end gap-2">
-            {latestSubmission && (
+            {pendingCount > 0 && (
               <div className="flex items-center gap-2 rounded-xl border border-blue-400/20 bg-blue-400/10 px-4 py-2.5 text-sm">
                 <GitBranch size={14} className="text-blue-400" />
                 <span className="text-slate-300">
-                  <span className="font-semibold text-blue-400">1 submission</span> pending review
+                  <span className="font-semibold text-blue-400">{pendingCount} submission</span>
+                  {pendingCount === 1 ? "" : "s"} pending review
                 </span>
               </div>
             )}
-            <Link
-              href={`/dashboard/task/task_w1d4`}
-              className="flex items-center gap-2 rounded-xl border border-yellow-400/20 bg-yellow-400/10 px-4 py-2.5 text-sm font-semibold text-yellow-400 transition-all hover:bg-yellow-400/15"
-            >
-              Continue: Day 4 — Dark Mode Toggle →
-            </Link>
+            {continueTask ? (
+              <Link
+                href={`/dashboard/task/${continueTask.id}`}
+                className="flex items-center gap-2 rounded-xl border border-yellow-400/20 bg-yellow-400/10 px-4 py-2.5 text-sm font-semibold text-yellow-400 transition-all hover:bg-yellow-400/15"
+              >
+                Continue: Day {continueTask.dayNo} — {continueTask.title} →
+              </Link>
+            ) : (
+              <div className="rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-slate-400">
+                Week {currentWeek} tasks unlock soon.
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -67,8 +86,11 @@ export default function DashboardPage() {
       {/* Progress + Tasks — side by side on large screens */}
       <div className="grid gap-6 xl:grid-cols-[1fr_1.6fr]">
         <PhaseProgress />
-        <TaskList weekNo={1} />
+        <TaskList weekNo={currentWeek} />
       </div>
+
+      {/* 8-week roadmap */}
+      <TrackRoadmap />
 
       {/* Recent Activity */}
       <div className="rounded-2xl border border-white/8 bg-white/4 p-6 backdrop-blur-xl">

@@ -10,7 +10,7 @@ const STEPS = [
     icon: Briefcase,
     title: "Choose Your Track",
     description:
-      "Pick from 6 industry-aligned tech tracks. Each is curated with mentors who currently work at top companies.",
+      "Pick from 8 industry-aligned tech tracks. Each is curated with mentors who currently work at top companies.",
     color: "#00F5FF",
   },
   {

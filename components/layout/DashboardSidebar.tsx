@@ -8,13 +8,14 @@ import {
   User, LogOut, Award, BookOpen, Flame
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { WEEKLY_TASKS, MOCK_USER } from "@/lib/mock-data";
-
-const weeks = [1, 2];
+import { WEEKLY_TASKS, MOCK_USER, TRACKS } from "@/lib/mock-data";
 
 export default function DashboardSidebar() {
   const pathname = usePathname();
-  const [openWeeks, setOpenWeeks] = useState<number[]>([1]);
+  const track = TRACKS.find((t) => t.id === MOCK_USER.enrolledTrackId);
+  const totalWeeks = track?.durationWeeks ?? 8;
+  const weeks = Array.from({ length: totalWeeks }, (_, i) => i + 1);
+  const [openWeeks, setOpenWeeks] = useState<number[]>([MOCK_USER.currentWeek]);
 
   const toggleWeek = (week: number) => {
     setOpenWeeks((prev) =>
@@ -129,23 +130,29 @@ export default function DashboardSidebar() {
                 </button>
                 {isOpen && (
                   <div className="ml-4 mt-1 space-y-0.5 border-l border-white/8 pl-3">
-                    {tasks.map((task) => (
-                      <Link
-                        key={task.id}
-                        href={`/dashboard/task/${task.id}`}
-                        className={cn(
-                          "flex items-center gap-2.5 rounded-lg px-3 py-2 text-xs transition-all duration-150",
-                          pathname === `/dashboard/task/${task.id}`
-                            ? "bg-cyan-500/10 text-cyan-400"
-                            : "text-slate-500 hover:bg-white/5 hover:text-slate-300"
-                        )}
-                      >
-                        <span className={cn("shrink-0 text-[10px] font-bold", statusColor[task.status])}>
-                          D{task.dayNo}
-                        </span>
-                        <span className="truncate">{task.title}</span>
-                      </Link>
-                    ))}
+                    {tasks.length === 0 ? (
+                      <div className="rounded-lg border border-white/8 bg-white/4 px-3 py-2 text-xs text-slate-500">
+                        Tasks unlock soon for this week.
+                      </div>
+                    ) : (
+                      tasks.map((task) => (
+                        <Link
+                          key={task.id}
+                          href={`/dashboard/task/${task.id}`}
+                          className={cn(
+                            "flex items-center gap-2.5 rounded-lg px-3 py-2 text-xs transition-all duration-150",
+                            pathname === `/dashboard/task/${task.id}`
+                              ? "bg-cyan-500/10 text-cyan-400"
+                              : "text-slate-500 hover:bg-white/5 hover:text-slate-300"
+                          )}
+                        >
+                          <span className={cn("shrink-0 text-[10px] font-bold", statusColor[task.status])}>
+                            D{task.dayNo}
+                          </span>
+                          <span className="truncate">{task.title}</span>
+                        </Link>
+                      ))
+                    )}
                   </div>
                 )}
               </div>

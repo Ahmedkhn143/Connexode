@@ -1,14 +1,18 @@
 import ProgressBar from "@/components/ui/ProgressBar";
-import { PHASE_PROGRESS } from "@/lib/mock-data";
+import { PHASE_PROGRESS, MOCK_USER, TRACKS } from "@/lib/mock-data";
 
 
 export default function PhaseProgress() {
+  const track = TRACKS.find((t) => t.id === MOCK_USER.enrolledTrackId);
+  const totalWeeks = track?.durationWeeks ?? 8;
+  const currentWeek = Math.min(MOCK_USER.currentWeek, totalWeeks);
+
   return (
     <div className="rounded-2xl border border-white/8 bg-white/4 p-6 backdrop-blur-xl">
       <div className="mb-5 flex items-center justify-between">
         <h2 className="font-display text-lg font-bold text-white">Internship Progress</h2>
         <span className="rounded-full border border-cyan-400/20 bg-cyan-400/10 px-3 py-1 text-xs font-semibold text-cyan-400">
-          Week 1 of 8
+          Week {currentWeek} of {totalWeeks}
         </span>
       </div>
 

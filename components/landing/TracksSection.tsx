@@ -4,14 +4,14 @@ import { useRef } from "react";
 import Link from "next/link";
 import { motion, useInView } from "framer-motion";
 import {
-  Code2, Brain, Workflow, Cloud, Shield, BarChart3, ArrowRight, Clock, Users
+  Code2, Brain, Workflow, Cloud, Shield, BarChart3, ArrowRight, Clock, Users, Layout, Server
 } from "lucide-react";
 import { TRACKS } from "@/lib/mock-data";
 
 import type { LucideProps } from "lucide-react";
 
 const ICON_MAP: Record<string, React.ComponentType<LucideProps>> = {
-  Code2, Brain, Workflow, Cloud, Shield, BarChart3,
+  Code2, Brain, Workflow, Cloud, Shield, BarChart3, Layout, Server,
 };
 
 const container = {
@@ -46,7 +46,7 @@ export default function TracksSection() {
             Choose Your Path
           </p>
           <h2 className="font-display mb-4 text-4xl font-extrabold text-white lg:text-5xl">
-            6 Industry-Ready{" "}
+            {TRACKS.length} Industry-Ready{" "}
             <span className="bg-gradient-to-r from-cyan-400 to-teal-400 bg-clip-text text-transparent">
               Tech Tracks
             </span>

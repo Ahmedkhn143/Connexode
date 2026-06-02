@@ -131,6 +131,9 @@ export default function SubmissionForm({ taskId, taskTitle, currentStatus }: Sub
               <AlertCircle size={11} /> {errors.github}
             </p>
           )}
+          <p className="mt-2 text-xs text-slate-500">
+            Mentors review this GitHub link to check your code quality.
+          </p>
         </div>
 
         {/* Live URL */}
