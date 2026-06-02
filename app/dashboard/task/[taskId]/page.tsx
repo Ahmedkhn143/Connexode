@@ -2,8 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
-import TaskInstructions from "@/components/task/TaskInstructions";
-import SubmissionForm from "@/components/task/SubmissionForm";
+import InteractiveTaskLayout from "@/components/task/InteractiveTaskLayout";
 import { WEEKLY_TASKS, SUBMISSIONS } from "@/lib/mock-data";
 
 interface PageProps {
@@ -40,31 +39,8 @@ export default async function TaskPage({ params }: PageProps) {
         Back to Dashboard
       </Link>
 
-      <div className="grid gap-6 lg:grid-cols-[1.5fr_1fr]">
-        {/* Left — Instructions */}
-        <TaskInstructions task={task} />
-
-        {/* Right — Submission */}
-        <div className="space-y-4">
-          <SubmissionForm
-            taskId={task.id}
-            taskTitle={task.title}
-            currentStatus={submission?.status ?? task.status}
-          />
-
-          {/* Mentor feedback (if reviewed) */}
-          {submission?.feedback && (
-            <div className="rounded-2xl border border-emerald-400/15 bg-emerald-400/5 p-5">
-              <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-emerald-400">
-                Mentor Feedback
-              </p>
-              <p className="text-sm leading-relaxed text-slate-300 italic">
-                &quot;{submission.feedback}&quot;
-              </p>
-            </div>
-          )}
-        </div>
-      </div>
+      <InteractiveTaskLayout task={task} submission={submission} />
     </div>
   );
 }
+

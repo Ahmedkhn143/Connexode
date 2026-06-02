@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ExternalLink, Globe, Send, CheckCircle2, Loader2, AlertCircle } from "lucide-react";
+import { ExternalLink, Globe, Send, CheckCircle2, Loader2, AlertCircle, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface SubmissionFormProps {
@@ -39,6 +39,29 @@ export default function SubmissionForm({ taskId, taskTitle, currentStatus }: Sub
   const [status, setStatus] = useState<"idle" | "loading" | "submitted">(
     currentStatus === "SUBMITTED" || currentStatus === "APPROVED" ? "submitted" : "idle"
   );
+  
+  // AI pre-check states
+  const [aiScore, setAiScore] = useState<number | null>(null);
+  const [aiFeedback, setAiFeedback] = useState<string | null>(null);
+
+  // Load existing submission if any (including localStorage items)
+  useState(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const localSubs = JSON.parse(localStorage.getItem("connexode_custom_submissions") || "[]");
+        const found = localSubs.find((s: any) => s.taskId === taskId);
+        if (found) {
+          setGithubUrl(found.githubUrl || "");
+          setLiveUrl(found.liveUrl || "");
+          setLinkedinUrl(found.linkedinUrl || "");
+          setAiScore(found.aiScore || null);
+          setAiFeedback(found.aiFeedback || null);
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    }
+  });
 
   const validate = () => {
     const newErrors: typeof errors = {};
@@ -67,22 +90,51 @@ export default function SubmissionForm({ taskId, taskTitle, currentStatus }: Sub
     e.preventDefault();
     if (!validate()) return;
     setStatus("loading");
-    // Simulate API call
-    await new Promise((r) => setTimeout(r, 1500));
+
+    let scoreVal = null;
+    let auditVal = null;
+
+    // Trigger real-time AI code auditor API
+    try {
+      const res = await fetch("/api/ai", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "audit",
+          taskId,
+          githubUrl,
+          liveUrl,
+          linkedinUrl,
+        }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        scoreVal = data.score;
+        auditVal = data.audit;
+        setAiScore(data.score);
+        setAiFeedback(data.audit);
+      }
+    } catch (err) {
+      console.error("AI Audit Error:", err);
+    }
     
     // Save to local storage for demo mock persist
     try {
       const submissions = JSON.parse(localStorage.getItem("connexode_custom_submissions") || "[]");
-      submissions.push({
+      // Remove old submission for same task if exists
+      const filtered = submissions.filter((s: any) => s.taskId !== taskId);
+      filtered.push({
         id: `sub_${Math.random().toString(36).substring(2, 9)}`,
         taskId,
         githubUrl,
         liveUrl,
         linkedinUrl,
         status: "PENDING",
-        submittedAt: new Date().toISOString()
+        submittedAt: new Date().toISOString(),
+        aiScore: scoreVal,
+        aiFeedback: auditVal
       });
-      localStorage.setItem("connexode_custom_submissions", JSON.stringify(submissions));
+      localStorage.setItem("connexode_custom_submissions", JSON.stringify(filtered));
     } catch (e) {
       console.error(e);
     }
@@ -92,49 +144,71 @@ export default function SubmissionForm({ taskId, taskTitle, currentStatus }: Sub
 
   if (status === "submitted") {
     return (
-      <div className="rounded-2xl border border-emerald-400/20 bg-emerald-400/8 p-8 text-center backdrop-blur-xl">
-        <div className="mb-4 flex justify-center">
-          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-emerald-400/15">
-            <CheckCircle2 size={32} className="text-emerald-400" />
+      <div className="space-y-4">
+        <div className="rounded-2xl border border-emerald-400/20 bg-emerald-400/8 p-6 text-center backdrop-blur-xl">
+          <div className="mb-3 flex justify-center">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-emerald-400/15">
+              <CheckCircle2 size={24} className="text-emerald-400" />
+            </div>
+          </div>
+          <h3 className="font-display mb-1.5 text-lg font-bold text-white">Task Submitted!</h3>
+          <p className="text-xs text-slate-400 leading-relaxed">
+            Your submission is now <span className="font-semibold text-emerald-400">Pending Review</span>. A mentor will review it within 24 hours.
+          </p>
+          <div className="mt-4 rounded-xl border border-white/8 bg-white/4 px-4 py-3 text-left text-xs space-y-1">
+            <p className="font-semibold text-slate-300 mb-1">{taskTitle}</p>
+            {githubUrl && (
+              <a
+                href={githubUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1.5 text-slate-500 hover:text-cyan-400"
+              >
+                <ExternalLink size={10} /> {githubUrl}
+              </a>
+            )}
+            {liveUrl && (
+              <a
+                href={liveUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1.5 text-slate-500 hover:text-teal-400"
+              >
+                <Globe size={10} /> {liveUrl}
+              </a>
+            )}
+            {linkedinUrl && (
+              <a
+                href={linkedinUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1.5 text-slate-500 hover:text-blue-400"
+              >
+                <LinkedinIcon size={10} /> {linkedinUrl}
+              </a>
+            )}
           </div>
         </div>
-        <h3 className="font-display mb-2 text-xl font-bold text-white">Task Submitted!</h3>
-        <p className="text-sm text-slate-400">
-          Your submission is now <span className="font-semibold text-emerald-400">Pending Review</span>. A mentor will review it within 24 hours and check both your code and LinkedIn post.
-        </p>
-        <div className="mt-6 rounded-xl border border-white/8 bg-white/4 px-5 py-3 text-left text-sm">
-          <p className="font-semibold text-slate-300">{taskTitle}</p>
-          {githubUrl && (
-            <a
-              href={githubUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mt-1 flex items-center gap-1.5 text-xs text-slate-500 hover:text-cyan-400"
-            >
-              <ExternalLink size={11} /> {githubUrl}
-            </a>
-          )}
-          {liveUrl && (
-            <a
-              href={liveUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mt-1 flex items-center gap-1.5 text-xs text-slate-500 hover:text-teal-400"
-            >
-              <Globe size={11} /> {liveUrl}
-            </a>
-          )}
-          {linkedinUrl && (
-            <a
-              href={linkedinUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mt-1 flex items-center gap-1.5 text-xs text-slate-500 hover:text-blue-400"
-            >
-              <LinkedinIcon size={11} /> {linkedinUrl}
-            </a>
-          )}
-        </div>
+
+        {/* AI Pre-Check Audit Panel */}
+        {aiFeedback && (
+          <div className="rounded-2xl border border-indigo-500/20 bg-indigo-500/5 p-5 space-y-3">
+            <div className="flex items-center justify-between border-b border-white/5 pb-2">
+              <span className="text-xs font-bold text-white flex items-center gap-1.5">
+                <Sparkles size={13} className="text-indigo-400 animate-pulse" />
+                AI Pre-Check Audit
+              </span>
+              {aiScore && (
+                <span className="rounded-md bg-indigo-500/15 px-2 py-0.5 text-2xs font-extrabold text-indigo-400">
+                  Pre-Check Score: {aiScore}/100
+                </span>
+              )}
+            </div>
+            <div className="text-2xs text-slate-400 leading-relaxed max-h-[220px] overflow-y-auto custom-scrollbar font-mono whitespace-pre-wrap">
+              {aiFeedback}
+            </div>
+          </div>
+        )}
       </div>
     );
   }

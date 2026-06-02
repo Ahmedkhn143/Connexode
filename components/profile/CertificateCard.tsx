@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Award, BadgeCheck, Download } from "lucide-react";
 import { type User, type Track, PHASE_PROGRESS } from "@/lib/mock-data";
 
@@ -104,26 +105,28 @@ export default function CertificateCard({ user, track }: CertificateCardProps) {
         </div>
       )}
 
-      <button
-        disabled={!isEligible}
-        className="flex w-full items-center justify-center gap-2 rounded-xl py-3 text-sm font-bold transition-all"
-        style={
-          isEligible
-            ? {
-                background: `linear-gradient(135deg, ${track.color}, ${track.color}cc)`,
-                color: "#020B18",
-                boxShadow: `0 0 20px ${track.color}30`,
-              }
-            : {
-                backgroundColor: "rgba(255,255,255,0.05)",
-                color: "#475569",
-                cursor: "not-allowed",
-              }
-        }
-      >
-        <Download size={15} />
-        {isEligible ? "Download Certificate" : "Certificate Locked"}
-      </button>
+      {isEligible ? (
+        <Link
+          href="/verify/CERT-FS-8A9F32"
+          className="flex w-full items-center justify-center gap-2 rounded-xl py-3 text-sm font-bold transition-all hover:scale-[1.01]"
+          style={{
+            background: `linear-gradient(135deg, ${track.color}, ${track.color}cc)`,
+            color: "#020B18",
+            boxShadow: `0 0 20px ${track.color}30`,
+          }}
+        >
+          <Award size={15} />
+          View & Verify Certificate
+        </Link>
+      ) : (
+        <button
+          disabled
+          className="flex w-full items-center justify-center gap-2 rounded-xl py-3 text-sm font-bold transition-all bg-white/5 text-[#475569] cursor-not-allowed"
+        >
+          <Download size={15} />
+          Certificate Locked
+        </button>
+      )}
     </div>
   );
 }

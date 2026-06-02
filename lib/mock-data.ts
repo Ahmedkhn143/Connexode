@@ -130,6 +130,30 @@ export const MOCK_MENTOR_ASSIGNMENTS: MentorTrackAssignment[] = [
   { mentorId: "usr_mentor1", mentorName: "Dr. Sarah Connor", trackId: "track_008", trackTitle: "Backend Engineering" },
 ];
 
+export interface Certificate {
+  id: string;
+  userId: string;
+  userName: string;
+  trackId: string;
+  trackTitle: string;
+  issueDate: string;
+  grade: "Excellent" | "Very Good" | "Good";
+  verificationHash: string;
+}
+
+export const MOCK_CERTIFICATES: Certificate[] = [
+  {
+    id: "CERT-FS-8A9F32",
+    userId: "usr_001",
+    userName: "Alex Johnson",
+    trackId: "track_001",
+    trackTitle: "Full Stack Web Internship",
+    issueDate: "2026-05-30",
+    grade: "Excellent",
+    verificationHash: "sha256-8a9f32b7c4d5e6f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5",
+  }
+];
+
 export const ACTIVE_USER_ID = "usr_001";
 export const MOCK_USER = MOCK_USERS.find((user) => user.id === ACTIVE_USER_ID)!;
 

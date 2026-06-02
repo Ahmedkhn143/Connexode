@@ -38,6 +38,7 @@ import {
   Search,
   Calendar,
   Layers,
+  Sparkles,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -493,6 +494,26 @@ export default function MentorDashboard() {
                     </a>
                   )}
                 </div>
+
+                {/* AI Pre-Check Audit Panel */}
+                {(selectedSub as any).aiFeedback && (
+                  <div className="rounded-2xl border border-indigo-500/20 bg-indigo-500/5 p-6 backdrop-blur-xl space-y-3">
+                    <div className="flex items-center justify-between border-b border-white/5 pb-2">
+                      <span className="text-xs font-bold text-white flex items-center gap-1.5">
+                        <Sparkles size={14} className="text-indigo-400" />
+                        AI Pre-Check Audit Results
+                      </span>
+                      {(selectedSub as any).aiScore && (
+                        <span className="rounded-md bg-indigo-500/15 px-2 py-0.5 text-2xs font-extrabold text-indigo-400">
+                          AI Score: {(selectedSub as any).aiScore}/100
+                        </span>
+                      )}
+                    </div>
+                    <div className="text-xs text-slate-300 leading-relaxed max-h-[220px] overflow-y-auto custom-scrollbar font-mono whitespace-pre-wrap">
+                      {(selectedSub as any).aiFeedback}
+                    </div>
+                  </div>
+                )}
 
                 {/* Assessment form */}
                 <div className="rounded-2xl border border-white/8 bg-white/4 p-6 backdrop-blur-xl">
