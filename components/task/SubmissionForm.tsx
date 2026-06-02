@@ -99,6 +99,7 @@ export default function SubmissionForm({ taskId, taskTitle, currentStatus }: Sub
       </h2>
 
       <form onSubmit={handleSubmit} className="space-y-5">
+        <input type="hidden" name="taskId" value={taskId} />
         {/* GitHub URL */}
         <div>
           <label

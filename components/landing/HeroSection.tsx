@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { ArrowRight, Sparkles, Terminal } from "lucide-react";
@@ -24,7 +24,6 @@ const TERMINAL_LINES = [
 ];
 
 function useTypewriter(words: string[], speed = 80, pause = 2000) {
-  const [displayText, setDisplayText] = useState("");
   const [wordIndex, setWordIndex] = useState(0);
   const [charIndex, setCharIndex] = useState(0);
   const [deleting, setDeleting] = useState(false);
@@ -40,15 +39,16 @@ function useTypewriter(words: string[], speed = 80, pause = 2000) {
     } else if (deleting && charIndex > 0) {
       timeout = setTimeout(() => setCharIndex((c) => c - 1), speed / 2);
     } else {
-      setDeleting(false);
-      setWordIndex((i) => (i + 1) % words.length);
+      timeout = setTimeout(() => {
+        setDeleting(false);
+        setWordIndex((i) => (i + 1) % words.length);
+      }, speed);
     }
 
-    setDisplayText(current.slice(0, charIndex));
     return () => clearTimeout(timeout);
   }, [charIndex, deleting, wordIndex, words, speed, pause]);
 
-  return displayText;
+  return words[wordIndex].slice(0, charIndex);
 }
 
 export default function HeroSection() {

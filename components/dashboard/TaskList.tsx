@@ -53,7 +53,7 @@ export default function TaskList({ weekNo }: TaskListProps) {
       </div>
 
       <div className="space-y-3">
-        {tasks.map((task, i) => {
+        {tasks.map((task) => {
           const cfg = STATUS_CONFIG[task.status];
           const StatusIcon = cfg.Icon;
           const isClickable = task.status !== "LOCKED";

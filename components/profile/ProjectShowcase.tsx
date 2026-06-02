@@ -57,7 +57,7 @@ export default function ProjectShowcase({ submissions }: ProjectShowcaseProps) {
 
                 {sub.feedback && (
                   <p className="mb-3 rounded-lg bg-white/4 px-3 py-2 text-xs leading-relaxed text-slate-400 italic">
-                    "{sub.feedback}"
+                    &quot;{sub.feedback}&quot;
                   </p>
                 )}
 

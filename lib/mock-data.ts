@@ -459,6 +459,52 @@ export const TRACK_ROADMAPS: Record<string, TrackWeekPlan[]> = {
       project: "Backend capstone",
     },
   ],
+  track_002: [
+    { weekNo: 1, title: "Python & AI Foundations", focus: "Python syntax, numpy, basic neural network concepts", outcomes: ["Write simple neural net scripts", "Clean data with Pandas"], project: "Data cleaning processor" },
+    { weekNo: 2, title: "LLM Prompt Engineering & APIs", focus: "OpenAI, Claude API calls, system prompt design", outcomes: ["Build chatbot interface", "Handle raw token stream"], project: "Chatbot agent" },
+    { weekNo: 3, title: "Vector Databases & Embeddings", focus: "Pinecone, ChromaDB, vector indexes", outcomes: ["Index documents", "Perform vector search"], project: "Doc Search engine" },
+    { weekNo: 4, title: "Retrieval-Augmented Generation (RAG)", focus: "LangChain, RAG architecture, semantic search", outcomes: ["Build custom RAG agent", "Add source citation flows"], project: "Enterprise RAG search" },
+    { weekNo: 5, title: "Agentic Workflows & LangGraph", focus: "LangGraph, decision trees, agent tool calls", outcomes: ["Design graph flow agents", "Add tool call callbacks"], project: "Autonomous task solver" },
+    { weekNo: 6, title: "Model Fine-tuning & Optimization", focus: "LoRA, QLoRA, training pipelines", outcomes: ["Prepare training datasets", "Verify model responses"], project: "Custom model fine-tune" },
+    { weekNo: 7, title: "AI Application Deployment", focus: "FastAPI, Docker, serverless GPUs", outcomes: ["Build FastAPI endpoint", "Deploy model container"], project: "High-throughput inference API" },
+    { weekNo: 8, title: "AI Capstone Project", focus: "Design, build, and deploy custom AI MVP", outcomes: ["Build end-to-end AI SaaS", "Publish performance report"], project: "AI Agent Platform Capstone" },
+  ],
+  track_003: [
+    { weekNo: 1, title: "n8n Basics & Node Workflows", focus: "Setup n8n, workflows, execution triggers", outcomes: ["Create starter node workflow", "Configure error nodes"], project: "Basic flow runner" },
+    { weekNo: 2, title: "APIs & Webhook Integrations", focus: "HTTP Request nodes, webhook trigger setups", outcomes: ["Receive external payloads", "Trigger workflow conditionally"], project: "API webhook controller" },
+    { weekNo: 3, title: "Data Transformation & Formatting", focus: "Code node, JSON processing, data maps", outcomes: ["Parse messy API arrays", "Format custom report summaries"], project: "Data cleanup node mapper" },
+    { weekNo: 4, title: "Advanced Logic & Error Handling", focus: "Router logic, retry configurations, alerts", outcomes: ["Build error fallback streams", "Send Slack/Discord alerts"], project: "Fault-tolerant cron scheduler" },
+    { weekNo: 5, title: "Database & Third-Party Sync", focus: "PostgreSQL nodes, Airtable/Google Sheets integrations", outcomes: ["Sync tables in realtime", "Store raw request history"], project: "CRM contact sync automation" },
+    { weekNo: 6, title: "Automation Capstone Project", focus: "Design, build, and scale automated system", outcomes: ["Deliver high-throughput automation system", "Publish dashboard metrics"], project: "E-Commerce order workflow" },
+  ],
+  track_004: [
+    { weekNo: 1, title: "Linux & Scripting Foundations", focus: "Bash scripting, system administration", outcomes: ["Automate log logfile rotate", "Setup user SSH credentials"], project: "Server health script" },
+    { weekNo: 2, title: "Docker Containerization", focus: "Dockerfiles, compose files, container networks", outcomes: ["Containerize Node app", "Setup multi-tier network"], project: "App container suite" },
+    { weekNo: 3, title: "Kubernetes Basics", focus: "Pods, services, deployments, configmaps", outcomes: ["Configure microservice cluster", "Run stateful set deployment"], project: "Local K8s cluster config" },
+    { weekNo: 4, title: "CI/CD Pipelines", focus: "GitHub Actions, build steps, test workflows", outcomes: ["Create lint/test pipelines", "Automate image release push"], project: "Continuous integration build" },
+    { weekNo: 5, title: "Infrastructure as Code (Terraform)", focus: "HCL, tfstate, resource definitions", outcomes: ["Provision VPC instances", "Manage modular state config"], project: "Terraform environment setup" },
+    { weekNo: 6, title: "Cloud Services (AWS/GCP)", focus: "S3/Cloud Storage, EC2, IAM policies", outcomes: ["Setup IAM security rules", "Deploy dynamic serverless app"], project: "Multi-region cloud deploy" },
+    { weekNo: 7, title: "Monitoring, Logging & Alerting", focus: "Prometheus, Grafana, ELK stack", outcomes: ["Build status dashboards", "Configure incident alert triggers"], project: "Operations alert center" },
+    { weekNo: 8, title: "DevOps Capstone Project", focus: "Build complete automated deployment pipeline", outcomes: ["Deliver zero-downtime deploy system", "Write runbooks"], project: "DevOps Capstone Deployment" },
+  ],
+  track_005: [
+    { weekNo: 1, title: "Security Fundamentals & Networking", focus: "TCP/IP models, port scanning, basic firewall rules", outcomes: ["Inspect packet streams", "Configure network ports"], project: "Network scanner utility" },
+    { weekNo: 2, title: "Linux Security & Shell Scripting", focus: "File permissions, privilege escalation audits", outcomes: ["Build security configuration scripts", "Audit login logs"], project: "System auditor script" },
+    { weekNo: 3, title: "Cryptography Basics", focus: "Symmetric/asymmetric algorithms, hashing, TLS/SSL", outcomes: ["Sign files with keys", "Configure certificate paths"], project: "Cryptographic vault wrapper" },
+    { weekNo: 4, title: "Web Application Vulnerabilities (OWASP)", focus: "SQL Injection, XSS, CSRF checks", outcomes: ["Audit custom forms for XSS", "Sanitize SQL entrypoints"], project: "Vulnerability scan audit" },
+    { weekNo: 5, title: "Penetration Testing & Metasploit", focus: "Vulnerability exploitation, reverse shells", outcomes: ["Conduct local penetration runs", "Identify software defects"], project: "Security analysis report" },
+    { weekNo: 6, title: "Incident Response & Digital Forensics", focus: "Log analytics, memory dumps, intrusion tracking", outcomes: ["Trace mock attack vector paths", "Analyze harddrive sector flags"], project: "Forensic tracing report" },
+    { weekNo: 7, title: "Network Defense & Firewalls", focus: "IDS/IPS setups, iptables, honeypots", outcomes: ["Install intrusion triggers", "Audit firewall rulesets"], project: "Network defense barrier" },
+    { weekNo: 8, title: "Cybersecurity Capstone Audit", focus: "Audit real system architecture and secure it", outcomes: ["Deliver system security audit report", "Harden active workspace"], project: "Platform Security Audit" },
+  ],
+  track_006: [
+    { weekNo: 1, title: "SQL Foundations", focus: "SELECT, JOIN, WHERE statements, queries", outcomes: ["Query relational tables", "Filter user activity datasets"], project: "SQL analytics query list" },
+    { weekNo: 2, title: "Advanced SQL & Data Extraction", focus: "Window functions, CTEs, query plan profiling", outcomes: ["Write composite aggregations", "Tune slow database queries"], project: "Enterprise analytics schema" },
+    { weekNo: 3, title: "Python for Data Analysis (Pandas/NumPy)", focus: "Dataframes, CSV parsing, data cleaners", outcomes: ["Clean raw spreadsheets", "Merge distinct data arrays"], project: "Python data pipeline" },
+    { weekNo: 4, title: "Data Visualization (Matplotlib/Seaborn)", focus: "Charts, distribution plots, heatmaps", outcomes: ["Build multi-plot dashboards", "Plot customer churn cohorts"], project: "Data presentation deck" },
+    { weekNo: 5, title: "Dashboarding & BI", focus: "Tableau interfaces, charts, dashboards", outcomes: ["Build live metrics report", "Establish business KPIs"], project: "Marketing dashboard suite" },
+    { weekNo: 6, title: "Data Analytics Capstone Report", focus: "Process, visualize and report dataset insight", outcomes: ["Deliver business insight briefing", "Publish code notebook"], project: "Market Analytics Capstone" },
+  ],
 };
 
 // ── Weekly Tasks ─────────────────────────────────────────────
@@ -475,7 +521,7 @@ export interface WeeklyTask {
   points: number;
 }
 
-export const WEEKLY_TASKS: WeeklyTask[] = [
+const STATIC_WEEKLY_TASKS: WeeklyTask[] = [
   // Week 1
   {
     id: "task_w1d1",
@@ -2671,6 +2717,93 @@ export const WEEKLY_TASKS: WeeklyTask[] = [
     status: "LOCKED",
     points: 120,
   },
+];
+
+// Dynamic task generator for non-primary tracks
+const generateTasksForTracks = (): WeeklyTask[] => {
+  const generated: WeeklyTask[] = [];
+  const dynamicTrackIds = ["track_002", "track_003", "track_004", "track_005", "track_006"];
+
+  for (const trackId of dynamicTrackIds) {
+    const roadmap = TRACK_ROADMAPS[trackId];
+    if (!roadmap) continue;
+
+    for (const week of roadmap) {
+      for (let day = 1; day <= 5; day++) {
+        let taskTitle = "";
+        let details = "";
+        let instructions: string[] = [];
+
+        // Distribute focus and titles dynamically based on days
+        if (day === 1) {
+          taskTitle = `Introduction to ${week.title}`;
+          details = `Understand the core principles of ${week.title} and setup the local workspace.`;
+          instructions = [
+            `Install required software and dependencies for ${week.title}.`,
+            `Read the initial guide on ${week.focus}.`,
+            `Complete a basic configuration check.`,
+            `Push your setup files to GitHub.`,
+          ];
+        } else if (day === 2) {
+          taskTitle = `Hands-on Practice: ${week.outcomes[0]}`;
+          details = `Implement a simple project to achieve the outcome: ${week.outcomes[0]}.`;
+          instructions = [
+            `Create a new workspace module.`,
+            `Implement code logic for ${week.outcomes[0]}.`,
+            `Test local executions with dynamic input parameters.`,
+            `Push code changes to your repository.`,
+          ];
+        } else if (day === 3) {
+          taskTitle = `Data & Integration: ${week.outcomes[1] || week.outcomes[0]}`;
+          details = `Connect data structures and execute workflows mapping to: ${week.outcomes[1] || week.outcomes[0]}.`;
+          instructions = [
+            `Connect your local module to external data inputs.`,
+            `Write scripts to parse and normalize dataset schemas.`,
+            `Confirm correct outputs and run diagnostics.`,
+            `Save work in a public GitHub repo.`,
+          ];
+        } else if (day === 4) {
+          taskTitle = `Refactoring & Quality Check`;
+          details = `Polish the codebase, add error boundaries, and optimize configurations.`;
+          instructions = [
+            `Refactor existing helper functions for readability.`,
+            `Add basic error handling and logging.`,
+            `Optimize execution times and profile performance.`,
+            `Commit and push code.`,
+          ];
+        } else {
+          taskTitle = `Weekly Project: ${week.project}`;
+          details = `Build and deliver the weekly project: ${week.project}.`;
+          instructions = [
+            `Design the system architecture for ${week.project}.`,
+            `Implement all core features specified in the requirements.`,
+            `Verify compatibility and write a comprehensive README.`,
+            `Deploy to a hosting provider or verify container runs.`,
+            `Submit your repository link.`,
+          ];
+        }
+
+        generated.push({
+          id: `task_${trackId.slice(6)}_w${week.weekNo}d${day}`,
+          trackId,
+          weekNo: week.weekNo,
+          dayNo: day,
+          title: taskTitle,
+          taskDetails: details,
+          instructions,
+          estimatedHours: day === 5 ? 4 : 2,
+          status: "LOCKED",
+          points: day === 5 ? 150 : 80,
+        });
+      }
+    }
+  }
+  return generated;
+};
+
+export const WEEKLY_TASKS: WeeklyTask[] = [
+  ...STATIC_WEEKLY_TASKS,
+  ...generateTasksForTracks(),
 ];
 
 // ── Badges ───────────────────────────────────────────────────

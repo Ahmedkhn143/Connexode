@@ -60,7 +60,7 @@ export default function CTASection() {
               transition={{ delay: 0.4 }}
               className="mx-auto mb-10 max-w-xl text-slate-400"
             >
-              Join the next cohort starting soon. Drop your email and we'll send you everything you need to get started — completely free.
+              Join the next cohort starting soon. Drop your email and we&apos;ll send you everything you need to get started — completely free.
             </motion.p>
 
             {status === "done" ? (
@@ -71,7 +71,7 @@ export default function CTASection() {
               >
                 <div className="flex items-center gap-2 rounded-2xl bg-emerald-500/15 px-8 py-4 text-emerald-400">
                   <CheckCircle2 size={20} />
-                  <span className="font-semibold">You're on the list! Check your inbox.</span>
+                  <span className="font-semibold">You&apos;re on the list! Check your inbox.</span>
                 </div>
               </motion.div>
             ) : (

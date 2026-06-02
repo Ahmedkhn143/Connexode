@@ -34,9 +34,11 @@ export default function Navbar() {
         <nav className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
           {/* Logo */}
           <Link href="/" className="group flex items-center gap-2.5">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-400 to-teal-500 shadow-[0_0_20px_rgba(0,245,255,0.4)] transition-shadow duration-300 group-hover:shadow-[0_0_30px_rgba(0,245,255,0.6)]">
-              <Code2 size={18} className="text-[#020B18]" />
-            </div>
+            <img
+              src="/logo.png"
+              alt="Connexode Logo"
+              className="h-9 w-9 rounded-xl object-cover shadow-[0_0_20px_rgba(0,245,255,0.4)] transition-shadow duration-300 group-hover:shadow-[0_0_30px_rgba(0,245,255,0.6)] animate-pulse-slow"
+            />
             <span className="font-display text-xl font-bold tracking-tight text-white">
               Connex<span className="text-cyan-400">ode</span>
             </span>

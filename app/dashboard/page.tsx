@@ -106,7 +106,7 @@ export default function DashboardPage() {
               </div>
               <div className="min-w-0">
                 <p className="text-sm font-semibold text-slate-200">{sub.taskTitle}</p>
-                <p className="mt-1 text-xs italic text-slate-500">"{sub.feedback}"</p>
+                <p className="mt-1 text-xs italic text-slate-500">&quot;{sub.feedback}&quot;</p>
               </div>
               <span className="ml-auto shrink-0 text-xs text-emerald-400 font-bold">
                 +{sub.points} pts

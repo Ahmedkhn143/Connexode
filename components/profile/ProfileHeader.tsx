@@ -1,4 +1,4 @@
-import { BadgeCheck, Calendar, Flame, MapPin } from "lucide-react";
+import { BadgeCheck, Calendar, Flame } from "lucide-react";
 import { type User, type Track } from "@/lib/mock-data";
 
 interface ProfileHeaderProps {

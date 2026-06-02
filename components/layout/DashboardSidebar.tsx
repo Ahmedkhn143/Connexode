@@ -37,9 +37,11 @@ export default function DashboardSidebar() {
     <aside className="flex h-full w-72 flex-col border-r border-white/8 bg-[#020B18]/60 backdrop-blur-xl">
       {/* Logo */}
       <div className="flex items-center gap-3 border-b border-white/8 px-6 py-5">
-        <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-400 to-teal-500 shadow-[0_0_16px_rgba(0,245,255,0.4)]">
-          <Code2 size={18} className="text-[#020B18]" />
-        </div>
+        <img
+          src="/logo.png"
+          alt="Connexode Logo"
+          className="h-9 w-9 rounded-xl object-cover shadow-[0_0_16px_rgba(0,245,255,0.4)]"
+        />
         <span className="font-display text-xl font-bold tracking-tight text-white">
           Connex<span className="text-cyan-400">ode</span>
         </span>

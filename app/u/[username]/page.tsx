@@ -6,7 +6,7 @@ import ProfileHeader from "@/components/profile/ProfileHeader";
 import BadgeGrid from "@/components/profile/BadgeGrid";
 import ProjectShowcase from "@/components/profile/ProjectShowcase";
 import CertificateCard from "@/components/profile/CertificateCard";
-import { MOCK_USER, TRACKS, BADGES, SUBMISSIONS } from "@/lib/mock-data";
+import { MOCK_USER, TRACKS, BADGES, SUBMISSIONS, WEEKLY_TASKS } from "@/lib/mock-data";
 
 interface PageProps {
   params: Promise<{ username: string }>;
@@ -31,6 +31,34 @@ export default async function PublicProfilePage({ params }: PageProps) {
 
   const user = MOCK_USER;
   const track = TRACKS.find((t) => t.id === user.enrolledTrackId)!;
+
+  const approvedSubmissions = SUBMISSIONS.filter(
+    (s) => s.userId === user.id && s.status === "APPROVED"
+  );
+
+  const dynamicBadges = BADGES.map((badge) => {
+    let earned = badge.earned;
+    if (badge.id === "badge_001") {
+      earned = approvedSubmissions.length > 0;
+    } else if (badge.id === "badge_002") {
+      const week1TasksCount = WEEKLY_TASKS.filter(
+        (t) => t.trackId === user.enrolledTrackId && t.weekNo === 1
+      ).length;
+      const week1ApprovedCount = approvedSubmissions.filter((s) => {
+        const task = WEEKLY_TASKS.find((t) => t.id === s.taskId);
+        return task?.weekNo === 1;
+      }).length;
+      earned = week1ApprovedCount >= week1TasksCount && week1TasksCount > 0;
+    } else if (badge.id === "badge_004") {
+      earned = approvedSubmissions.some((s) =>
+        s.taskTitle.toLowerCase().includes("navbar") || s.taskTitle.toLowerCase().includes("hero")
+      );
+    }
+    return { ...badge, earned };
+  });
+
+  const totalTasksCount = WEEKLY_TASKS.filter((t) => t.trackId === user.enrolledTrackId).length;
+  const completedCount = approvedSubmissions.length;
 
   return (
     <div className="min-h-screen bg-[#020B18] px-6 py-10">
@@ -80,7 +108,7 @@ export default async function PublicProfilePage({ params }: PageProps) {
         <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
           {/* Left column */}
           <div className="space-y-6">
-            <BadgeGrid badges={BADGES} />
+            <BadgeGrid badges={dynamicBadges} />
             <ProjectShowcase submissions={SUBMISSIONS} />
           </div>
 
@@ -93,7 +121,7 @@ export default async function PublicProfilePage({ params }: PageProps) {
               <h3 className="font-display mb-4 text-sm font-bold text-white">Activity Summary</h3>
               <div className="space-y-3">
                 {[
-                  { label: "Tasks Completed", value: "7 / 35" },
+                  { label: "Tasks Completed", value: `${completedCount} / ${totalTasksCount}` },
                   { label: "Total Points", value: user.points.toLocaleString() },
                   { label: "Current Streak", value: `${user.streak} days` },
                   { label: "Campus Rank", value: user.rank },

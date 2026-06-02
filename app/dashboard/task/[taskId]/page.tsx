@@ -59,7 +59,7 @@ export default async function TaskPage({ params }: PageProps) {
                 Mentor Feedback
               </p>
               <p className="text-sm leading-relaxed text-slate-300 italic">
-                "{submission.feedback}"
+                &quot;{submission.feedback}&quot;
               </p>
             </div>
           )}
