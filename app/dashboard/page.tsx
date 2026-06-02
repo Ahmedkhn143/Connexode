@@ -1,21 +1,44 @@
-import type { Metadata } from "next";
+"use client";
+
+import { useState, useEffect } from "react";
 import StatsRow from "@/components/dashboard/StatsRow";
 import PhaseProgress from "@/components/dashboard/PhaseProgress";
 import TaskList from "@/components/dashboard/TaskList";
 import TrackRoadmap from "@/components/dashboard/TrackRoadmap";
-import { MOCK_USER, TRACKS, SUBMISSIONS, WEEKLY_TASKS } from "@/lib/mock-data";
+import { getActiveUser, TRACKS, SUBMISSIONS, WEEKLY_TASKS, type User } from "@/lib/mock-data";
 import { BadgeCheck, GitBranch } from "lucide-react";
 import Link from "next/link";
-
-export const metadata: Metadata = {
-  title: "Dashboard — Connexode",
-};
+import AdminDashboard from "../admin/page";
+import MentorDashboard from "../mentor/page";
 
 export default function DashboardPage() {
-  const track = TRACKS.find((t) => t.id === MOCK_USER.enrolledTrackId)!;
-  const currentWeek = MOCK_USER.currentWeek;
+  const [activeUser, setActiveUser] = useState<User | null>(null);
+
+  useEffect(() => {
+    setActiveUser(getActiveUser());
+  }, []);
+
+  if (!activeUser) {
+    return (
+      <div className="flex h-64 items-center justify-center text-slate-400">
+        <div className="h-6 w-6 animate-spin rounded-full border-2 border-cyan-400 border-t-transparent" />
+      </div>
+    );
+  }
+
+  // Role Redirection
+  if (activeUser.role === "ADMIN") {
+    return <AdminDashboard />;
+  }
+
+  if (activeUser.role === "MENTOR") {
+    return <MentorDashboard />;
+  }
+
+  const track = TRACKS.find((t) => t.id === activeUser.enrolledTrackId)!;
+  const currentWeek = activeUser.currentWeek;
   const weekTasks = WEEKLY_TASKS.filter(
-    (t) => t.trackId === MOCK_USER.enrolledTrackId && t.weekNo === currentWeek
+    (t) => t.trackId === activeUser.enrolledTrackId && t.weekNo === currentWeek
   );
   const continueTask =
     weekTasks.find((t) => t.status === "IN_PROGRESS") ??
@@ -23,7 +46,7 @@ export default function DashboardPage() {
     weekTasks.find((t) => t.status !== "LOCKED") ??
     weekTasks[0];
   const pendingCount = SUBMISSIONS.filter(
-    (s) => s.userId === MOCK_USER.id && s.status === "PENDING"
+    (s) => s.userId === activeUser.id && s.status === "PENDING"
   ).length;
 
   return (
@@ -44,7 +67,7 @@ export default function DashboardPage() {
           <div>
             <p className="mb-1 text-sm text-slate-500">Welcome back 👋</p>
             <h2 className="font-display text-2xl font-extrabold text-white">
-              {MOCK_USER.name}
+              {activeUser.name}
             </h2>
             <p className="mt-1 flex items-center gap-2 text-sm text-slate-400">
               <span

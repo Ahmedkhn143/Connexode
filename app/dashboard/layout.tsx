@@ -1,16 +1,33 @@
-import type { Metadata } from "next";
-import DashboardSidebar from "@/components/layout/DashboardSidebar";
+"use client";
 
-export const metadata: Metadata = {
-  title: "Dashboard — Connexode",
-  description: "Your Connexode student dashboard. Track progress, complete daily tasks, and submit your work.",
-};
+import { useState, useEffect } from "react";
+import DashboardSidebar from "@/components/layout/DashboardSidebar";
+import { getActiveUser, type User } from "@/lib/mock-data";
 
 export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const [activeUser, setActiveUser] = useState<User | null>(null);
+
+  useEffect(() => {
+    setActiveUser(getActiveUser());
+  }, []);
+
+  if (!activeUser) {
+    return (
+      <div className="flex h-screen items-center justify-center bg-[#020B18] text-slate-400">
+        <div className="h-6 w-6 animate-spin rounded-full border-2 border-cyan-400 border-t-transparent" />
+      </div>
+    );
+  }
+
+  // Admin and Mentor views don't need the student sidebar layout
+  if (activeUser.role !== "STUDENT") {
+    return <div className="min-h-screen bg-[#020B18]">{children}</div>;
+  }
+
   return (
     <div className="flex h-screen overflow-hidden bg-[#020B18]">
       {/* Sidebar */}
@@ -28,7 +45,7 @@ export default function DashboardLayout({
           </div>
           <div className="flex items-center gap-3">
             <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-cyan-500 to-teal-600 text-xs font-bold text-[#020B18]">
-              AJ
+              {activeUser.avatarInitials}
             </div>
           </div>
         </div>

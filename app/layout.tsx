@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter, Space_Grotesk } from "next/font/google";
 import "./globals.css";
 import CustomCursor from "@/components/ui/CustomCursor";
+import RoleSwitcher from "@/components/layout/RoleSwitcher";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -41,6 +42,7 @@ export default function RootLayout({
     >
       <body className="min-h-full antialiased">
         <CustomCursor />
+        <RoleSwitcher />
         {children}
       </body>
     </html>

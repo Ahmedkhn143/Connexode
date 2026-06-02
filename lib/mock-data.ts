@@ -70,10 +70,86 @@ export const MOCK_USERS: User[] = [
     currentWeek: 1,
     currentDay: 2,
   },
+  {
+    id: "usr_mentor1",
+    name: "Dr. Sarah Connor",
+    username: "sarah-connor",
+    email: "sarah@connexode.com",
+    role: "MENTOR",
+    points: 0,
+    avatarInitials: "SC",
+    enrolledTrackId: "",
+    joinDate: "2026-01-10",
+    streak: 0,
+    rank: "Expert Mentor",
+    currentWeek: 0,
+    currentDay: 0,
+  },
+  {
+    id: "usr_mentor2",
+    name: "Marcus Aurelius",
+    username: "marcus-a",
+    email: "marcus@connexode.com",
+    role: "MENTOR",
+    points: 0,
+    avatarInitials: "MA",
+    enrolledTrackId: "",
+    joinDate: "2026-01-12",
+    streak: 0,
+    rank: "Architect Mentor",
+    currentWeek: 0,
+    currentDay: 0,
+  },
+  {
+    id: "usr_admin",
+    name: "Ahmad Khan (Admin)",
+    username: "ahmad-admin",
+    email: "admin@connexode.com",
+    role: "ADMIN",
+    points: 0,
+    avatarInitials: "AK",
+    enrolledTrackId: "",
+    joinDate: "2026-01-01",
+    streak: 0,
+    rank: "Super Admin",
+    currentWeek: 0,
+    currentDay: 0,
+  },
+];
+
+export interface MentorTrackAssignment {
+  mentorId: string;
+  mentorName: string;
+  trackId: string;
+  trackTitle: string;
+}
+
+export const MOCK_MENTOR_ASSIGNMENTS: MentorTrackAssignment[] = [
+  { mentorId: "usr_mentor1", mentorName: "Dr. Sarah Connor", trackId: "track_001", trackTitle: "Full Stack Web Internship" },
+  { mentorId: "usr_mentor2", mentorName: "Marcus Aurelius", trackId: "track_007", trackTitle: "Frontend Engineering" },
+  { mentorId: "usr_mentor1", mentorName: "Dr. Sarah Connor", trackId: "track_008", trackTitle: "Backend Engineering" },
 ];
 
 export const ACTIVE_USER_ID = "usr_001";
 export const MOCK_USER = MOCK_USERS.find((user) => user.id === ACTIVE_USER_ID)!;
+
+export const getActiveUser = (): User => {
+  if (typeof window !== "undefined") {
+    const saved = localStorage.getItem("connexode_active_user");
+    if (saved) {
+      const found = MOCK_USERS.find((u) => u.id === saved);
+      if (found) return found;
+    }
+  }
+  return MOCK_USERS.find((u) => u.id === ACTIVE_USER_ID)!;
+};
+
+export const setActiveUser = (id: string) => {
+  if (typeof window !== "undefined") {
+    localStorage.setItem("connexode_active_user", id);
+    window.location.reload();
+  }
+};
 
 // ── Tracks ───────────────────────────────────────────────────
 export interface Track {
