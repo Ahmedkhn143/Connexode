@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import {
   Code2, ChevronDown, ChevronRight, LayoutDashboard,
   User, LogOut, Award, BookOpen, Flame
@@ -12,6 +12,8 @@ import { WEEKLY_TASKS, MOCK_USER, TRACKS } from "@/lib/mock-data";
 
 export default function DashboardSidebar() {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const isBadgesView = searchParams.get("view") === "badges";
   const track = TRACKS.find((t) => t.id === MOCK_USER.enrolledTrackId);
   const totalWeeks = track?.durationWeeks ?? 8;
   const weeks = Array.from({ length: totalWeeks }, (_, i) => i + 1);
@@ -86,7 +88,7 @@ export default function DashboardSidebar() {
             href={`/u/${MOCK_USER.username}`}
             className={cn(
               "flex items-center gap-3 rounded-xl px-4 py-2.5 text-sm font-medium transition-all duration-200",
-              pathname.startsWith("/u/")
+              pathname.startsWith("/u/") && !isBadgesView
                 ? "bg-cyan-500/15 text-cyan-400"
                 : "text-slate-400 hover:bg-white/5 hover:text-slate-200"
             )}
@@ -95,8 +97,13 @@ export default function DashboardSidebar() {
             My Profile
           </Link>
           <Link
-            href="/dashboard"
-            className="flex items-center gap-3 rounded-xl px-4 py-2.5 text-sm font-medium text-slate-400 hover:bg-white/5 hover:text-slate-200"
+            href={`/u/${MOCK_USER.username}?view=badges`}
+            className={cn(
+              "flex items-center gap-3 rounded-xl px-4 py-2.5 text-sm font-medium transition-all duration-200",
+              pathname.startsWith("/u/") && isBadgesView
+                ? "bg-cyan-500/15 text-cyan-400"
+                : "text-slate-400 hover:bg-white/5 hover:text-slate-200"
+            )}
           >
             <Award size={16} />
             My Badges

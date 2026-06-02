@@ -2912,6 +2912,7 @@ export interface Submission {
   taskTitle: string;
   githubUrl: string;
   liveUrl?: string;
+  linkedinUrl?: string;
   status: SubmissionStatus;
   feedback?: string;
   submittedAt: string;
@@ -2924,6 +2925,7 @@ export const SUBMISSIONS: Submission[] = [
     id: "sub_001", userId: "usr_001", taskId: "task_w1d1", taskTitle: "Build a Next.js Navbar",
     githubUrl: "https://github.com/alex-johnson/connexode-week1-navbar",
     liveUrl: "https://connexode-navbar.vercel.app",
+    linkedinUrl: "https://www.linkedin.com/posts/alex-johnson_connexode-navbar-activity-12345",
     status: "APPROVED", feedback: "Excellent glassmorphism implementation! Clean code structure.",
     submittedAt: "2026-04-02T14:30:00Z", reviewedAt: "2026-04-03T09:00:00Z", points: 100,
   },
@@ -2931,6 +2933,7 @@ export const SUBMISSIONS: Submission[] = [
     id: "sub_002", userId: "usr_001", taskId: "task_w1d2", taskTitle: "Hero Section with Animation",
     githubUrl: "https://github.com/alex-johnson/connexode-week1-hero",
     liveUrl: "https://connexode-hero.vercel.app",
+    linkedinUrl: "https://www.linkedin.com/posts/alex-johnson_connexode-hero-activity-12346",
     status: "APPROVED", feedback: "Smooth animations. Great attention to detail on the typewriter effect.",
     submittedAt: "2026-04-03T16:00:00Z", reviewedAt: "2026-04-04T10:00:00Z", points: 120,
   },
@@ -2942,6 +2945,84 @@ export const SUBMISSIONS: Submission[] = [
     submittedAt: "2026-04-05T12:00:00Z", points: 0,
   },
 ];
+
+// ── Curriculum & Audit Logs ─────────────────────────────────
+export interface TaskEditLog {
+  id: string;
+  editorName: string;
+  editorRole: string;
+  trackTitle: string;
+  fieldName: string;
+  oldValue: string;
+  newValue: string;
+  changedAt: string;
+}
+
+export const MOCK_TASK_EDIT_LOGS: TaskEditLog[] = [
+  {
+    id: "log_001",
+    editorName: "Marcus Aurelius",
+    editorRole: "MENTOR",
+    trackTitle: "Frontend Engineering",
+    fieldName: "title",
+    oldValue: "React Components 101",
+    newValue: "React Components & Core Props",
+    changedAt: "2026-06-01T10:00:00Z"
+  }
+];
+
+export function addTask(task: WeeklyTask, editor: User) {
+  WEEKLY_TASKS.push(task);
+  const track = TRACKS.find(t => t.id === task.trackId);
+  MOCK_TASK_EDIT_LOGS.unshift({
+    id: `log_${Math.random().toString(36).substring(2, 9)}`,
+    editorName: editor.name,
+    editorRole: editor.role,
+    trackTitle: track ? track.title : "Unknown Track",
+    fieldName: "creation",
+    oldValue: "(none)",
+    newValue: task.title,
+    changedAt: new Date().toISOString()
+  });
+}
+
+export function editTask(id: string, updatedTask: Partial<WeeklyTask>, editor: User) {
+  const index = WEEKLY_TASKS.findIndex(t => t.id === id);
+  if (index !== -1) {
+    const oldTask = WEEKLY_TASKS[index];
+    WEEKLY_TASKS[index] = { ...oldTask, ...updatedTask };
+    const track = TRACKS.find(t => t.id === oldTask.trackId);
+    MOCK_TASK_EDIT_LOGS.unshift({
+      id: `log_${Math.random().toString(36).substring(2, 9)}`,
+      editorName: editor.name,
+      editorRole: editor.role,
+      trackTitle: track ? track.title : "Unknown Track",
+      fieldName: "title",
+      oldValue: oldTask.title,
+      newValue: updatedTask.title || oldTask.title,
+      changedAt: new Date().toISOString()
+    });
+  }
+}
+
+export function deleteTask(id: string, editor: User) {
+  const index = WEEKLY_TASKS.findIndex(t => t.id === id);
+  if (index !== -1) {
+    const oldTask = WEEKLY_TASKS[index];
+    WEEKLY_TASKS.splice(index, 1);
+    const track = TRACKS.find(t => t.id === oldTask.trackId);
+    MOCK_TASK_EDIT_LOGS.unshift({
+      id: `log_${Math.random().toString(36).substring(2, 9)}`,
+      editorName: editor.name,
+      editorRole: editor.role,
+      trackTitle: track ? track.title : "Unknown Track",
+      fieldName: "deletion",
+      oldValue: oldTask.title,
+      newValue: "(deleted)",
+      changedAt: new Date().toISOString()
+    });
+  }
+}
 
 // ── Phase Progress ────────────────────────────────────────────
 export const PHASE_PROGRESS = [

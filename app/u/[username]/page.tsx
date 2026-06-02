@@ -10,6 +10,7 @@ import { MOCK_USER, TRACKS, BADGES, SUBMISSIONS, WEEKLY_TASKS } from "@/lib/mock
 
 interface PageProps {
   params: Promise<{ username: string }>;
+  searchParams?: Promise<{ view?: string }>;
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
@@ -23,8 +24,10 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   };
 }
 
-export default async function PublicProfilePage({ params }: PageProps) {
+export default async function PublicProfilePage({ params, searchParams }: PageProps) {
   const { username } = await params;
+  const { view } = (await searchParams) || {};
+  const showOnlyBadges = view === "badges";
 
   // For the demo, only our mock user exists
   if (username !== MOCK_USER.username) notFound();
@@ -100,41 +103,49 @@ export default async function PublicProfilePage({ params }: PageProps) {
         </div>
 
         {/* Profile Header */}
-        <div className="mb-6">
-          <ProfileHeader user={user} track={track} />
-        </div>
+        {!showOnlyBadges && (
+          <div className="mb-6">
+            <ProfileHeader user={user} track={track} />
+          </div>
+        )}
 
         {/* Main Grid */}
-        <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
-          {/* Left column */}
+        {showOnlyBadges ? (
           <div className="space-y-6">
             <BadgeGrid badges={dynamicBadges} />
-            <ProjectShowcase submissions={SUBMISSIONS} />
           </div>
+        ) : (
+          <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
+            {/* Left column */}
+            <div className="space-y-6">
+              <BadgeGrid badges={dynamicBadges} />
+              <ProjectShowcase submissions={SUBMISSIONS} />
+            </div>
 
-          {/* Right column */}
-          <div className="space-y-6">
-            <CertificateCard user={user} track={track} />
+            {/* Right column */}
+            <div className="space-y-6">
+              <CertificateCard user={user} track={track} />
 
-            {/* Quick stats card */}
-            <div className="rounded-2xl border border-white/8 bg-white/4 p-5 backdrop-blur-xl">
-              <h3 className="font-display mb-4 text-sm font-bold text-white">Activity Summary</h3>
-              <div className="space-y-3">
-                {[
-                  { label: "Tasks Completed", value: `${completedCount} / ${totalTasksCount}` },
-                  { label: "Total Points", value: user.points.toLocaleString() },
-                  { label: "Current Streak", value: `${user.streak} days` },
-                  { label: "Campus Rank", value: user.rank },
-                ].map((item) => (
-                  <div key={item.label} className="flex items-center justify-between text-sm">
-                    <span className="text-slate-500">{item.label}</span>
-                    <span className="font-semibold text-slate-200">{item.value}</span>
-                  </div>
-                ))}
+              {/* Quick stats card */}
+              <div className="rounded-2xl border border-white/8 bg-white/4 p-5 backdrop-blur-xl">
+                <h3 className="font-display mb-4 text-sm font-bold text-white">Activity Summary</h3>
+                <div className="space-y-3">
+                  {[
+                    { label: "Tasks Completed", value: `${completedCount} / ${totalTasksCount}` },
+                    { label: "Total Points", value: user.points.toLocaleString() },
+                    { label: "Current Streak", value: `${user.streak} days` },
+                    { label: "Campus Rank", value: user.rank },
+                  ].map((item) => (
+                    <div key={item.label} className="flex items-center justify-between text-sm">
+                      <span className="text-slate-500">{item.label}</span>
+                      <span className="font-semibold text-slate-200">{item.value}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );

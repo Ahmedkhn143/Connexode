@@ -1,15 +1,53 @@
 "use client";
 
-import { useState } from "react";
-import { TRACKS, WEEKLY_TASKS, MOCK_USERS, SUBMISSIONS, MOCK_MENTOR_ASSIGNMENTS, type Track } from "@/lib/mock-data";
-import { BookOpen, Users, GitBranch, ShieldAlert, Plus, LineChart, Code2, Award, Flame, Mail, GraduationCap } from "lucide-react";
+import { useState, useEffect } from "react";
+import {
+  TRACKS,
+  WEEKLY_TASKS,
+  MOCK_USERS,
+  SUBMISSIONS,
+  MOCK_MENTOR_ASSIGNMENTS,
+  MOCK_TASK_EDIT_LOGS,
+  addTask,
+  editTask,
+  deleteTask,
+  type Track,
+  type WeeklyTask,
+  type User,
+  type Submission,
+} from "@/lib/mock-data";
+import { BookOpen, Users, GitBranch, ShieldAlert, Plus, LineChart, Code2, Award, Flame, Mail, GraduationCap, History, CheckCircle2, XCircle, Clock, Trash2, Edit2, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 
-type Tab = "students" | "mentors" | "tracks";
+type Tab = "students" | "mentors" | "tracks" | "audits" | "curriculum";
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState<Tab>("students");
   const [tracks, setTracks] = useState<Track[]>(TRACKS);
+  const [tasksList, setTasksList] = useState<WeeklyTask[]>([]);
+  const [logsList, setLogsList] = useState(MOCK_TASK_EDIT_LOGS);
+  
+  // Admin Curriculum Edit states
+  const [selectedTrackIdForCurriculum, setSelectedTrackIdForCurriculum] = useState<string>("track_001");
+  const [editingTask, setEditingTask] = useState<WeeklyTask | null>(null);
+  
+  // Add task form states
+  const [isAddingTask, setIsAddingTask] = useState(false);
+  const [newTaskTitle, setNewTaskTitle] = useState("");
+  const [newTaskDetails, setNewTaskDetails] = useState("");
+  const [newTaskWeek, setNewTaskWeek] = useState(1);
+  const [newTaskDay, setNewTaskDay] = useState(1);
+  const [newTaskHours, setNewTaskHours] = useState(3);
+  const [newTaskPoints, setNewTaskPoints] = useState(100);
+  const [newTaskInstructions, setNewTaskInstructions] = useState("");
+
+  const [activeAdmin, setActiveAdmin] = useState<User | null>(null);
+
+  useEffect(() => {
+    setActiveAdmin(MOCK_USERS.find((u) => u.role === "ADMIN") || null);
+    setTasksList(WEEKLY_TASKS);
+    setLogsList(MOCK_TASK_EDIT_LOGS);
+  }, []);
 
   // Filter students out of MOCK_USERS
   const students = MOCK_USERS.filter((u) => u.role === "STUDENT");
@@ -17,8 +55,96 @@ export default function AdminDashboard() {
 
   const totalStudents = students.length;
   const totalTracks = tracks.length;
-  const totalTasks = WEEKLY_TASKS.length;
+  const totalTasks = tasksList.length;
   const totalSubmissions = SUBMISSIONS.length;
+
+  // Add Task handler for Admin
+  const handleAddTask = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!activeAdmin) return;
+
+    const taskInstructionsList = newTaskInstructions
+      .split("\n")
+      .map((i) => i.trim())
+      .filter((i) => i !== "");
+
+    const newId = `task_admin_${Math.random().toString(36).substring(2, 9)}`;
+    const newWeeklyTask: WeeklyTask = {
+      id: newId,
+      trackId: selectedTrackIdForCurriculum,
+      weekNo: Number(newTaskWeek),
+      dayNo: Number(newTaskDay),
+      title: newTaskTitle,
+      taskDetails: newTaskDetails,
+      instructions: taskInstructionsList.length > 0 ? taskInstructionsList : ["Follow instructions from the administrator."],
+      estimatedHours: Number(newTaskHours),
+      status: "LOCKED",
+      points: Number(newTaskPoints),
+    };
+
+    addTask(newWeeklyTask, activeAdmin);
+    setTasksList([...WEEKLY_TASKS]); // Sync
+    setLogsList([...MOCK_TASK_EDIT_LOGS]); // Sync
+    setIsAddingTask(false);
+    
+    // Reset form
+    setNewTaskTitle("");
+    setNewTaskDetails("");
+    setNewTaskInstructions("");
+    setNewTaskWeek(1);
+    setNewTaskDay(1);
+    setNewTaskHours(3);
+    setNewTaskPoints(100);
+
+    alert("Curriculum outline task added successfully by Admin!");
+  };
+
+  // Edit Task handler for Admin
+  const handleEditTaskSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!activeAdmin || !editingTask) return;
+
+    editTask(editingTask.id, editingTask, activeAdmin);
+    setTasksList([...WEEKLY_TASKS]); // Sync
+    setLogsList([...MOCK_TASK_EDIT_LOGS]); // Sync
+    setEditingTask(null);
+    alert("Curriculum outline task updated successfully by Admin!");
+  };
+
+  // Delete Task handler for Admin
+  const handleDeleteTask = (taskId: string) => {
+    if (!activeAdmin) return;
+    if (!confirm("Are you sure you want to delete this task?")) return;
+
+    deleteTask(taskId, activeAdmin);
+    setTasksList([...WEEKLY_TASKS]); // Sync
+    setLogsList([...MOCK_TASK_EDIT_LOGS]); // Sync
+    alert("Curriculum outline task deleted successfully by Admin!");
+  };
+
+  // Calculate Mentor stats dynamically
+  const getMentorStats = (mentorId: string) => {
+    const assignments = MOCK_MENTOR_ASSIGNMENTS.filter((a) => a.mentorId === mentorId);
+    const assignedTrackIds = assignments.map((a) => a.trackId);
+
+    // Submissions for mentor's tracks
+    const assignedSubmissions = SUBMISSIONS.filter((sub) => {
+      const task = WEEKLY_TASKS.find((t) => t.id === sub.taskId);
+      return task && assignedTrackIds.includes(task.trackId);
+    });
+
+    const checked = assignedSubmissions.filter((s) => s.status === "APPROVED" || s.status === "REJECTED").length;
+    const remaining = assignedSubmissions.filter((s) => s.status === "PENDING").length;
+
+    // Last feedback given
+    const feedbackList = assignedSubmissions
+      .filter((s) => s.feedback && s.reviewedAt)
+      .sort((a, b) => new Date(b.reviewedAt!).getTime() - new Date(a.reviewedAt!).getTime());
+
+    const lastFeedback = feedbackList.length > 0 ? feedbackList[0].feedback : "(No feedback submitted yet)";
+
+    return { checked, remaining, lastFeedback };
+  };
 
   return (
     <div className="min-h-screen bg-[#020B18] text-slate-100 px-6 py-8">
@@ -92,7 +218,7 @@ export default function AdminDashboard() {
         </section>
 
         {/* Tab Selection */}
-        <section className="flex border-b border-white/8 gap-6 text-sm font-semibold">
+        <section className="flex border-b border-white/8 gap-6 text-sm font-semibold overflow-x-auto scrollbar-none pb-0.5">
           <button
             onClick={() => setActiveTab("students")}
             className={`pb-4 transition-all ${
@@ -107,7 +233,7 @@ export default function AdminDashboard() {
               activeTab === "mentors" ? "text-cyan-400 border-b-2 border-cyan-400" : "text-slate-400 hover:text-slate-200"
             }`}
           >
-            Mentor Assignments ({mentors.length})
+            Mentor Performance ({mentors.length})
           </button>
           <button
             onClick={() => setActiveTab("tracks")}
@@ -116,6 +242,22 @@ export default function AdminDashboard() {
             }`}
           >
             Course Curriculum Tracks ({totalTracks})
+          </button>
+          <button
+            onClick={() => setActiveTab("curriculum")}
+            className={`pb-4 transition-all flex items-center gap-1.5 ${
+              activeTab === "curriculum" ? "text-cyan-400 border-b-2 border-cyan-400" : "text-slate-400 hover:text-slate-200"
+            }`}
+          >
+            <BookOpen size={15} /> Outline Editor
+          </button>
+          <button
+            onClick={() => setActiveTab("audits")}
+            className={`pb-4 transition-all flex items-center gap-1.5 ${
+              activeTab === "audits" ? "text-cyan-400 border-b-2 border-cyan-400" : "text-slate-400 hover:text-slate-200"
+            }`}
+          >
+            <History size={15} /> Audit logs Feed
           </button>
         </section>
 
@@ -178,35 +320,32 @@ export default function AdminDashboard() {
 
           {activeTab === "mentors" && (
             <div className="space-y-4">
-              <h3 className="font-display text-lg font-bold text-white">Mentor Assignments</h3>
+              <h3 className="font-display text-lg font-bold text-white">Mentor Performance Directory</h3>
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-sm text-slate-300">
                   <thead className="bg-white/4 text-xs font-semibold uppercase tracking-wider text-slate-400 border-b border-white/8">
                     <tr>
                       <th className="px-6 py-4">Mentor Name</th>
-                      <th className="px-6 py-4">Email</th>
                       <th className="px-6 py-4">Assigned Track</th>
-                      <th className="px-6 py-4 text-right">Actions</th>
+                      <th className="px-6 py-4 text-center">Tasks Checked</th>
+                      <th className="px-6 py-4 text-center">Tasks Remaining</th>
+                      <th className="px-6 py-4">Latest Remarks</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-white/8">
                     {mentors.map((mentor) => {
                       const assignments = MOCK_MENTOR_ASSIGNMENTS.filter((a) => a.mentorId === mentor.id);
+                      const stats = getMentorStats(mentor.id);
+
                       return (
                         <tr key={mentor.id} className="hover:bg-white/4 transition-colors">
                           <td className="px-6 py-4 font-semibold text-white">
                             <div>
                               <p>{mentor.name}</p>
-                              <p className="text-[10px] text-slate-500 font-medium">{mentor.rank}</p>
+                              <p className="text-[10px] text-slate-500 font-medium">{mentor.email}</p>
                             </div>
                           </td>
                           <td className="px-6 py-4 text-slate-400">
-                            <span className="flex items-center gap-1.5">
-                              <Mail size={13} />
-                              {mentor.email}
-                            </span>
-                          </td>
-                          <td className="px-6 py-4">
                             <div className="flex flex-col gap-1">
                               {assignments.map((asg, i) => (
                                 <span key={i} className="text-xs text-slate-300 font-medium">
@@ -215,13 +354,15 @@ export default function AdminDashboard() {
                               ))}
                             </div>
                           </td>
-                          <td className="px-6 py-4 text-right">
-                            <button
-                              onClick={() => alert("Reassigning mentors requires active database connectivity.")}
-                              className="text-xs font-bold text-cyan-400 hover:underline"
-                            >
-                              Manage Assignments
-                            </button>
+                          <td className="px-6 py-4 text-center font-bold text-emerald-400">{stats.checked}</td>
+                          <td className="px-6 py-4 text-center font-bold text-yellow-500">
+                            <span className="inline-flex items-center gap-1">
+                              {stats.remaining > 0 ? <Clock size={12} className="animate-spin-slow" /> : null}
+                              {stats.remaining}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 text-xs italic text-slate-400 max-w-xs truncate" title={stats.lastFeedback}>
+                            &quot;{stats.lastFeedback}&quot;
                           </td>
                         </tr>
                       );
@@ -255,7 +396,7 @@ export default function AdminDashboard() {
                   </thead>
                   <tbody className="divide-y divide-white/8">
                     {tracks.map((track) => {
-                      const taskCount = WEEKLY_TASKS.filter((t) => t.trackId === track.id).length;
+                      const taskCount = tasksList.filter((t) => t.trackId === track.id).length;
                       return (
                         <tr key={track.id} className="hover:bg-white/4 transition-colors">
                           <td className="px-6 py-4 font-semibold text-white flex items-center gap-3">
@@ -277,8 +418,316 @@ export default function AdminDashboard() {
               </div>
             </div>
           )}
+
+          {activeTab === "audits" && (
+            <div className="space-y-4">
+              <h3 className="font-display text-lg font-bold text-white flex items-center gap-2">
+                <History className="text-purple-400" />
+                Change Audit Logs Timeline Feed
+              </h3>
+              <p className="text-xs text-slate-500">Track all curriculum modifications made by administrators and mentors.</p>
+              
+              <div className="space-y-3 mt-4 max-h-[600px] overflow-y-auto pr-1">
+                {logsList.map((log) => (
+                  <div key={log.id} className="p-4 rounded-xl border border-white/8 bg-white/4 flex items-start gap-4 transition-all">
+                    <div className={`h-8 w-8 rounded-lg flex items-center justify-center flex-shrink-0 ${
+                      log.fieldName === "creation" 
+                        ? "bg-emerald-500/10 text-emerald-400"
+                        : log.fieldName === "deletion"
+                        ? "bg-red-500/10 text-red-400"
+                        : "bg-cyan-500/10 text-cyan-400"
+                    }`}>
+                      <History size={16} />
+                    </div>
+                    <div className="flex-1 space-y-1">
+                      <div className="flex justify-between items-center text-xs">
+                        <span className="font-bold text-slate-200">
+                          {log.editorName} <span className="text-[10px] text-slate-500 font-semibold">({log.editorRole})</span>
+                        </span>
+                        <span className="text-[10px] text-slate-500 font-medium">
+                          {new Date(log.changedAt).toLocaleString()}
+                        </span>
+                      </div>
+                      <p className="text-xs text-slate-300">
+                        Modified task outlines for track <span className="text-purple-400 font-semibold">{log.trackTitle}</span>:
+                      </p>
+                      <div className="bg-black/20 p-2.5 rounded-lg border border-white/5 text-[11px] font-mono mt-1 text-slate-400 flex flex-wrap gap-x-4">
+                        <div>
+                          <span className="text-slate-500 font-semibold">Field:</span> <span className="text-slate-200">{log.fieldName}</span>
+                        </div>
+                        <div>
+                          <span className="text-red-400/80 font-semibold">Before:</span> <span className="line-through">{log.oldValue}</span>
+                        </div>
+                        <div>
+                          <span className="text-emerald-400/80 font-semibold">After:</span> <span className="text-slate-200">{log.newValue}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+
+                {logsList.length === 0 && (
+                  <p className="text-center text-xs text-slate-600 py-12">No curriculum modification log matches.</p>
+                )}
+              </div>
+            </div>
+          )}
+
+          {activeTab === "curriculum" && (
+            <div className="space-y-6">
+              <div className="flex flex-wrap items-center justify-between gap-4">
+                <div>
+                  <h3 className="font-display text-lg font-bold text-white">Curriculum Course Editor</h3>
+                  <p className="text-xs text-slate-500">Edit, add, or delete outline tasks for any internship track.</p>
+                </div>
+                
+                <div className="flex items-center gap-3">
+                  <select
+                    value={selectedTrackIdForCurriculum}
+                    onChange={(e) => {
+                      setSelectedTrackIdForCurriculum(e.target.value);
+                      setEditingTask(null);
+                      setIsAddingTask(false);
+                    }}
+                    className="rounded-xl border border-white/8 bg-[#020B18] px-4 py-2.5 text-xs text-slate-200 outline-none focus:border-cyan-400"
+                  >
+                    {tracks.map((track) => (
+                      <option key={track.id} value={track.id}>
+                        {track.title}
+                      </option>
+                    ))}
+                  </select>
+
+                  <button
+                    onClick={() => {
+                      setIsAddingTask(true);
+                      setEditingTask(null);
+                    }}
+                    className="flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-cyan-500 to-teal-500 px-4 py-2.5 text-xs font-bold text-[#020B18] hover:scale-[1.01] transition-all"
+                  >
+                    <Plus size={14} /> Add Task
+                  </button>
+                </div>
+              </div>
+
+              {isAddingTask ? (
+                /* Add Task */
+                <div className="rounded-xl border border-white/8 bg-white/4 p-6 space-y-4">
+                  <div className="flex items-center gap-2">
+                    <button onClick={() => setIsAddingTask(false)} className="text-slate-400 hover:text-slate-200">
+                      <ArrowLeft size={16} />
+                    </button>
+                    <h4 className="font-bold text-white text-sm">Add New Curriculum Outline Task</h4>
+                  </div>
+                  <form onSubmit={handleAddTask} className="space-y-4 text-xs">
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      <div>
+                        <label className="block text-slate-400 font-semibold mb-1">Week Number (1-8)</label>
+                        <input
+                          type="number"
+                          min="1"
+                          max="8"
+                          required
+                          value={newTaskWeek}
+                          onChange={(e) => setNewTaskWeek(Number(e.target.value))}
+                          className="w-full rounded-xl border border-white/8 bg-[#020B18] px-4 py-3 text-slate-200 outline-none"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-slate-400 font-semibold mb-1">Day Number (1-5)</label>
+                        <input
+                          type="number"
+                          min="1"
+                          max="5"
+                          required
+                          value={newTaskDay}
+                          onChange={(e) => setNewTaskDay(Number(e.target.value))}
+                          className="w-full rounded-xl border border-white/8 bg-[#020B18] px-4 py-3 text-slate-200 outline-none"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-slate-400 font-semibold mb-1">Task Title</label>
+                      <input
+                        type="text"
+                        required
+                        placeholder="e.g. Build a dark mode toggle"
+                        value={newTaskTitle}
+                        onChange={(e) => setNewTaskTitle(e.target.value)}
+                        className="w-full rounded-xl border border-white/8 bg-[#020B18] px-4 py-3 text-slate-200 outline-none"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-slate-400 font-semibold mb-1">Details / Description</label>
+                      <textarea
+                        required
+                        placeholder="Detailed task description..."
+                        value={newTaskDetails}
+                        onChange={(e) => setNewTaskDetails(e.target.value)}
+                        rows={3}
+                        className="w-full rounded-xl border border-white/8 bg-[#020B18] px-4 py-3 text-slate-200 outline-none"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-slate-400 font-semibold mb-1">Instructions (One instruction per line)</label>
+                      <textarea
+                        placeholder="Step 1: Setup configurations...&#10;Step 2: Connect DB..."
+                        value={newTaskInstructions}
+                        onChange={(e) => setNewTaskInstructions(e.target.value)}
+                        rows={3}
+                        className="w-full rounded-xl border border-white/8 bg-[#020B18] px-4 py-3 text-slate-200 outline-none"
+                      />
+                    </div>
+
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      <div>
+                        <label className="block text-slate-400 font-semibold mb-1">Estimated Hours</label>
+                        <input
+                          type="number"
+                          required
+                          value={newTaskHours}
+                          onChange={(e) => setNewTaskHours(Number(e.target.value))}
+                          className="w-full rounded-xl border border-white/8 bg-[#020B18] px-4 py-3 text-slate-200 outline-none"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-slate-400 font-semibold mb-1">Points</label>
+                        <input
+                          type="number"
+                          required
+                          value={newTaskPoints}
+                          onChange={(e) => setNewTaskPoints(Number(e.target.value))}
+                          className="w-full rounded-xl border border-white/8 bg-[#020B18] px-4 py-3 text-slate-200 outline-none"
+                        />
+                      </div>
+                    </div>
+
+                    <button
+                      type="submit"
+                      className="w-full rounded-xl bg-gradient-to-r from-purple-500 to-indigo-500 py-3.5 text-xs font-bold text-white hover:scale-[1.01]"
+                    >
+                      Publish Outline Task (Admin Override)
+                    </button>
+                  </form>
+                </div>
+              ) : editingTask ? (
+                /* Edit Task */
+                <div className="rounded-xl border border-white/8 bg-white/4 p-6 space-y-4">
+                  <div className="flex items-center gap-2 text-cyan-400">
+                    <button onClick={() => setEditingTask(null)} className="text-slate-400 hover:text-slate-200">
+                      <ArrowLeft size={16} />
+                    </button>
+                    <h4 className="font-bold text-white text-sm">Edit Task: {editingTask.title}</h4>
+                  </div>
+                  <form onSubmit={handleEditTaskSubmit} className="space-y-4 text-xs">
+                    <div>
+                      <label className="block text-slate-400 font-semibold mb-1">Task Title</label>
+                      <input
+                        type="text"
+                        required
+                        value={editingTask.title}
+                        onChange={(e) => setEditingTask({ ...editingTask, title: e.target.value })}
+                        className="w-full rounded-xl border border-white/8 bg-[#020B18] px-4 py-3 text-slate-200 outline-none"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-slate-400 font-semibold mb-1">Task Details</label>
+                      <textarea
+                        required
+                        value={editingTask.taskDetails}
+                        onChange={(e) => setEditingTask({ ...editingTask, taskDetails: e.target.value })}
+                        rows={4}
+                        className="w-full rounded-xl border border-white/8 bg-[#020B18] px-4 py-3 text-slate-200 outline-none"
+                      />
+                    </div>
+
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      <div>
+                        <label className="block text-slate-400 font-semibold mb-1">Estimated Hours</label>
+                        <input
+                          type="number"
+                          required
+                          value={editingTask.estimatedHours}
+                          onChange={(e) => setEditingTask({ ...editingTask, estimatedHours: Number(e.target.value) })}
+                          className="w-full rounded-xl border border-white/8 bg-[#020B18] px-4 py-3 text-slate-200 outline-none"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-slate-400 font-semibold mb-1">Points</label>
+                        <input
+                          type="number"
+                          required
+                          value={editingTask.points}
+                          onChange={(e) => setEditingTask({ ...editingTask, points: Number(e.target.value) })}
+                          className="w-full rounded-xl border border-white/8 bg-[#020B18] px-4 py-3 text-slate-200 outline-none"
+                        />
+                      </div>
+                    </div>
+
+                    <button
+                      type="submit"
+                      className="w-full rounded-xl bg-gradient-to-r from-cyan-500 to-teal-500 py-3.5 text-xs font-bold text-[#020B18] hover:scale-[1.01]"
+                    >
+                      Save Task Changes
+                    </button>
+                  </form>
+                </div>
+              ) : (
+                /* Outline Day-by-Day Timeline List */
+                <div className="space-y-4 max-h-[600px] overflow-y-auto pr-1">
+                  {tasksList
+                    .filter((t) => t.trackId === selectedTrackIdForCurriculum)
+                    .sort((a, b) => a.weekNo - b.weekNo || a.dayNo - b.dayNo)
+                    .map((task) => (
+                      <div
+                        key={task.id}
+                        className="p-4 rounded-xl border border-white/8 bg-white/4 flex justify-between items-start hover:bg-white/6 transition-all"
+                      >
+                        <div className="space-y-2">
+                          <span className="rounded-full bg-purple-500/10 border border-purple-500/20 px-2 py-0.5 text-[9px] font-bold text-purple-400">
+                            Week {task.weekNo} · Day {task.dayNo}
+                          </span>
+                          <h4 className="text-sm font-bold text-white mt-1.5">{task.title}</h4>
+                          <p className="text-xs text-slate-400 leading-relaxed max-w-xl">{task.taskDetails}</p>
+                          <div className="flex gap-4 text-[10px] text-slate-500">
+                            <span>Points: <span className="text-cyan-400 font-semibold">{task.points} pts</span></span>
+                            <span>Estimate: <span className="text-slate-300 font-semibold">{task.estimatedHours} hrs</span></span>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-1.5 ml-4">
+                          <button
+                            onClick={() => setEditingTask(task)}
+                            className="p-2 rounded-lg bg-white/5 border border-white/8 text-slate-400 hover:text-cyan-400 hover:bg-cyan-500/10 transition-all"
+                            title="Edit Task"
+                          >
+                            <Edit2 size={13} />
+                          </button>
+                          <button
+                            onClick={() => handleDeleteTask(task.id)}
+                            className="p-2 rounded-lg bg-white/5 border border-white/8 text-slate-400 hover:text-red-400 hover:bg-red-500/10 transition-all"
+                            title="Delete Task"
+                          >
+                            <Trash2 size={13} />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+
+                  {tasksList.filter((t) => t.trackId === selectedTrackIdForCurriculum).length === 0 && (
+                    <p className="text-center text-xs text-slate-600 py-12">No tasks defined for this curriculum track.</p>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
         </section>
       </main>
     </div>
   );
 }
+
