@@ -22,12 +22,7 @@ export default function RegisterPage() {
         
         {/* Brand logo */}
         <div className="flex items-center gap-2 relative z-10">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-400 to-blue-600 shadow-[0_0_15px_rgba(34,211,238,0.25)]">
-            <Zap size={18} className="text-[#020B18] fill-[#020B18]" />
-          </div>
-          <span className="font-display text-lg font-black tracking-widest text-white uppercase">
-            CONNEXODE
-          </span>
+          <img src="/logo.png" alt="Connexode Logo" className="h-9 w-auto object-contain" />
         </div>
 
         {/* Feature Highlights */}
@@ -65,13 +60,8 @@ export default function RegisterPage() {
       <div className="flex-1 flex flex-col justify-center items-center px-6 py-12 lg:p-12 relative z-10 overflow-y-auto">
         
         {/* Mobile Logo */}
-        <div className="lg:hidden flex items-center gap-2 mb-8">
-          <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-400 to-blue-600">
-            <Zap size={16} className="text-[#020B18]" />
-          </div>
-          <span className="font-display text-base font-black tracking-widest text-white uppercase">
-            CONNEXODE
-          </span>
+        <div className="lg:hidden flex items-center justify-center gap-2 mb-8">
+          <img src="/logo.png" alt="Connexode Logo" className="h-8 w-auto object-contain" />
         </div>
 
         <div className="w-full max-w-lg mb-4 text-center lg:text-left">

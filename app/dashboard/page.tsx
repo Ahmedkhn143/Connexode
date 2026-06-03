@@ -5,7 +5,7 @@ import StatsRow from "@/components/dashboard/StatsRow";
 import PhaseProgress from "@/components/dashboard/PhaseProgress";
 import TaskList from "@/components/dashboard/TaskList";
 import TrackRoadmap from "@/components/dashboard/TrackRoadmap";
-import { getActiveUser, TRACKS, SUBMISSIONS, WEEKLY_TASKS, type User } from "@/lib/mock-data";
+import { getActiveUser, getPaymentStatus, TRACKS, SUBMISSIONS, WEEKLY_TASKS, type User } from "@/lib/mock-data";
 import { BadgeCheck, GitBranch } from "lucide-react";
 import Link from "next/link";
 import AdminDashboard from "../admin/page";
@@ -13,9 +13,14 @@ import MentorDashboard from "../mentor/page";
 
 export default function DashboardPage() {
   const [activeUser, setActiveUser] = useState<User | null>(null);
+  const [paymentStatus, setPaymentStatusState] = useState<"PENDING" | "PAID">("PENDING");
 
   useEffect(() => {
-    setActiveUser(getActiveUser());
+    const user = getActiveUser();
+    setActiveUser(user);
+    if (user) {
+      setPaymentStatusState(getPaymentStatus(user.enrolledTrackId));
+    }
   }, []);
 
   if (!activeUser) {
@@ -51,6 +56,27 @@ export default function DashboardPage() {
 
   return (
     <div className="mx-auto max-w-5xl space-y-6">
+      {/* Payment Gating Banner */}
+      {paymentStatus === "PENDING" && (
+        <div className="rounded-2xl border border-yellow-500/20 bg-yellow-500/5 p-6 backdrop-blur-xl flex flex-col md:flex-row items-center justify-between gap-4 shadow-[0_0_30px_rgba(234,179,8,0.05)]">
+          <div className="space-y-1 text-center md:text-left">
+            <h3 className="font-display text-sm font-extrabold text-white flex items-center justify-center md:justify-start gap-2">
+              <span className="h-2 w-2 rounded-full bg-yellow-500 animate-ping" />
+              Enrollment Pending Payment
+            </h3>
+            <p className="text-xs text-slate-400 max-w-xl">
+              Pay the enrollment fee to unlock mentoring reviews, submit weekly tasks, and earn industry-certified verified credentials.
+            </p>
+          </div>
+          <Link
+            href={`/checkout/${track.id}`}
+            className="rounded-xl bg-yellow-500 px-5 py-3 text-xs font-bold text-[#020B18] shadow-[0_0_15px_rgba(234,179,8,0.2)] hover:scale-[1.02] hover:shadow-[0_0_25px_rgba(234,179,8,0.3)] transition-all shrink-0 cursor-pointer"
+          >
+            Unlock Internship (JazzCash / EasyPaisa)
+          </Link>
+        </div>
+      )}
+
       {/* Welcome banner */}
       <div
         className="relative overflow-hidden rounded-2xl border p-6"
@@ -107,7 +133,21 @@ export default function DashboardPage() {
       <StatsRow />
 
       {/* Progress + Tasks — side by side on large screens */}
-      <div className="grid gap-6 xl:grid-cols-[1fr_1.6fr]">
+      <div className="grid gap-6 xl:grid-cols-[1fr_1.6fr] relative">
+        {paymentStatus === "PENDING" && (
+          <div className="absolute inset-0 bg-[#020B18]/70 backdrop-blur-md rounded-2xl flex flex-col items-center justify-center text-center p-6 z-20 border border-white/5">
+            <h3 className="font-display text-lg font-bold text-white mb-2">Workspace Locked</h3>
+            <p className="text-xs text-slate-400 max-w-sm mb-4 leading-relaxed">
+              You must unlock this internship program via payment to view your current roadmap and tasks.
+            </p>
+            <Link
+              href={`/checkout/${track.id}`}
+              className="rounded-xl bg-cyan-400 px-5 py-3 text-xs font-bold text-[#020B18] shadow-[0_0_20px_rgba(34,211,238,0.2)] hover:scale-[1.02] hover:shadow-[0_0_30px_rgba(34,211,238,0.3)] transition-all cursor-pointer"
+            >
+              Unlock Now
+            </Link>
+          </div>
+        )}
         <PhaseProgress />
         <TaskList weekNo={currentWeek} />
       </div>
