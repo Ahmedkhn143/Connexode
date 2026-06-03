@@ -961,22 +961,31 @@ export default function AdminDashboard() {
                   <h4 className="font-bold text-cyan-400 uppercase tracking-wider text-[10px] border-b border-white/5 pb-1">
                     Personal Details
                   </h4>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <span className="text-slate-500">Full Name:</span>
-                      <p className="text-white font-semibold">{selectedApplication.userName}</p>
-                    </div>
-                    <div>
-                      <span className="text-slate-500">Father's Name:</span>
-                      <p className="text-white font-semibold">{selectedApplication.fatherName || "(Not Provided)"}</p>
-                    </div>
-                    <div>
-                      <span className="text-slate-500">Mobile Number:</span>
-                      <p className="text-white font-mono">{selectedApplication.mobile || "(Not Provided)"}</p>
-                    </div>
-                    <div>
-                      <span className="text-slate-500">CNIC Number:</span>
-                      <p className="text-white font-mono">{selectedApplication.cnic || "(Not Provided)"}</p>
+                  <div className="flex gap-4 items-start">
+                    {selectedApplication.avatarImage && (
+                      <img
+                        src={selectedApplication.avatarImage}
+                        alt="Applicant Avatar"
+                        className="h-16 w-16 rounded-full object-cover border border-white/10 shadow"
+                      />
+                    )}
+                    <div className="flex-1 grid grid-cols-2 gap-3">
+                      <div>
+                        <span className="text-slate-500">Full Name:</span>
+                        <p className="text-white font-semibold">{selectedApplication.userName}</p>
+                      </div>
+                      <div>
+                        <span className="text-slate-500">Father's Name:</span>
+                        <p className="text-white font-semibold">{selectedApplication.fatherName || "(Not Provided)"}</p>
+                      </div>
+                      <div>
+                        <span className="text-slate-500">Mobile Number:</span>
+                        <p className="text-white font-mono">{selectedApplication.mobile || "(Not Provided)"}</p>
+                      </div>
+                      <div>
+                        <span className="text-slate-500">CNIC Number:</span>
+                        <p className="text-white font-mono">{selectedApplication.cnic || "(Not Provided)"}</p>
+                      </div>
                     </div>
                   </div>
                   <div>

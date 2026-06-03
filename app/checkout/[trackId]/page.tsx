@@ -1,11 +1,33 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
-import { CheckCircle2, Loader2, ArrowLeft, ShieldCheck, Wallet, ArrowRight, Upload, AlertCircle, Clock, FileText, Building2, Smartphone } from "lucide-react";
+import { CheckCircle2, Loader2, ArrowLeft, ShieldCheck, Wallet, ArrowRight, Upload, AlertCircle, Clock, FileText, Building2, Smartphone, User as UserIcon } from "lucide-react";
 import { TRACKS, setPaymentStatus, enrollUserInTrack } from "@/lib/mock-data";
 import { cn } from "@/lib/utils";
+
+const PAK_UNIVERSITIES = [
+  "FAST NUCES",
+  "National University of Sciences and Technology (NUST)",
+  "COMSATS University",
+  "University of Engineering and Technology (UET)",
+  "Information Technology University (ITU)",
+  "Lahore University of Management Sciences (LUMS)",
+  "Institute of Business Administration (IBA)",
+  "NED University of Engineering and Technology",
+  "University of the Punjab",
+  "University of Karachi",
+  "Other"
+];
+
+const EXPERIENCE_LEVELS = [
+  "Fresh Graduate",
+  "Student (Undergraduate)",
+  "Less than 1 year",
+  "1 to 2 years",
+  "More than 2 years"
+];
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -21,12 +43,14 @@ export default function CheckoutPage() {
   const [cnic, setCnic] = useState("");
   const [address, setAddress] = useState("");
   const [institute, setInstitute] = useState("FAST NUCES");
-  const [experience, setExperience] = useState("");
+  const [customInstitute, setCustomInstitute] = useState("");
+  const [experience, setExperience] = useState("Fresh Graduate");
   const [projectsUrl, setProjectsUrl] = useState("");
   const [heardFrom, setHeardFrom] = useState("");
   const [expectations, setExpectations] = useState("");
   
   // File Uploads
+  const [avatarImage, setAvatarImage] = useState<string | null>(null);
   const [resumeFile, setResumeFile] = useState<string | null>(null);
   const [resumeFileName, setResumeFileName] = useState("");
   const [receiptImage, setReceiptImage] = useState<string | null>(null);
@@ -55,6 +79,23 @@ export default function CheckoutPage() {
   }
 
   // File Upload Handlers
+  const handleAvatarUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 1024 * 1024) {
+      setError("Profile picture size must be less than 1MB");
+      return;
+    }
+
+    setError("");
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setAvatarImage(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+  };
+
   const handleResumeUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -95,12 +136,28 @@ export default function CheckoutPage() {
     setError("");
 
     // Form Validations
+    if (!avatarImage) return setError("Profile image is required");
     if (!fullName.trim()) return setError("Full Name is required");
     if (!fatherName.trim()) return setError("Father's Name is required");
     if (!mobileNumber.trim()) return setError("Mobile number is required");
+    
+    // Strict Mobile check: 03XX-XXXXXXX
+    if (!/^03[0-9]{2}-[0-9]{7}$/.test(mobileNumber)) {
+      return setError("Mobile number must be in format 03XX-XXXXXXX (e.g. 0300-1234567)");
+    }
+    
     if (!cnic.trim()) return setError("CNIC number is required");
+    
+    // Strict CNIC check: XXXXX-XXXXXXX-X
+    if (!/^[0-9]{5}-[0-9]{7}-[0-9]{1}$/.test(cnic)) {
+      return setError("CNIC must be in format XXXXX-XXXXXXX-X (e.g. 42101-1234567-1)");
+    }
+    
     if (!address.trim()) return setError("Permanent address is required");
-    if (!institute.trim()) return setError("Institute name is required");
+    
+    const finalInstitute = institute === "Other" ? customInstitute : institute;
+    if (!finalInstitute.trim()) return setError("Institute / University name is required");
+    
     if (!resumeFile) return setError("Resume file is required");
     if (!receiptImage) return setError("Payment screenshot is required");
     if (!senderName.trim()) return setError("Sender Name / Account Title is required");
@@ -119,11 +176,12 @@ export default function CheckoutPage() {
         mobile: mobileNumber,
         cnic,
         address,
-        institute,
+        institute: finalInstitute,
         experience,
         projectsUrl,
         heardFrom,
         expectations,
+        avatarImage,
         resumeFileName,
         resumeFile,
         senderName,
@@ -183,6 +241,24 @@ export default function CheckoutPage() {
                 <h3 className="text-xs font-bold text-cyan-400 uppercase tracking-wider border-b border-white/8 pb-2">
                   Personal Details
                 </h3>
+
+                {/* Profile Pic Upload */}
+                <div className="flex flex-col items-center mb-6">
+                  <div className="relative group">
+                    <div className="h-24 w-24 overflow-hidden rounded-full border-2 border-white/10 bg-[#030c1c] flex items-center justify-center relative">
+                      {avatarImage ? (
+                        <img src={avatarImage} alt="Profile Preview" className="h-full w-full object-cover" />
+                      ) : (
+                        <UserIcon size={36} className="text-slate-600" />
+                      )}
+                      <label className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 cursor-pointer transition-all">
+                        <Upload size={18} className="text-white" />
+                        <input type="file" accept="image/*" onChange={handleAvatarUpload} className="hidden" />
+                      </label>
+                    </div>
+                  </div>
+                  <p className="text-[10px] text-slate-500 mt-2 font-bold">Upload Profile Picture * (Max 1MB)</p>
+                </div>
 
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div>
@@ -266,25 +342,41 @@ export default function CheckoutPage() {
                     <label className="mb-1.5 block text-2xs font-semibold uppercase tracking-wider text-slate-400">
                       Institute *
                     </label>
-                    <input
-                      type="text"
-                      required
+                    <select
                       value={institute}
                       onChange={(e) => setInstitute(e.target.value)}
-                      className="w-full rounded-xl border border-white/10 bg-[#030c1c] px-4 py-3 text-xs text-slate-200 outline-none focus:border-cyan-400/40"
-                    />
+                      className="w-full rounded-xl border border-white/10 bg-[#030c1c] px-4 py-3 text-xs text-slate-300 outline-none"
+                    >
+                      {PAK_UNIVERSITIES.map((uni) => (
+                        <option key={uni} value={uni}>{uni}</option>
+                      ))}
+                    </select>
+
+                    {institute === "Other" && (
+                      <input
+                        type="text"
+                        required
+                        placeholder="Write your university name here"
+                        value={customInstitute}
+                        onChange={(e) => setCustomInstitute(e.target.value)}
+                        className="w-full rounded-xl border border-white/10 bg-[#030c1c] px-4 py-3 text-xs text-slate-200 outline-none focus:border-cyan-400/40 mt-3 animate-fade-in"
+                      />
+                    )}
                   </div>
+
                   <div>
                     <label className="mb-1.5 block text-2xs font-semibold uppercase tracking-wider text-slate-400">
-                      Working Experience
+                      Working Experience *
                     </label>
-                    <input
-                      type="text"
-                      placeholder="e.g. Fresh student, 6 months internship, etc."
+                    <select
                       value={experience}
                       onChange={(e) => setExperience(e.target.value)}
-                      className="w-full rounded-xl border border-white/10 bg-[#030c1c] px-4 py-3 text-xs text-slate-200 outline-none focus:border-cyan-400/40"
-                    />
+                      className="w-full rounded-xl border border-white/10 bg-[#030c1c] px-4 py-3 text-xs text-slate-300 outline-none"
+                    >
+                      {EXPERIENCE_LEVELS.map((exp) => (
+                        <option key={exp} value={exp}>{exp}</option>
+                      ))}
+                    </select>
                   </div>
                 </div>
 
