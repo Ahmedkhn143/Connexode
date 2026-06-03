@@ -75,7 +75,7 @@ export default function RegisterForm() {
         
         setSuccess("Account registered successfully! Redirecting...");
         setTimeout(() => {
-          router.push("/dashboard");
+          router.push("/");
           window.location.reload();
         }, 1000);
       } catch (err) {
@@ -93,7 +93,7 @@ export default function RegisterForm() {
         localStorage.setItem("connexode_active_user", staticUser.id);
         setSuccess("Logged in successfully! Redirecting...");
         setTimeout(() => {
-          router.push("/dashboard");
+          router.push("/");
           window.location.reload();
         }, 1000);
         return;
@@ -109,7 +109,7 @@ export default function RegisterForm() {
         localStorage.setItem("connexode_active_user", dynamicUser.id);
         setSuccess("Logged in successfully! Redirecting...");
         setTimeout(() => {
-          router.push("/dashboard");
+          router.push("/");
           window.location.reload();
         }, 1000);
         return;

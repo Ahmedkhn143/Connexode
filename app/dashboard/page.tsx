@@ -6,7 +6,7 @@ import PhaseProgress from "@/components/dashboard/PhaseProgress";
 import TaskList from "@/components/dashboard/TaskList";
 import TrackRoadmap from "@/components/dashboard/TrackRoadmap";
 import { getActiveUser, getPaymentStatus, TRACKS, SUBMISSIONS, WEEKLY_TASKS, type User } from "@/lib/mock-data";
-import { BadgeCheck, GitBranch, ArrowRight } from "lucide-react";
+import { BadgeCheck, GitBranch, ArrowRight, MessageSquare, Send, User as UserIcon } from "lucide-react";
 import Link from "next/link";
 import AdminDashboard from "../admin/page";
 import MentorDashboard from "../mentor/page";
@@ -14,6 +14,24 @@ import MentorDashboard from "../mentor/page";
 export default function DashboardPage() {
   const [activeUser, setActiveUser] = useState<User | null>(null);
   const [paymentStatus, setPaymentStatusState] = useState<"PENDING" | "PENDING_VERIFICATION" | "PAID">("PENDING");
+  const [profileDetails, setProfileDetails] = useState<any>(null);
+  const [questions, setQuestions] = useState<any[]>([]);
+  const [newQuestion, setNewQuestion] = useState("");
+
+  const loadQuestions = () => {
+    if (typeof window !== "undefined") {
+      const activeUserObj = getActiveUser();
+      const stored = localStorage.getItem("connexode_qa_tickets");
+      if (stored) {
+        try {
+          const allTickets = JSON.parse(stored);
+          setQuestions(allTickets.filter((t: any) => t.userId === activeUserObj.id));
+        } catch (e) {
+          console.error(e);
+        }
+      }
+    }
+  };
 
   useEffect(() => {
     const user = getActiveUser();
@@ -22,6 +40,49 @@ export default function DashboardPage() {
       setPaymentStatusState(getPaymentStatus(user.enrolledTrackId));
     }
   }, []);
+
+  useEffect(() => {
+    if (activeUser) {
+      const stored = localStorage.getItem("connexode_manual_payments");
+      if (stored) {
+        try {
+          const payments = JSON.parse(stored);
+          const userApp = payments.find((p: any) => p.userId === activeUser.id && p.trackId === activeUser.enrolledTrackId);
+          if (userApp) {
+            setProfileDetails(userApp);
+          }
+        } catch (e) {
+          console.error(e);
+        }
+      }
+      loadQuestions();
+    }
+  }, [activeUser]);
+
+  const handleAskQuestion = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newQuestion.trim()) return;
+
+    if (typeof window !== "undefined" && activeUser) {
+      const allTickets = JSON.parse(localStorage.getItem("connexode_qa_tickets") || "[]");
+      const newTicket = {
+        id: `q_${Math.random().toString(36).substring(2, 9)}`,
+        userId: activeUser.id,
+        userName: activeUser.name,
+        trackId: activeUser.enrolledTrackId,
+        question: newQuestion,
+        reply: null,
+        status: "PENDING",
+        askedAt: new Date().toISOString(),
+        repliedAt: null
+      };
+      allTickets.push(newTicket);
+      localStorage.setItem("connexode_qa_tickets", JSON.stringify(allTickets));
+      setNewQuestion("");
+      loadQuestions();
+      alert("Your question has been sent! Mentor will respond within 24 hours.");
+    }
+  };
 
   if (!activeUser) {
     return (
@@ -246,6 +307,134 @@ export default function DashboardPage() {
               </span>
             </div>
           ))}
+        </div>
+      </div>
+
+      {/* Profile & Q&A Grid */}
+      <div className="grid gap-6 md:grid-cols-2">
+        {/* Profile Card */}
+        <div className="rounded-2xl border border-white/8 bg-white/4 p-6 backdrop-blur-xl space-y-4">
+          <h3 className="font-display text-lg font-bold text-white flex items-center gap-2">
+            <UserIcon className="text-cyan-400" size={20} />
+            My Internship Profile Details
+          </h3>
+          
+          {profileDetails ? (
+            <div className="space-y-4">
+              <div className="flex items-center gap-4">
+                {profileDetails.avatarImage ? (
+                  <img
+                    src={profileDetails.avatarImage}
+                    alt="Profile Avatar"
+                    className="h-16 w-16 rounded-full object-cover border border-white/10 shadow-lg"
+                  />
+                ) : (
+                  <div className="h-16 w-16 rounded-full bg-cyan-500/10 text-cyan-400 flex items-center justify-center font-bold">
+                    {profileDetails.userName.substring(0, 2).toUpperCase()}
+                  </div>
+                )}
+                <div>
+                  <h4 className="font-bold text-white text-sm">{profileDetails.userName}</h4>
+                  <p className="text-xs text-slate-400">Track: {profileDetails.trackTitle}</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3 text-xs leading-normal">
+                <div>
+                  <span className="text-slate-500 font-semibold">Father's Name:</span>
+                  <p className="text-slate-200">{profileDetails.fatherName}</p>
+                </div>
+                <div>
+                  <span className="text-slate-500 font-semibold">Mobile:</span>
+                  <p className="text-slate-200 font-mono">{profileDetails.mobile}</p>
+                </div>
+                <div>
+                  <span className="text-slate-500 font-semibold">CNIC:</span>
+                  <p className="text-slate-200 font-mono">{profileDetails.cnic}</p>
+                </div>
+                <div>
+                  <span className="text-slate-500 font-semibold">Institute:</span>
+                  <p className="text-slate-200 truncate">{profileDetails.institute}</p>
+                </div>
+                <div className="col-span-2">
+                  <span className="text-slate-500 font-semibold">Permanent Address:</span>
+                  <p className="text-slate-200">{profileDetails.address}</p>
+                </div>
+                <div>
+                  <span className="text-slate-500 font-semibold">Experience:</span>
+                  <p className="text-slate-200">{profileDetails.experience}</p>
+                </div>
+                {profileDetails.projectsUrl && (
+                  <div>
+                    <span className="text-slate-500 font-semibold">LinkedIn / Projects:</span>
+                    <p className="text-slate-200 truncate">
+                      <a href={profileDetails.projectsUrl} target="_blank" rel="noopener noreferrer" className="text-cyan-400 hover:underline">
+                        View Profile
+                      </a>
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+          ) : (
+            <p className="text-xs text-slate-500 italic py-6 text-center">
+              Profile details will load once you submit your internship application.
+            </p>
+          )}
+        </div>
+
+        {/* Q&A Helpdesk Card */}
+        <div className="rounded-2xl border border-white/8 bg-white/4 p-6 backdrop-blur-xl space-y-4">
+          <h3 className="font-display text-lg font-bold text-white flex items-center gap-2">
+            <MessageSquare className="text-cyan-400" size={20} />
+            Ask Mentor Helpdesk
+          </h3>
+          <p className="text-[10px] text-yellow-500 font-bold leading-normal bg-yellow-500/5 border border-yellow-500/10 rounded-lg p-2.5">
+            ⚠️ **SLA Notice:** Your assigned mentor will respond to your queries within **24 hours**.
+          </p>
+
+          <form onSubmit={handleAskQuestion} className="space-y-2">
+            <textarea
+              required
+              rows={3}
+              value={newQuestion}
+              onChange={(e) => setNewQuestion(e.target.value)}
+              placeholder="Ask your mentor a question (e.g. details regarding week tasks or code checks)..."
+              className="w-full rounded-xl border border-white/10 bg-[#030c1c] px-4 py-3 text-xs text-slate-200 outline-none focus:border-cyan-400/40"
+            />
+            <button
+              type="submit"
+              className="w-full flex items-center justify-center gap-1.5 rounded-xl bg-cyan-400 py-2.5 text-xs font-bold text-[#020B18] hover:scale-[1.01] transition-transform"
+            >
+              <Send size={12} />
+              Submit Query to Mentor
+            </button>
+          </form>
+
+          {/* Ticket Feed list */}
+          <div className="space-y-3 pt-2 max-h-[160px] overflow-y-auto pr-1">
+            {questions.map((q) => (
+              <div key={q.id} className="p-3 rounded-lg bg-black/20 border border-white/5 space-y-1.5 text-xs">
+                <div className="flex justify-between items-center text-[10px]">
+                  <span className="text-slate-500">{new Date(q.askedAt).toLocaleDateString()}</span>
+                  <span className={`rounded px-1.5 py-0.5 text-[9px] font-extrabold ${
+                    q.status === "ANSWERED" ? "bg-emerald-500/10 text-emerald-400" : "bg-yellow-500/10 text-yellow-500 animate-pulse"
+                  }`}>
+                    {q.status}
+                  </span>
+                </div>
+                <p className="text-slate-300 font-semibold">&quot;{q.question}&quot;</p>
+                {q.reply && (
+                  <div className="pl-2 border-l border-cyan-500/40 text-[11px] text-cyan-400 leading-normal">
+                    <span className="font-bold text-slate-400">Mentor reply:</span> &quot;{q.reply}&quot;
+                  </div>
+                )}
+              </div>
+            ))}
+            {questions.length === 0 && (
+              <p className="text-center text-xs text-slate-500 py-6 italic">No questions submitted yet.</p>
+            )}
+          </div>
         </div>
       </div>
     </div>

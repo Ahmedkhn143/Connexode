@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState, useEffect } from "react";
 import Link from "next/link";
 import { motion, useInView } from "framer-motion";
 import {
@@ -26,6 +26,13 @@ const item = {
 export default function TracksSection() {
   const ref = useRef<HTMLElement>(null);
   const inView = useInView(ref, { once: true, margin: "-100px" });
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setIsLoggedIn(!!localStorage.getItem("connexode_active_user"));
+    }
+  }, []);
 
   return (
     <section ref={ref} id="tracks" className="relative px-6 py-28">
@@ -67,7 +74,7 @@ export default function TracksSection() {
             const Icon = ICON_MAP[track.icon] ?? Code2;
             return (
               <motion.div key={track.id} variants={item}>
-                <Link href={`/dashboard`} className="group block h-full">
+                <Link href={isLoggedIn ? `/checkout/${track.id}` : "/register"} className="group block h-full">
                   <div
                     className="relative h-full overflow-hidden rounded-2xl border border-white/8 bg-white/4 p-7 backdrop-blur-xl transition-all duration-300 group-hover:-translate-y-2 group-hover:border-opacity-40"
                     style={

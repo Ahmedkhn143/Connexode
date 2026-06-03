@@ -35,15 +35,16 @@ import {
   Trash2,
   Edit2,
   ArrowLeft,
-  Search,
-  Calendar,
   Layers,
   Sparkles,
+  MessageSquare,
+  Search,
+  Calendar,
 } from "lucide-react";
 import Link from "next/link";
 
 type SubFilter = "ALL" | "PENDING" | "APPROVED" | "REJECTED";
-type Tab = "submissions" | "students" | "curriculum";
+type Tab = "submissions" | "students" | "curriculum" | "questions";
 
 export default function MentorDashboard() {
   const [activeMentor, setActiveMentor] = useState<User | null>(null);
@@ -69,6 +70,11 @@ export default function MentorDashboard() {
   const [newTaskInstructions, setNewTaskInstructions] = useState("");
   const [tasksList, setTasksList] = useState<WeeklyTask[]>([]);
 
+  // Student Q&A States
+  const [questions, setQuestions] = useState<any[]>([]);
+  const [activeReplyId, setActiveReplyId] = useState<string>("");
+  const [replyText, setReplyText] = useState("");
+
   // Student directory states
   const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null);
   const [searchStudentQuery, setSearchStudentQuery] = useState("");
@@ -92,7 +98,58 @@ export default function MentorDashboard() {
     } else {
       setSubmissions(SUBMISSIONS);
     }
+    // Load student Q&A tickets
+    const loadTickets = () => {
+      const stored = localStorage.getItem("connexode_qa_tickets");
+      if (stored) {
+        try {
+          setQuestions(JSON.parse(stored));
+        } catch (e) {
+          console.error(e);
+        }
+      }
+    };
+    loadTickets();
   }, []);
+
+  const handleReplySubmit = (e: React.FormEvent, ticketId: string) => {
+    e.preventDefault();
+    if (!replyText.trim()) return;
+
+    const updated = questions.map((q) => {
+      if (q.id === ticketId) {
+        return {
+          ...q,
+          reply: replyText,
+          status: "ANSWERED",
+          repliedAt: new Date().toISOString()
+        };
+      }
+      return q;
+    });
+
+    setQuestions(updated);
+    localStorage.setItem("connexode_qa_tickets", JSON.stringify(updated));
+    setReplyText("");
+    setActiveReplyId("");
+    alert("Reply sent to student successfully!");
+  };
+
+  const getStudentAppDetails = (studentId: string | undefined) => {
+    if (!studentId) return null;
+    if (typeof window !== "undefined") {
+      const stored = localStorage.getItem("connexode_manual_payments");
+      if (stored) {
+        try {
+          const payments = JSON.parse(stored);
+          return payments.find((p: any) => p.userId === studentId);
+        } catch (e) {
+          console.error(e);
+        }
+      }
+    }
+    return null;
+  };
 
   // Determine tracks assigned to this mentor
   const mentorAssignments = activeMentor
@@ -304,6 +361,14 @@ export default function MentorDashboard() {
           }`}
         >
           <BookOpen size={16} /> Curriculum Editor
+        </button>
+        <button
+          onClick={() => setActiveTab("questions")}
+          className={`pb-4 transition-all flex items-center gap-2 ${
+            activeTab === "questions" ? "text-cyan-400 border-b-2 border-cyan-400" : "text-slate-400 hover:text-slate-200"
+          }`}
+        >
+          <MessageSquare size={16} /> Student Questions ({questions.filter((q) => q.status === "PENDING" && assignedTrackIds.includes(q.trackId)).length})
         </button>
       </nav>
 
@@ -671,35 +736,32 @@ export default function MentorDashboard() {
                       <div className="flex items-start justify-between gap-4 flex-wrap">
                         <div>
                           <span className="text-[10px] font-bold text-cyan-400 uppercase tracking-widest block mb-1">
-                            Student Profile Summary
+                            Student Profile (Mentorship View)
                           </span>
                           <h2 className="font-display text-2xl font-extrabold text-white">{student?.name}</h2>
-                          <p className="text-xs text-slate-400 mt-1">
-                            Registered Email: <span className="text-slate-300">{student?.email}</span> · Joined {student?.joinDate}
-                          </p>
-                        </div>
-                        <div className="flex gap-4">
-                          <div className="text-center bg-white/4 border border-white/8 px-4 py-2.5 rounded-xl">
-                            <span className="text-[10px] text-slate-500 block uppercase font-bold">Total Points</span>
-                            <span className="text-lg font-bold text-yellow-400">{student?.points}</span>
+                          <div className="mt-4 space-y-2 text-xs">
+                            <div>
+                              <span className="text-slate-500 font-bold block">Father's Name:</span>
+                              <span className="text-slate-200 text-sm font-semibold">
+                                {getStudentAppDetails(student?.id)?.fatherName || "Richard Johnson (Mock)"}
+                              </span>
+                            </div>
+                            <div>
+                              <span className="text-slate-500 font-bold block">LinkedIn Profile:</span>
+                              {getStudentAppDetails(student?.id)?.projectsUrl ? (
+                                <a
+                                  href={getStudentAppDetails(student?.id).projectsUrl}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-cyan-400 font-semibold hover:underline"
+                                >
+                                  {getStudentAppDetails(student?.id).projectsUrl}
+                                </a>
+                              ) : (
+                                <span className="text-slate-500 italic">No LinkedIn/Projects URL provided</span>
+                              )}
+                            </div>
                           </div>
-                          <div className="text-center bg-white/4 border border-white/8 px-4 py-2.5 rounded-xl">
-                            <span className="text-[10px] text-slate-500 block uppercase font-bold">Daily Streak</span>
-                            <span className="text-lg font-bold text-orange-400">{student?.streak} days</span>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="mt-4 pt-4 border-t border-white/8 grid gap-4 sm:grid-cols-2 text-xs">
-                        <div>
-                          <span className="text-slate-500 block font-medium">Internship Track</span>
-                          <span className="font-semibold text-slate-200">{track?.title}</span>
-                        </div>
-                        <div>
-                          <span className="text-slate-500 block font-medium">Progress Status</span>
-                          <span className="font-semibold text-slate-200">
-                            Currently at Week {student?.currentWeek} · Day {student?.currentDay}
-                          </span>
                         </div>
                       </div>
                     </div>
@@ -1054,6 +1116,88 @@ export default function MentorDashboard() {
                 )}
               </div>
             )}
+          </div>
+        )}
+        {activeTab === "questions" && (
+          <div className="rounded-2xl border border-white/8 bg-white/4 p-6 backdrop-blur-xl space-y-4">
+            <h3 className="font-display text-lg font-bold text-white flex items-center gap-2">
+              <MessageSquare size={20} className="text-cyan-400" />
+              Student Q&A Helpdesk Tickets
+            </h3>
+            <p className="text-xs text-slate-500">
+              Review and reply to questions posted by students enrolled in your track courses. All responses show up instantly on their dashboard.
+            </p>
+
+            <div className="space-y-4 overflow-y-auto max-h-[600px] pr-1">
+              {questions
+                .filter((q) => assignedTrackIds.includes(q.trackId))
+                .map((q) => (
+                  <div key={q.id} className="p-5 rounded-xl border border-white/8 bg-white/3 space-y-3">
+                    <div className="flex justify-between items-center text-xs">
+                      <div>
+                        <span className="font-bold text-white">{q.userName}</span>
+                        <span className="text-[10px] text-slate-500 ml-2">ID: {q.userId}</span>
+                      </div>
+                      <span className={`rounded px-2 py-0.5 text-[9px] font-extrabold uppercase ${
+                        q.status === "ANSWERED" ? "bg-emerald-500/10 text-emerald-400" : "bg-yellow-500/10 text-yellow-500"
+                      }`}>
+                        {q.status}
+                      </span>
+                    </div>
+
+                    <p className="text-sm font-medium text-slate-200 bg-black/20 p-3 rounded-lg border border-white/5">
+                      &quot;{q.question}&quot;
+                    </p>
+
+                    {q.reply ? (
+                      <div className="pl-3 border-l-2 border-cyan-500 text-xs leading-normal">
+                        <span className="font-bold text-slate-400 block mb-0.5">Your Response:</span>
+                        <p className="text-cyan-400 italic">&quot;{q.reply}&quot;</p>
+                      </div>
+                    ) : (
+                      <div className="space-y-2 pt-1.5">
+                        {activeReplyId === q.id ? (
+                          <form onSubmit={(e) => handleReplySubmit(e, q.id)} className="space-y-2">
+                            <textarea
+                              required
+                              rows={2}
+                              value={replyText}
+                              onChange={(e) => setReplyText(e.target.value)}
+                              placeholder="Type your response to the student's question..."
+                              className="w-full rounded-xl border border-white/10 bg-[#020B18] px-4 py-3 text-xs text-slate-200 outline-none focus:border-cyan-400/40"
+                            />
+                            <div className="flex gap-2">
+                              <button
+                                type="submit"
+                                className="rounded-lg bg-cyan-500 px-4 py-2 text-2xs font-bold text-[#020B18] hover:scale-[1.01] transition-transform"
+                              >
+                                Send Reply
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => { setActiveReplyId(""); setReplyText(""); }}
+                                className="rounded-lg bg-white/5 border border-white/10 px-4 py-2 text-2xs text-slate-400 hover:text-white"
+                              >
+                                Cancel
+                              </button>
+                            </div>
+                          </form>
+                        ) : (
+                          <button
+                            onClick={() => setActiveReplyId(q.id)}
+                            className="rounded-lg bg-cyan-500/10 border border-cyan-500/20 px-4 py-2 text-2xs font-bold text-cyan-400 hover:bg-cyan-500/15 transition-all"
+                          >
+                            Reply to Question
+                          </button>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              {questions.filter((q) => assignedTrackIds.includes(q.trackId)).length === 0 && (
+                <p className="text-center text-xs text-slate-600 py-12">No student questions found in your track queue.</p>
+              )}
+            </div>
           </div>
         )}
       </main>
