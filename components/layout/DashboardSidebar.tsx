@@ -38,16 +38,16 @@ export default function DashboardSidebar() {
   return (
     <aside className="flex h-full w-72 flex-col border-r border-white/8 bg-[#020B18]/60 backdrop-blur-xl">
       {/* Logo */}
-      <div className="flex items-center gap-3 border-b border-white/8 px-6 py-5">
+      <Link href="/" className="group flex items-center gap-3 border-b border-white/8 px-6 py-5">
         <img
           src="/logo.png"
           alt="Connexode Logo"
-          className="h-9 w-9 rounded-xl object-cover shadow-[0_0_16px_rgba(0,245,255,0.4)]"
+          className="h-9 w-9 rounded-xl object-cover shadow-[0_0_16px_rgba(0,245,255,0.4)] transition-shadow duration-300 group-hover:shadow-[0_0_24px_rgba(0,245,255,0.6)]"
         />
         <span className="font-display text-xl font-bold tracking-tight text-white">
           Connex<span className="text-cyan-400">ode</span>
         </span>
-      </div>
+      </Link>
 
       {/* User Quick Info */}
       <div className="border-b border-white/8 px-5 py-4">

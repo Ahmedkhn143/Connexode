@@ -21,9 +21,16 @@ export default function RegisterPage() {
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-cyan-500/5 via-transparent to-transparent pointer-events-none" />
         
         {/* Brand logo */}
-        <div className="flex items-center gap-2 relative z-10">
-          <img src="/logo.png" alt="Connexode Logo" className="h-9 w-auto object-contain" />
-        </div>
+        <Link href="/" className="group flex items-center gap-2.5 relative z-10">
+          <img
+            src="/logo.png"
+            alt="Connexode Logo"
+            className="h-9 w-9 rounded-xl object-cover shadow-[0_0_20px_rgba(0,245,255,0.4)] transition-shadow duration-300 group-hover:shadow-[0_0_30px_rgba(0,245,255,0.6)]"
+          />
+          <span className="font-display text-xl font-bold tracking-tight text-white">
+            Connex<span className="text-cyan-400">ode</span>
+          </span>
+        </Link>
 
         {/* Feature Highlights */}
         <div className="space-y-8 my-auto relative z-10 max-w-sm">
@@ -60,9 +67,16 @@ export default function RegisterPage() {
       <div className="flex-1 flex flex-col justify-center items-center px-6 py-12 lg:p-12 relative z-10 overflow-y-auto">
         
         {/* Mobile Logo */}
-        <div className="lg:hidden flex items-center justify-center gap-2 mb-8">
-          <img src="/logo.png" alt="Connexode Logo" className="h-8 w-auto object-contain" />
-        </div>
+        <Link href="/" className="lg:hidden group flex items-center justify-center gap-2.5 mb-8">
+          <img
+            src="/logo.png"
+            alt="Connexode Logo"
+            className="h-8 w-8 rounded-xl object-cover shadow-[0_0_20px_rgba(0,245,255,0.4)]"
+          />
+          <span className="font-display text-lg font-bold tracking-tight text-white">
+            Connex<span className="text-cyan-400">ode</span>
+          </span>
+        </Link>
 
         <div className="w-full max-w-lg mb-4 text-center lg:text-left">
           <h2 className="font-display text-2xl font-extrabold text-white mb-1.5">
