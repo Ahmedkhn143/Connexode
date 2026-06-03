@@ -6,7 +6,7 @@ import PhaseProgress from "@/components/dashboard/PhaseProgress";
 import TaskList from "@/components/dashboard/TaskList";
 import TrackRoadmap from "@/components/dashboard/TrackRoadmap";
 import { getActiveUser, getPaymentStatus, TRACKS, SUBMISSIONS, WEEKLY_TASKS, type User } from "@/lib/mock-data";
-import { BadgeCheck, GitBranch } from "lucide-react";
+import { BadgeCheck, GitBranch, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import AdminDashboard from "../admin/page";
 import MentorDashboard from "../mentor/page";
@@ -18,7 +18,7 @@ export default function DashboardPage() {
   useEffect(() => {
     const user = getActiveUser();
     setActiveUser(user);
-    if (user) {
+    if (user && user.enrolledTrackId) {
       setPaymentStatusState(getPaymentStatus(user.enrolledTrackId));
     }
   }, []);
@@ -38,6 +38,55 @@ export default function DashboardPage() {
 
   if (activeUser.role === "MENTOR") {
     return <MentorDashboard />;
+  }
+
+  // Check if user has no enrolled track
+  if (!activeUser.enrolledTrackId) {
+    return (
+      <div className="mx-auto max-w-5xl space-y-8 py-4">
+        <div>
+          <span className="rounded bg-cyan-400/10 border border-cyan-400/25 px-2.5 py-1 text-[10px] font-extrabold text-cyan-400 uppercase tracking-wider">
+            Internship Catalog
+          </span>
+          <h1 className="font-display text-3xl font-black text-white mt-3">
+            Select Your Internship Track
+          </h1>
+          <p className="text-sm text-slate-400 mt-1">
+            Choose an internship course to enroll, complete hands-on tasks, and earn industry-certified credentials.
+          </p>
+        </div>
+
+        <div className="grid gap-6 sm:grid-cols-2 md:grid-cols-3">
+          {TRACKS.map((t) => (
+            <div
+              key={t.id}
+              className="rounded-2xl border border-white/8 bg-white/4 p-5 hover:border-cyan-400/30 hover:bg-white/6 transition-all flex flex-col justify-between"
+            >
+              <div className="space-y-3">
+                <span className="h-10 w-10 rounded-xl bg-cyan-400/10 text-cyan-400 flex items-center justify-center font-bold text-sm">
+                  {t.title.substring(0, 2).toUpperCase()}
+                </span>
+                <div>
+                  <h3 className="font-display text-base font-extrabold text-white">{t.title}</h3>
+                  <p className="text-[10px] text-slate-500 font-semibold">{t.durationWeeks} Weeks Program</p>
+                </div>
+                <p className="text-xs text-slate-400 leading-normal">{t.description}</p>
+              </div>
+
+              <div className="pt-5 border-t border-white/5 mt-5">
+                <Link
+                  href={`/checkout/${t.id}`}
+                  className="w-full flex items-center justify-center gap-1.5 rounded-xl bg-cyan-400 py-2.5 text-xs font-bold text-[#020B18] hover:scale-[1.02] transition-transform"
+                >
+                  Apply & Enroll
+                  <ArrowRight size={13} />
+                </Link>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
   }
 
   const track = TRACKS.find((t) => t.id === activeUser.enrolledTrackId)!;

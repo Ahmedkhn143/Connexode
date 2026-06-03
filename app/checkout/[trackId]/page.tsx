@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import { CheckCircle2, Loader2, ArrowLeft, ShieldCheck, Wallet, ArrowRight, Upload, AlertCircle, Clock, FileText, Building2, Smartphone } from "lucide-react";
-import { TRACKS, setPaymentStatus } from "@/lib/mock-data";
+import { TRACKS, setPaymentStatus, enrollUserInTrack } from "@/lib/mock-data";
 import { cn } from "@/lib/utils";
 
 export default function CheckoutPage() {
@@ -136,6 +136,7 @@ export default function CheckoutPage() {
       });
       localStorage.setItem("connexode_manual_payments", JSON.stringify(filtered));
       setPaymentStatus(trackId, "PENDING_VERIFICATION");
+      enrollUserInTrack(trackId);
       setState("pending_approval");
     } catch (err) {
       console.error(err);

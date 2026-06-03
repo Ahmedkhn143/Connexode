@@ -161,11 +161,43 @@ export const getActiveUser = (): User => {
   if (typeof window !== "undefined") {
     const saved = localStorage.getItem("connexode_active_user");
     if (saved) {
+      // Find in dynamic users first
+      const dynamicUsersRaw = localStorage.getItem("connexode_dynamic_users");
+      if (dynamicUsersRaw) {
+        try {
+          const dynamicUsers = JSON.parse(dynamicUsersRaw);
+          const foundDynamic = dynamicUsers.find((u: any) => u.id === saved);
+          if (foundDynamic) {
+            const trackSaved = localStorage.getItem(`connexode_user_track_${saved}`);
+            if (trackSaved) {
+              foundDynamic.enrolledTrackId = trackSaved;
+            }
+            return foundDynamic;
+          }
+        } catch (e) {
+          console.error(e);
+        }
+      }
+
+      // Find in static users
       const found = MOCK_USERS.find((u) => u.id === saved);
-      if (found) return found;
+      if (found) {
+        const trackSaved = localStorage.getItem(`connexode_user_track_${saved}`);
+        if (trackSaved) {
+          return { ...found, enrolledTrackId: trackSaved };
+        }
+        return found;
+      }
     }
   }
-  return MOCK_USERS.find((u) => u.id === ACTIVE_USER_ID)!;
+  const defaultUser = MOCK_USERS.find((u) => u.id === ACTIVE_USER_ID)!;
+  if (typeof window !== "undefined") {
+    const trackSaved = localStorage.getItem(`connexode_user_track_${defaultUser.id}`);
+    if (trackSaved) {
+      return { ...defaultUser, enrolledTrackId: trackSaved };
+    }
+  }
+  return defaultUser;
 };
 
 export const getPaymentStatus = (trackId: string): "PENDING" | "PENDING_VERIFICATION" | "PAID" => {
@@ -184,12 +216,17 @@ export const setPaymentStatus = (trackId: string, status: "PENDING" | "PENDING_V
   }
 };
 
-
-
 export const setActiveUser = (id: string) => {
   if (typeof window !== "undefined") {
     localStorage.setItem("connexode_active_user", id);
     window.location.reload();
+  }
+};
+
+export const enrollUserInTrack = (trackId: string) => {
+  if (typeof window !== "undefined") {
+    const activeUser = getActiveUser();
+    localStorage.setItem(`connexode_user_track_${activeUser.id}`, trackId);
   }
 };
 
