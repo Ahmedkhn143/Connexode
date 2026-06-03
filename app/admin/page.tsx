@@ -17,7 +17,7 @@ import {
   type User,
   type Submission,
 } from "@/lib/mock-data";
-import { BookOpen, Users, GitBranch, ShieldAlert, Plus, LineChart, Code2, Award, Flame, Mail, GraduationCap, History, CheckCircle2, XCircle, Clock, Trash2, Edit2, ArrowLeft } from "lucide-react";
+import { BookOpen, Users, GitBranch, ShieldAlert, Plus, LineChart, Code2, Award, Flame, Mail, GraduationCap, History, CheckCircle2, XCircle, Clock, Trash2, Edit2, ArrowLeft, FileText } from "lucide-react";
 import Link from "next/link";
 
 type Tab = "students" | "mentors" | "tracks" | "audits" | "curriculum" | "payments";
@@ -29,6 +29,7 @@ export default function AdminDashboard() {
   const [logsList, setLogsList] = useState(MOCK_TASK_EDIT_LOGS);
   const [payments, setPayments] = useState<any[]>([]);
   const [selectedReceipt, setSelectedReceipt] = useState<string | null>(null);
+  const [selectedApplication, setSelectedApplication] = useState<any | null>(null);
   
   // Admin Curriculum Edit states
   const [selectedTrackIdForCurriculum, setSelectedTrackIdForCurriculum] = useState<string>("track_001");
@@ -813,6 +814,12 @@ export default function AdminDashboard() {
                         <td className="px-6 py-4">
                           <p className="font-semibold text-white">{p.userName}</p>
                           <p className="text-[10px] text-slate-500">ID: {p.userId}</p>
+                          <button
+                            onClick={() => setSelectedApplication(p)}
+                            className="mt-1.5 flex items-center gap-1 text-[10px] text-cyan-400 hover:text-cyan-300 font-bold transition-colors"
+                          >
+                            <BookOpen size={11} /> View Application Form
+                          </button>
                         </td>
                         <td className="px-6 py-4">
                           <span className="text-xs font-medium text-slate-200">
@@ -926,6 +933,126 @@ export default function AdminDashboard() {
                   alt="Receipt Full Preview"
                   className="max-w-full max-h-[60vh] object-contain rounded-lg border border-white/5 shadow-lg"
                 />
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Lightbox / Modal for Candidate Application Form Profile */}
+        {selectedApplication && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 p-4 backdrop-blur-sm overflow-y-auto">
+            <div className="relative max-w-2xl w-full bg-slate-900 border border-white/10 rounded-2xl overflow-hidden shadow-2xl flex flex-col my-8">
+              <div className="flex items-center justify-between px-6 py-4 border-b border-white/5 bg-slate-950">
+                <div>
+                  <h3 className="text-sm font-bold text-white">Internship Application Form Details</h3>
+                  <p className="text-[10px] text-slate-500">Track: {selectedApplication.trackTitle}</p>
+                </div>
+                <button
+                  onClick={() => setSelectedApplication(null)}
+                  className="rounded-lg bg-white/5 px-3 py-1.5 text-xs text-slate-400 hover:text-white hover:bg-white/10 transition-all"
+                >
+                  Close
+                </button>
+              </div>
+              
+              <div className="p-6 space-y-5 text-xs text-slate-300 overflow-y-auto max-h-[70vh]">
+                {/* Personal Info */}
+                <div className="space-y-2">
+                  <h4 className="font-bold text-cyan-400 uppercase tracking-wider text-[10px] border-b border-white/5 pb-1">
+                    Personal Details
+                  </h4>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <span className="text-slate-500">Full Name:</span>
+                      <p className="text-white font-semibold">{selectedApplication.userName}</p>
+                    </div>
+                    <div>
+                      <span className="text-slate-500">Father's Name:</span>
+                      <p className="text-white font-semibold">{selectedApplication.fatherName || "(Not Provided)"}</p>
+                    </div>
+                    <div>
+                      <span className="text-slate-500">Mobile Number:</span>
+                      <p className="text-white font-mono">{selectedApplication.mobile || "(Not Provided)"}</p>
+                    </div>
+                    <div>
+                      <span className="text-slate-500">CNIC Number:</span>
+                      <p className="text-white font-mono">{selectedApplication.cnic || "(Not Provided)"}</p>
+                    </div>
+                  </div>
+                  <div>
+                    <span className="text-slate-500">Permanent Address:</span>
+                    <p className="text-white mt-0.5">{selectedApplication.address || "(Not Provided)"}</p>
+                  </div>
+                </div>
+
+                {/* Professional Info */}
+                <div className="space-y-2">
+                  <h4 className="font-bold text-cyan-400 uppercase tracking-wider text-[10px] border-b border-white/5 pb-1">
+                    Academic & Professional details
+                  </h4>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <span className="text-slate-500">Institute:</span>
+                      <p className="text-white font-semibold">{selectedApplication.institute || "(Not Provided)"}</p>
+                    </div>
+                    <div>
+                      <span className="text-slate-500">Working Experience:</span>
+                      <p className="text-white">{selectedApplication.experience || "Fresh student"}</p>
+                    </div>
+                  </div>
+                  {selectedApplication.projectsUrl && (
+                    <div>
+                      <span className="text-slate-500">Past Projects URL:</span>
+                      <p className="mt-0.5">
+                        <a
+                          href={selectedApplication.projectsUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-cyan-400 hover:underline break-all"
+                        >
+                          {selectedApplication.projectsUrl}
+                        </a>
+                      </p>
+                    </div>
+                  )}
+                </div>
+
+                {/* Survey Info */}
+                <div className="space-y-2">
+                  <h4 className="font-bold text-cyan-400 uppercase tracking-wider text-[10px] border-b border-white/5 pb-1">
+                    Additional Information
+                  </h4>
+                  <div>
+                    <span className="text-slate-500">Where did you hear about Internee.pk?</span>
+                    <p className="text-white mt-0.5">{selectedApplication.heardFrom || "Not provided"}</p>
+                  </div>
+                  <div>
+                    <span className="text-slate-500">What do you expect from us?</span>
+                    <p className="text-white mt-0.5">{selectedApplication.expectations || "Not provided"}</p>
+                  </div>
+                </div>
+
+                {/* Resume Download Box */}
+                {selectedApplication.resumeFile && (
+                  <div className="rounded-xl border border-white/10 bg-white/3 p-4 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="h-9 w-9 rounded-lg bg-red-500/10 text-red-400 flex items-center justify-center">
+                        <FileText size={18} />
+                      </div>
+                      <div>
+                        <p className="font-bold text-white text-xs">{selectedApplication.resumeFileName || "resume.pdf"}</p>
+                        <p className="text-[10px] text-slate-500">Applicant Attached CV</p>
+                      </div>
+                    </div>
+                    <a
+                      href={selectedApplication.resumeFile}
+                      download={selectedApplication.resumeFileName || "resume.pdf"}
+                      className="rounded-lg bg-cyan-500 px-4 py-2 text-2xs font-bold text-[#020B18] hover:scale-[1.01] transition-all"
+                    >
+                      Download Resume
+                    </a>
+                  </div>
+                )}
               </div>
             </div>
           </div>
