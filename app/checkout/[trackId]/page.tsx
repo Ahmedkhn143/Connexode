@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
-import { CheckCircle2, Loader2, ArrowLeft, ShieldCheck, Wallet, ArrowRight } from "lucide-react";
+import { CheckCircle2, Loader2, ArrowLeft, ShieldCheck, Wallet, ArrowRight, Upload, AlertCircle, Clock } from "lucide-react";
 import { TRACKS, setPaymentStatus } from "@/lib/mock-data";
 import { cn } from "@/lib/utils";
 
@@ -13,12 +13,16 @@ export default function CheckoutPage() {
   const trackId = params.trackId as string;
 
   const track = TRACKS.find((t) => t.id === trackId);
-  const [method, setMethod] = useState<"easypaisa" | "jazzcash">("easypaisa");
+  const [method, setMethod] = useState<"easypaisa" | "jazzcash" | "manual">("easypaisa");
   
   // Checkout States
   const [mobileNumber, setMobileNumber] = useState("");
+  const [senderName, setSenderName] = useState("");
+  const [transactionId, setTransactionId] = useState("");
+  const [receiptImage, setReceiptImage] = useState<string | null>(null);
+  
   const [error, setError] = useState("");
-  const [state, setState] = useState<"idle" | "sending" | "countdown" | "success">("idle");
+  const [state, setState] = useState<"idle" | "sending" | "countdown" | "success" | "pending_approval">("idle");
   const [timer, setTimer] = useState(30);
 
   // Price calculation
@@ -31,7 +35,6 @@ export default function CheckoutPage() {
         setTimer((prev) => prev - 1);
       }, 1000);
     } else if (state === "countdown" && timer === 0) {
-      // Auto-approve after timeout for seamless UX demo
       handlePaymentComplete();
     }
     return () => clearInterval(interval);
@@ -50,9 +53,69 @@ export default function CheckoutPage() {
     );
   }
 
+  // Handle receipt image selection
+  const handleReceiptUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 1024 * 1024) {
+      setError("Receipt image size must be less than 1MB");
+      return;
+    }
+
+    setError("");
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setReceiptImage(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+  };
+
   const handlePay = (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+
+    if (method === "manual") {
+      if (!senderName.trim()) {
+        setError("Sender Name is required");
+        return;
+      }
+      if (!transactionId.trim()) {
+        setError("Transaction ID (TID) is required");
+        return;
+      }
+      if (!receiptImage) {
+        setError("Receipt screenshot is required");
+        return;
+      }
+
+      // Submit manual receipt
+      try {
+        const pending = JSON.parse(localStorage.getItem("connexode_manual_payments") || "[]");
+        // Remove existing transaction for this track if any
+        const filtered = pending.filter((p: any) => p.trackId !== trackId);
+        filtered.push({
+          id: `tx_${Math.random().toString(36).substring(2, 9)}`,
+          trackId,
+          trackTitle: track.title,
+          userName: "Alex Johnson",
+          userId: "usr_001",
+          method: "manual",
+          senderName,
+          transactionId,
+          receiptImage,
+          price,
+          status: "PENDING",
+          submittedAt: new Date().toISOString(),
+        });
+        localStorage.setItem("connexode_manual_payments", JSON.stringify(filtered));
+        setPaymentStatus(trackId, "PENDING_VERIFICATION");
+        setState("pending_approval");
+      } catch (err) {
+        console.error(err);
+      }
+      return;
+    }
 
     if (!mobileNumber) {
       setError("Mobile number is required");
@@ -116,63 +179,151 @@ export default function CheckoutPage() {
             </div>
 
             {/* Payment Method Tabs */}
-            <div className="grid grid-cols-2 gap-3.5">
+            <div className="grid grid-cols-3 gap-2.5">
               <button
                 type="button"
-                onClick={() => setMethod("easypaisa")}
+                onClick={() => {
+                  setMethod("easypaisa");
+                  setError("");
+                }}
                 className={cn(
-                  "flex items-center justify-center gap-2 rounded-xl py-3 border transition-all text-xs font-bold",
+                  "flex flex-col items-center justify-center gap-1 rounded-xl py-2.5 border transition-all text-[11px] font-bold",
                   method === "easypaisa"
                     ? "bg-[#3EB149]/15 border-[#3EB149] text-[#3EB149]"
                     : "bg-white/4 border-white/8 text-slate-500 hover:text-slate-300"
                 )}
               >
-                <Wallet size={14} />
+                <Wallet size={12} />
                 EasyPaisa
               </button>
               <button
                 type="button"
-                onClick={() => setMethod("jazzcash")}
+                onClick={() => {
+                  setMethod("jazzcash");
+                  setError("");
+                }}
                 className={cn(
-                  "flex items-center justify-center gap-2 rounded-xl py-3 border transition-all text-xs font-bold",
+                  "flex flex-col items-center justify-center gap-1 rounded-xl py-2.5 border transition-all text-[11px] font-bold",
                   method === "jazzcash"
                     ? "bg-[#D9232A]/15 border-[#D9232A] text-[#D9232A]"
                     : "bg-white/4 border-white/8 text-slate-500 hover:text-slate-300"
                 )}
               >
-                <Wallet size={14} />
+                <Wallet size={12} />
                 JazzCash
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setMethod("manual");
+                  setError("");
+                }}
+                className={cn(
+                  "flex flex-col items-center justify-center gap-1 rounded-xl py-2.5 border transition-all text-[11px] font-bold",
+                  method === "manual"
+                    ? "bg-cyan-500/15 border-cyan-400 text-cyan-400"
+                    : "bg-white/4 border-white/8 text-slate-500 hover:text-slate-300"
+                )}
+              >
+                <Upload size={12} />
+                Upload Receipt
               </button>
             </div>
 
             {/* Form */}
             <form onSubmit={handlePay} className="space-y-4">
-              <div>
-                <label className="mb-1.5 block text-2xs font-semibold uppercase tracking-wider text-slate-400">
-                  {method === "easypaisa" ? "EasyPaisa" : "JazzCash"} Account Mobile Number
-                </label>
-                <input
-                  type="tel"
-                  required
-                  value={mobileNumber}
-                  onChange={(e) => setMobileNumber(e.target.value)}
-                  placeholder="e.g. 03001234567"
-                  className={cn(
-                    "w-full rounded-xl border bg-white/5 px-4 py-3.5 text-xs text-slate-200 outline-none transition-all",
-                    error ? "border-red-400/40 focus:ring-1 focus:ring-red-400/10" : "border-white/10 focus:border-cyan-400/40"
-                  )}
-                />
-                {error && <p className="mt-1 text-[11px] text-red-400">{error}</p>}
-                <p className="mt-2 text-[10px] text-slate-500 leading-normal">
-                  Make sure you have sufficient balance in your mobile wallet and that your device is unlocked.
-                </p>
-              </div>
+              
+              {method !== "manual" ? (
+                // Digital wallet forms
+                <div>
+                  <label className="mb-1.5 block text-2xs font-semibold uppercase tracking-wider text-slate-400">
+                    {method === "easypaisa" ? "EasyPaisa" : "JazzCash"} Account Mobile Number
+                  </label>
+                  <input
+                    type="tel"
+                    required
+                    value={mobileNumber}
+                    onChange={(e) => setMobileNumber(e.target.value)}
+                    placeholder="e.g. 03001234567"
+                    className={cn(
+                      "w-full rounded-xl border bg-white/5 px-4 py-3.5 text-xs text-slate-200 outline-none transition-all",
+                      error ? "border-red-400/40 focus:ring-1 focus:ring-red-400/10" : "border-white/10 focus:border-cyan-400/40"
+                    )}
+                  />
+                  {error && <p className="mt-1 text-[11px] text-red-400">{error}</p>}
+                  <p className="mt-2 text-[10px] text-slate-500 leading-normal">
+                    Make sure you have sufficient balance in your mobile wallet and that your device is unlocked to accept the auto PIN request.
+                  </p>
+                </div>
+              ) : (
+                // Manual upload form (internee.pk style)
+                <div className="space-y-4">
+                  <div className="rounded-xl border border-yellow-500/10 bg-yellow-500/5 p-4 text-[10px] text-slate-400 leading-normal">
+                    💡 **Instructions:** Send **Rs. {price.toLocaleString()}** to our Mobile Account (EasyPaisa/JazzCash: **0300-1234567**), then upload the screenshot and enter transaction details below.
+                  </div>
+
+                  <div>
+                    <label className="mb-1.5 block text-2xs font-semibold uppercase tracking-wider text-slate-400">
+                      Sender Name / Account Title *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={senderName}
+                      onChange={(e) => setSenderName(e.target.value)}
+                      placeholder="e.g. Alex Johnson"
+                      className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-xs text-slate-200 outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="mb-1.5 block text-2xs font-semibold uppercase tracking-wider text-slate-400">
+                      Transaction ID (TID) *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={transactionId}
+                      onChange={(e) => setTransactionId(e.target.value)}
+                      placeholder="e.g. 8092178942"
+                      className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-xs text-slate-200 outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="mb-1.5 block text-2xs font-semibold uppercase tracking-wider text-slate-400">
+                      Upload Receipt Screenshot *
+                    </label>
+                    <div className="flex flex-col items-center justify-center border border-dashed border-white/10 rounded-xl p-4 bg-white/3">
+                      {receiptImage ? (
+                        <div className="relative w-full max-h-[160px] overflow-hidden rounded-lg flex items-center justify-center">
+                          <img src={receiptImage} alt="Receipt Preview" className="max-h-[150px] object-contain rounded border border-white/10" />
+                          <button
+                            type="button"
+                            onClick={() => setReceiptImage(null)}
+                            className="absolute top-1 right-1 rounded-full bg-black/60 px-2 py-0.5 text-3xs text-white"
+                          >
+                            Change
+                          </button>
+                        </div>
+                      ) : (
+                        <label className="flex flex-col items-center justify-center cursor-pointer w-full py-4 text-slate-500 hover:text-slate-300">
+                          <Upload size={20} className="mb-1 text-cyan-400" />
+                          <span className="text-3xs font-semibold">Select image (Max 1MB)</span>
+                          <input type="file" accept="image/*" onChange={handleReceiptUpload} className="hidden" />
+                        </label>
+                      )}
+                    </div>
+                  </div>
+                  {error && <p className="mt-1 text-[11px] text-red-400">{error}</p>}
+                </div>
+              )}
 
               <button
                 type="submit"
                 className="w-full flex items-center justify-center gap-2 rounded-xl bg-cyan-400 py-3.5 text-xs font-bold text-[#020B18] shadow-[0_0_20px_rgba(34,211,238,0.2)] transition-all hover:scale-[1.01] hover:shadow-[0_0_30px_rgba(34,211,238,0.3)] cursor-pointer"
               >
-                Pay Rs. {price.toLocaleString()}
+                {method === "manual" ? "Submit Receipt Verification" : `Pay Rs. ${price.toLocaleString()}`}
                 <ArrowRight size={14} />
               </button>
             </form>
@@ -254,6 +405,31 @@ export default function CheckoutPage() {
               className="w-full flex items-center justify-center gap-2 rounded-xl bg-emerald-400 py-3.5 text-xs font-bold text-[#020B18] shadow-[0_0_20px_rgba(16,185,129,0.2)] transition-all hover:scale-[1.01] cursor-pointer"
             >
               Enter Internship Workspace
+            </button>
+          </div>
+        )}
+
+        {/* Step 5: Pending verification dashboard */}
+        {state === "pending_approval" && (
+          <div className="rounded-2xl border border-yellow-500/20 bg-yellow-500/5 p-10 backdrop-blur-xl text-center space-y-6">
+            <div className="flex justify-center">
+              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-yellow-500/15 border border-yellow-500/25">
+                <Clock size={28} className="text-yellow-500 animate-pulse" />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <h2 className="font-display text-xl font-bold text-white">Verification Pending</h2>
+              <p className="text-xs text-slate-400 max-w-sm mx-auto leading-relaxed">
+                Your payment screenshot has been uploaded. Our admin team will verify the Transaction ID (TID): **{transactionId}** and unlock your internship dashboard in 2-4 hours.
+              </p>
+            </div>
+
+            <button
+              onClick={() => router.push("/dashboard")}
+              className="w-full flex items-center justify-center gap-2 rounded-xl bg-yellow-500 py-3.5 text-xs font-bold text-[#020B18] shadow-[0_0_20px_rgba(234,179,8,0.2)] transition-all hover:scale-[1.01] cursor-pointer"
+            >
+              Go to Student Dashboard
             </button>
           </div>
         )}

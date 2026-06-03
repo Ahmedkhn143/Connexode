@@ -168,19 +168,22 @@ export const getActiveUser = (): User => {
   return MOCK_USERS.find((u) => u.id === ACTIVE_USER_ID)!;
 };
 
-export const getPaymentStatus = (trackId: string): "PENDING" | "PAID" => {
+export const getPaymentStatus = (trackId: string): "PENDING" | "PENDING_VERIFICATION" | "PAID" => {
   if (typeof window !== "undefined") {
     const saved = localStorage.getItem(`connexode_payment_status_${trackId}`);
-    if (saved === "PAID") return "PAID";
+    if (saved === "PAID" || saved === "PENDING_VERIFICATION" || saved === "PENDING") {
+      return saved as any;
+    }
   }
   return "PENDING";
 };
 
-export const setPaymentStatus = (trackId: string, status: "PENDING" | "PAID") => {
+export const setPaymentStatus = (trackId: string, status: "PENDING" | "PENDING_VERIFICATION" | "PAID") => {
   if (typeof window !== "undefined") {
     localStorage.setItem(`connexode_payment_status_${trackId}`, status);
   }
 };
+
 
 
 export const setActiveUser = (id: string) => {

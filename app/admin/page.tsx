@@ -11,6 +11,7 @@ import {
   addTask,
   editTask,
   deleteTask,
+  setPaymentStatus,
   type Track,
   type WeeklyTask,
   type User,
@@ -19,13 +20,15 @@ import {
 import { BookOpen, Users, GitBranch, ShieldAlert, Plus, LineChart, Code2, Award, Flame, Mail, GraduationCap, History, CheckCircle2, XCircle, Clock, Trash2, Edit2, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 
-type Tab = "students" | "mentors" | "tracks" | "audits" | "curriculum";
+type Tab = "students" | "mentors" | "tracks" | "audits" | "curriculum" | "payments";
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState<Tab>("students");
   const [tracks, setTracks] = useState<Track[]>(TRACKS);
   const [tasksList, setTasksList] = useState<WeeklyTask[]>([]);
   const [logsList, setLogsList] = useState(MOCK_TASK_EDIT_LOGS);
+  const [payments, setPayments] = useState<any[]>([]);
+  const [selectedReceipt, setSelectedReceipt] = useState<string | null>(null);
   
   // Admin Curriculum Edit states
   const [selectedTrackIdForCurriculum, setSelectedTrackIdForCurriculum] = useState<string>("track_001");
@@ -47,7 +50,51 @@ export default function AdminDashboard() {
     setActiveAdmin(MOCK_USERS.find((u) => u.role === "ADMIN") || null);
     setTasksList(WEEKLY_TASKS);
     setLogsList(MOCK_TASK_EDIT_LOGS);
+
+    if (typeof window !== "undefined") {
+      const stored = localStorage.getItem("connexode_manual_payments");
+      if (stored) {
+        try {
+          setPayments(JSON.parse(stored));
+        } catch (e) {
+          console.error(e);
+        }
+      }
+    }
   }, []);
+
+  const handleApprovePayment = (txId: string, trackId: string) => {
+    setPaymentStatus(trackId, "PAID");
+    const updatedPayments = payments.map((p) => {
+      if (p.id === txId) {
+        return { ...p, status: "APPROVED" };
+      }
+      return p;
+    });
+    setPayments(updatedPayments);
+    localStorage.setItem("connexode_manual_payments", JSON.stringify(updatedPayments));
+    alert("Payment approved successfully! The student's workspace has been unlocked.");
+  };
+
+  const handleRejectPayment = (txId: string, trackId: string) => {
+    setPaymentStatus(trackId, "PENDING");
+    const updatedPayments = payments.map((p) => {
+      if (p.id === txId) {
+        return { ...p, status: "REJECTED" };
+      }
+      return p;
+    });
+    setPayments(updatedPayments);
+    localStorage.setItem("connexode_manual_payments", JSON.stringify(updatedPayments));
+    alert("Payment rejected! The student will need to re-submit their payment receipt.");
+  };
+
+  const handleDeletePayment = (txId: string) => {
+    if (!confirm("Are you sure you want to delete this payment record?")) return;
+    const updatedPayments = payments.filter((p) => p.id !== txId);
+    setPayments(updatedPayments);
+    localStorage.setItem("connexode_manual_payments", JSON.stringify(updatedPayments));
+  };
 
   // Filter students out of MOCK_USERS
   const students = MOCK_USERS.filter((u) => u.role === "STUDENT");
@@ -258,6 +305,14 @@ export default function AdminDashboard() {
             }`}
           >
             <History size={15} /> Audit logs Feed
+          </button>
+          <button
+            onClick={() => setActiveTab("payments")}
+            className={`pb-4 transition-all flex items-center gap-1.5 ${
+              activeTab === "payments" ? "text-cyan-400 border-b-2 border-cyan-400" : "text-slate-400 hover:text-slate-200"
+            }`}
+          >
+            <Clock size={15} /> Payment Approvals ({payments.filter((p) => p.status === "PENDING").length})
           </button>
         </section>
 
@@ -725,7 +780,156 @@ export default function AdminDashboard() {
               )}
             </div>
           )}
+
+          {activeTab === "payments" && (
+            <div className="space-y-4">
+              <h3 className="font-display text-lg font-bold text-white flex items-center gap-2">
+                <Clock className="text-cyan-400" />
+                Manual Payment Approvals Queue
+              </h3>
+              <p className="text-xs text-slate-500">
+                Review uploaded EasyPaisa / JazzCash payment screenshots. Approving a receipt unlocks the student's dashboard access for that course track.
+              </p>
+              
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-sm text-slate-300">
+                  <thead className="bg-white/4 text-xs font-semibold uppercase tracking-wider text-slate-400 border-b border-white/8">
+                    <tr>
+                      <th className="px-6 py-4">Submission Date</th>
+                      <th className="px-6 py-4">Student</th>
+                      <th className="px-6 py-4">Track</th>
+                      <th className="px-6 py-4">Transaction Details</th>
+                      <th className="px-6 py-4">Receipt Screenshot</th>
+                      <th className="px-6 py-4">Status</th>
+                      <th className="px-6 py-4 text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-white/8">
+                    {payments.map((p) => (
+                      <tr key={p.id} className="hover:bg-white/4 transition-colors">
+                        <td className="px-6 py-4 text-xs text-slate-400">
+                          {new Date(p.submittedAt).toLocaleString()}
+                        </td>
+                        <td className="px-6 py-4">
+                          <p className="font-semibold text-white">{p.userName}</p>
+                          <p className="text-[10px] text-slate-500">ID: {p.userId}</p>
+                        </td>
+                        <td className="px-6 py-4">
+                          <span className="text-xs font-medium text-slate-200">
+                            {p.trackTitle}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 text-xs space-y-1">
+                          <div>
+                            <span className="text-slate-500 font-semibold">Sender:</span>{" "}
+                            <span className="text-slate-300 font-medium">{p.senderName}</span>
+                          </div>
+                          <div>
+                            <span className="text-slate-500 font-semibold">TID:</span>{" "}
+                            <span className="font-mono text-cyan-400 font-bold">{p.transactionId}</span>
+                          </div>
+                          <div>
+                            <span className="text-slate-500 font-semibold">Amount:</span>{" "}
+                            <span className="text-emerald-400 font-bold">Rs. {p.price}</span>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          {p.receiptImage ? (
+                            <button
+                              onClick={() => setSelectedReceipt(p.receiptImage)}
+                              className="group relative h-12 w-20 overflow-hidden rounded-lg border border-white/10 hover:border-cyan-500/50 transition-all flex items-center justify-center bg-black/40"
+                            >
+                              <img
+                                src={p.receiptImage}
+                                alt="Receipt Thumbnail"
+                                className="h-full w-full object-cover group-hover:scale-105 transition-transform"
+                              />
+                              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-[10px] font-bold text-white">
+                                View Full
+                              </div>
+                            </button>
+                          ) : (
+                            <span className="text-xs text-slate-500 italic">No Screenshot</span>
+                          )}
+                        </td>
+                        <td className="px-6 py-4">
+                          <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold ${
+                            p.status === "APPROVED"
+                              ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                              : p.status === "REJECTED"
+                              ? "bg-red-500/10 text-red-400 border border-red-500/20"
+                              : "bg-yellow-500/10 text-yellow-500 border border-yellow-500/20"
+                          }`}>
+                            <span className="h-1.5 w-1.5 rounded-full bg-current" />
+                            {p.status}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 text-right">
+                          <div className="flex justify-end items-center gap-2">
+                            {p.status === "PENDING" && (
+                              <>
+                                <button
+                                  onClick={() => handleApprovePayment(p.id, p.trackId)}
+                                  className="rounded-lg bg-emerald-500/10 border border-emerald-500/20 px-3 py-1.5 text-xs font-bold text-emerald-400 hover:bg-emerald-500/20 hover:text-emerald-300 transition-all"
+                                >
+                                  Approve
+                                </button>
+                                <button
+                                  onClick={() => handleRejectPayment(p.id, p.trackId)}
+                                  className="rounded-lg bg-red-500/10 border border-red-500/20 px-3 py-1.5 text-xs font-bold text-red-400 hover:bg-red-500/20 hover:text-red-300 transition-all"
+                                >
+                                  Reject
+                                </button>
+                              </>
+                            )}
+                            <button
+                              onClick={() => handleDeletePayment(p.id)}
+                              className="p-2 rounded-lg bg-white/5 border border-white/8 text-slate-400 hover:text-red-400 hover:bg-red-500/10 transition-all"
+                              title="Delete Record"
+                            >
+                              <Trash2 size={13} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                    {payments.length === 0 && (
+                      <tr>
+                        <td colSpan={7} className="text-center text-xs text-slate-500 py-12">
+                          No manual payment transactions found in queue.
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
         </section>
+
+        {/* Lightbox / Modal for Receipt Preview */}
+        {selectedReceipt && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 p-4 backdrop-blur-sm">
+            <div className="relative max-w-3xl w-full bg-slate-900 border border-white/10 rounded-2xl overflow-hidden shadow-2xl flex flex-col">
+              <div className="flex items-center justify-between px-6 py-4 border-b border-white/5 bg-slate-950">
+                <h3 className="text-sm font-bold text-white">Payment Receipt Proof</h3>
+                <button
+                  onClick={() => setSelectedReceipt(null)}
+                  className="rounded-lg bg-white/5 px-3 py-1.5 text-xs text-slate-400 hover:text-white hover:bg-white/10 transition-all"
+                >
+                  Close
+                </button>
+              </div>
+              <div className="p-6 flex items-center justify-center bg-black/40 overflow-y-auto max-h-[75vh]">
+                <img
+                  src={selectedReceipt}
+                  alt="Receipt Full Preview"
+                  className="max-w-full max-h-[60vh] object-contain rounded-lg border border-white/5 shadow-lg"
+                />
+              </div>
+            </div>
+          </div>
+        )}
       </main>
     </div>
   );
