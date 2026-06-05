@@ -79,6 +79,8 @@ export default function MentorDashboard() {
   const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null);
   const [searchStudentQuery, setSearchStudentQuery] = useState("");
 
+  const [allUsers, setAllUsers] = useState<User[]>(MOCK_USERS);
+
   useEffect(() => {
     setActiveMentor(getActiveUser());
     setTasksList(WEEKLY_TASKS);
@@ -95,6 +97,36 @@ export default function MentorDashboard() {
         return acc;
       }, []);
       setSubmissions(combined);
+
+      // Load combined static and dynamic users
+      const dynamicUsersRaw = localStorage.getItem("connexode_dynamic_users");
+      if (dynamicUsersRaw) {
+        try {
+          const dynamicUsers = JSON.parse(dynamicUsersRaw);
+          const combinedUsers = [...dynamicUsers, ...MOCK_USERS].reduce((acc: User[], u: User) => {
+            if (!acc.some((x) => x.id === u.id)) {
+              const trackSaved = localStorage.getItem(`connexode_user_track_${u.id}`);
+              if (trackSaved) {
+                u.enrolledTrackId = trackSaved;
+              }
+              acc.push(u);
+            }
+            return acc;
+          }, []);
+          setAllUsers(combinedUsers);
+        } catch (e) {
+          console.error(e);
+        }
+      } else {
+        const combinedUsers = MOCK_USERS.map((u) => {
+          const trackSaved = localStorage.getItem(`connexode_user_track_${u.id}`);
+          if (trackSaved) {
+            return { ...u, enrolledTrackId: trackSaved };
+          }
+          return u;
+        });
+        setAllUsers(combinedUsers);
+      }
     } else {
       setSubmissions(SUBMISSIONS);
     }
@@ -158,7 +190,7 @@ export default function MentorDashboard() {
   const assignedTrackIds = mentorAssignments.map((a) => a.trackId);
 
   // Filter students enrolled in mentor's tracks
-  const assignedStudents = MOCK_USERS.filter(
+  const assignedStudents = allUsers.filter(
     (u) => u.role === "STUDENT" && assignedTrackIds.includes(u.enrolledTrackId)
   );
 
@@ -183,7 +215,7 @@ export default function MentorDashboard() {
 
   const selectedSub = submissions.find((s) => s.id === selectedSubId);
   const selectedTask = selectedSub ? tasksList.find((t) => t.id === selectedSub.taskId) : null;
-  const selectedUser = selectedSub ? MOCK_USERS.find((u) => u.id === selectedSub.userId) : null;
+  const selectedUser = selectedSub ? allUsers.find((u) => u.id === selectedSub.userId) : null;
 
   const handleReviewSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -307,26 +339,33 @@ export default function MentorDashboard() {
   );
 
   return (
-    <div className="min-h-screen bg-[#020B18] text-slate-100 px-6 py-8">
+    <div className="min-h-screen bg-[#020B18] text-slate-100 px-6 py-12 relative overflow-hidden">
+      {/* Ambient background glows */}
+      <div className="absolute top-[-10%] left-[-10%] w-[600px] h-[600px] bg-cyan-500/8 rounded-full blur-[150px] pointer-events-none" />
+      <div className="absolute top-[20%] right-[-15%] w-[500px] h-[500px] bg-purple-600/10 rounded-full blur-[130px] pointer-events-none" />
+      <div className="absolute bottom-[-10%] left-[20%] w-[550px] h-[550px] bg-emerald-500/5 rounded-full blur-[150px] pointer-events-none" />
+
       {/* Top Header */}
-      <header className="mx-auto max-w-7xl mb-8 flex flex-wrap items-center justify-between gap-4 border-b border-white/8 pb-6">
+      <header className="relative z-10 mx-auto max-w-7xl mb-10 flex flex-wrap items-center justify-between gap-6 border-b border-white/5 pb-8">
         <div>
-          <div className="flex items-center gap-2 text-cyan-400 mb-1">
-            <ShieldAlert size={16} />
-            <span className="text-xs font-semibold uppercase tracking-wider">Mentor Command Workspace</span>
+          <div className="flex items-center gap-2 text-cyan-400 mb-2.5 animate-pulse-slow">
+            <ShieldAlert size={15} />
+            <span className="text-[10px] font-extrabold uppercase tracking-widest">Mentor Command Workspace</span>
           </div>
-          <h1 className="font-display text-3xl font-extrabold text-white">Connexode Mentorship</h1>
+          <h1 className="font-display text-3xl sm:text-4xl font-black tracking-tight text-white">
+            Connexode <span className="bg-gradient-to-r from-cyan-400 via-teal-400 to-indigo-400 bg-clip-text text-transparent">Mentorship</span>
+          </h1>
         </div>
         <div className="flex items-center gap-3">
           <Link
             href="/dashboard"
-            className="rounded-xl border border-white/10 bg-white/5 px-4.5 py-2.5 text-xs font-bold hover:bg-white/8 transition-all"
+            className="group flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/4 px-4.5 py-3 text-xs font-bold hover:bg-white/8 hover:border-white/15 transition-all duration-300"
           >
             Student Panel
           </Link>
           <Link
             href="/admin"
-            className="rounded-xl border border-purple-500/20 bg-purple-500/10 px-4.5 py-2.5 text-xs font-bold text-purple-400 hover:bg-purple-500/15 transition-all"
+            className="group flex items-center gap-1.5 rounded-xl border border-purple-500/20 bg-purple-500/10 px-4.5 py-3 text-xs font-bold text-purple-400 hover:bg-purple-500/15 hover:border-purple-500/30 transition-all duration-300 shadow-[0_0_15px_rgba(168,85,247,0.1)]"
           >
             Admin Panel
           </Link>
@@ -334,46 +373,64 @@ export default function MentorDashboard() {
       </header>
 
       {/* Navigation tabs */}
-      <nav className="mx-auto max-w-7xl mb-6 flex border-b border-white/8 gap-6 text-sm font-semibold">
+      <nav className="relative z-10 mx-auto max-w-7xl mb-8 flex border-b border-white/5 gap-2 text-xs font-bold overflow-x-auto scrollbar-none pb-0">
         <button
           onClick={() => setActiveTab("submissions")}
-          className={`pb-4 transition-all flex items-center gap-2 ${
-            activeTab === "submissions" ? "text-cyan-400 border-b-2 border-cyan-400" : "text-slate-400 hover:text-slate-200"
+          className={`pb-4 px-4 transition-all duration-300 relative flex items-center gap-1.5 ${
+            activeTab === "submissions" 
+              ? "text-cyan-400 font-extrabold border-b-2 border-cyan-400" 
+              : "text-slate-400 hover:text-slate-200"
           }`}
         >
-          <ClipboardCheck size={16} /> Grading Queue ({pendingCount} pending)
+          <ClipboardCheck size={13} />
+          Grading Queue
+          <span className="ml-2 rounded-full bg-white/5 px-2 py-0.5 text-[9px] text-slate-500 font-semibold">{pendingCount}</span>
         </button>
         <button
           onClick={() => {
             setActiveTab("students");
             setSelectedStudentId(null);
           }}
-          className={`pb-4 transition-all flex items-center gap-2 ${
-            activeTab === "students" ? "text-cyan-400 border-b-2 border-cyan-400" : "text-slate-400 hover:text-slate-200"
+          className={`pb-4 px-4 transition-all duration-300 relative flex items-center gap-1.5 ${
+            activeTab === "students" 
+              ? "text-cyan-400 font-extrabold border-b-2 border-cyan-400" 
+              : "text-slate-400 hover:text-slate-200"
           }`}
         >
-          <Users size={16} /> Intern Records
+          <Users size={13} />
+          Intern Records
         </button>
         <button
           onClick={() => setActiveTab("curriculum")}
-          className={`pb-4 transition-all flex items-center gap-2 ${
-            activeTab === "curriculum" ? "text-cyan-400 border-b-2 border-cyan-400" : "text-slate-400 hover:text-slate-200"
+          className={`pb-4 px-4 transition-all duration-300 relative flex items-center gap-1.5 ${
+            activeTab === "curriculum" 
+              ? "text-cyan-400 font-extrabold border-b-2 border-cyan-400" 
+              : "text-slate-400 hover:text-slate-200"
           }`}
         >
-          <BookOpen size={16} /> Curriculum Editor
+          <BookOpen size={13} />
+          Curriculum Editor
         </button>
         <button
           onClick={() => setActiveTab("questions")}
-          className={`pb-4 transition-all flex items-center gap-2 ${
-            activeTab === "questions" ? "text-cyan-400 border-b-2 border-cyan-400" : "text-slate-400 hover:text-slate-200"
+          className={`pb-4 px-4 transition-all duration-300 relative flex items-center gap-1.5 ${
+            activeTab === "questions" 
+              ? "text-cyan-400 font-extrabold border-b-2 border-cyan-400" 
+              : "text-slate-400 hover:text-slate-200"
           }`}
         >
-          <MessageSquare size={16} /> Student Questions ({questions.filter((q) => q.status === "PENDING" && assignedTrackIds.includes(q.trackId)).length})
+          <MessageSquare size={13} />
+          Student Questions
+          {questions.filter((q) => q.status === "PENDING" && assignedTrackIds.includes(q.trackId)).length > 0 && (
+            <span className="ml-1.5 rounded-full bg-yellow-500/15 border border-yellow-500/25 px-2 py-0.5 text-[9px] font-black text-yellow-500 animate-pulse">
+              {questions.filter((q) => q.status === "PENDING" && assignedTrackIds.includes(q.trackId)).length}
+            </span>
+          )}
         </button>
       </nav>
 
       {/* Dynamic Tabs View */}
-      <main className="mx-auto max-w-7xl">
+      <main className="relative z-10 mx-auto max-w-7xl">
         {activeTab === "submissions" && (
           <div className="grid gap-6 lg:grid-cols-[1.2fr_2.2fr]">
             {/* Left Column: Submissions Queue & Student Lists */}
@@ -408,7 +465,7 @@ export default function MentorDashboard() {
                   ) : (
                     filteredSubmissions.map((sub) => {
                       const task = tasksList.find((t) => t.id === sub.taskId);
-                      const user = MOCK_USERS.find((u) => u.id === sub.userId);
+                      const user = allUsers.find((u) => u.id === sub.userId);
                       const isSelected = sub.id === selectedSubId;
 
                       return (
@@ -722,7 +779,7 @@ export default function MentorDashboard() {
             {/* Student Complete Record Profile Timeline */}
             <section>
               {selectedStudentId ? (() => {
-                const student = MOCK_USERS.find((u) => u.id === selectedStudentId);
+                const student = allUsers.find((u) => u.id === selectedStudentId);
                 const track = TRACKS.find((t) => t.id === student?.enrolledTrackId);
                 
                 // Fetch all task records for this student's track, matched with submissions

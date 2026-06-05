@@ -61,13 +61,94 @@ Respond to the student's question directly, offering clean code snippets (TypeSc
     
     if (action === "audit") {
       // Auto Code Audit before submission
+      let fetchedCode = "";
+      if (githubUrl) {
+        try {
+          // Parse github url
+          const cleanUrl = githubUrl.replace(/\.git$/, "").replace(/\/$/, "");
+          const parsed = new URL(cleanUrl);
+          if (parsed.hostname === "github.com") {
+            const parts = parsed.pathname.split("/").filter(Boolean);
+            if (parts.length >= 2) {
+              const owner = parts[0];
+              const repo = parts[1];
+              
+              const res = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents`, {
+                headers: { "User-Agent": "Connexode-AI-Agent" }
+              });
+              if (res.ok) {
+                const items = await res.json();
+                if (Array.isArray(items)) {
+                  const fileContents: string[] = [];
+                  
+                  // 1. Fetch package.json
+                  const packageJsonItem = items.find(item => item.name === "package.json" && item.type === "file");
+                  if (packageJsonItem && packageJsonItem.download_url) {
+                    const pRes = await fetch(packageJsonItem.download_url);
+                    if (pRes.ok) {
+                      const pText = await pRes.text();
+                      fileContents.push(`=== package.json ===\n${pText.slice(0, 1000)}`);
+                    }
+                  }
+                  
+                  // 2. Fetch files from components/ or app/
+                  const srcDirs = items.filter(item => ["app", "components", "src"].includes(item.name) && item.type === "dir");
+                  for (const dir of srcDirs) {
+                    const dirRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${dir.name}`, {
+                      headers: { "User-Agent": "Connexode-AI-Agent" }
+                    });
+                    if (dirRes.ok) {
+                      const dirItems = await dirRes.json();
+                      if (Array.isArray(dirItems)) {
+                        const filesToFetch = dirItems.filter(item => 
+                          item.type === "file" && /\.(tsx|ts|js|jsx|css)$/.test(item.name)
+                        ).slice(0, 2);
+                        for (const file of filesToFetch) {
+                          if (file.download_url) {
+                            const fileRes = await fetch(file.download_url);
+                            if (fileRes.ok) {
+                              const codeText = await fileRes.text();
+                              fileContents.push(`=== ${dir.name}/${file.name} ===\n${codeText.slice(0, 1500)}`);
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                  
+                  if (fileContents.length > 0) {
+                    fetchedCode = fileContents.join("\n\n");
+                  }
+                }
+              }
+            }
+          }
+        } catch (err) {
+          console.error("Failed fetching Github repo files:", err);
+        }
+      }
+
       if (apiKey && GoogleGenAI) {
         try {
           const genAI = new GoogleGenAI(apiKey);
-          const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+          // Try newer/stable models in order
+          const modelsToTry = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash"];
+          let model = null;
+          let lastErr = null;
+          
+          for (const mName of modelsToTry) {
+            try {
+              model = genAI.getGenerativeModel({ model: mName });
+              break;
+            } catch (e) {
+              lastErr = e;
+            }
+          }
+          
+          if (!model) throw lastErr;
           
           const prompt = `You are the Connexode Automated AI Code Reviewer.
-Analyze this simulated submission for the task: "${task.title}".
+Analyze the submission for the task: "${task.title}".
 Instructions: ${task.instructions.join(" | ")}
 
 Submission URLs:
@@ -75,8 +156,11 @@ Submission URLs:
 - Live Demo: ${liveUrl || "Not provided"}
 - LinkedIn: ${linkedinUrl}
 
+Fetched Repository Code/Metadata:
+${fetchedCode || "No repository code files could be fetched. Auditing based on repository structure simulation."}
+
 Provide a structured code audit in markdown format. 
-Make sure your response starts with a JSON block followed by a markdown review.
+You must output a JSON block at the very beginning followed by a markdown review.
 Format:
 \`\`\`json
 {
@@ -86,7 +170,7 @@ Format:
 }
 \`\`\`
 ### AI Review Output...
-Keep the critique highly professional, mention at least 2 specific suggestions to improve performance or accessibility, check if the LinkedIn link looks legitimate, and write a summary.`;
+Keep the critique highly professional, mention at least 2 specific suggestions to improve performance or accessibility based on the fetched code, check if the LinkedIn link looks legitimate, and write a summary.`;
 
           const result = await model.generateContent(prompt);
           const responseText = result.response.text();

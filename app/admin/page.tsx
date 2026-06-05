@@ -45,6 +45,7 @@ export default function AdminDashboard() {
   const [newTaskPoints, setNewTaskPoints] = useState(100);
   const [newTaskInstructions, setNewTaskInstructions] = useState("");
 
+  const [allUsers, setAllUsers] = useState<User[]>(MOCK_USERS);
   const [activeAdmin, setActiveAdmin] = useState<User | null>(null);
 
   useEffect(() => {
@@ -61,11 +62,62 @@ export default function AdminDashboard() {
           console.error(e);
         }
       }
+
+      // Load combined static and dynamic users
+      const dynamicUsersRaw = localStorage.getItem("connexode_dynamic_users");
+      if (dynamicUsersRaw) {
+        try {
+          const dynamicUsers = JSON.parse(dynamicUsersRaw);
+          const combined = [...dynamicUsers, ...MOCK_USERS].reduce((acc: User[], u: User) => {
+            if (!acc.some((x) => x.id === u.id)) {
+              const trackSaved = localStorage.getItem(`connexode_user_track_${u.id}`);
+              if (trackSaved) {
+                u.enrolledTrackId = trackSaved;
+              }
+              acc.push(u);
+            }
+            return acc;
+          }, []);
+          setAllUsers(combined);
+        } catch (e) {
+          console.error(e);
+        }
+      } else {
+        const combined = MOCK_USERS.map((u) => {
+          const trackSaved = localStorage.getItem(`connexode_user_track_${u.id}`);
+          if (trackSaved) {
+            return { ...u, enrolledTrackId: trackSaved };
+          }
+          return u;
+        });
+        setAllUsers(combined);
+      }
     }
   }, []);
 
   const handleApprovePayment = (txId: string, trackId: string) => {
-    setPaymentStatus(trackId, "PAID");
+    const payment = payments.find((p) => p.id === txId);
+    const userId = payment ? payment.userId : undefined;
+    setPaymentStatus(trackId, "PAID", userId);
+    
+    // Also update dynamic users array to enroll the user in that track officially
+    if (userId && typeof window !== "undefined") {
+      const dynamicUsersRaw = localStorage.getItem("connexode_dynamic_users");
+      if (dynamicUsersRaw) {
+        try {
+          const dynamicUsers = JSON.parse(dynamicUsersRaw);
+          const userIdx = dynamicUsers.findIndex((u: any) => u.id === userId);
+          if (userIdx !== -1) {
+            dynamicUsers[userIdx].enrolledTrackId = trackId;
+            localStorage.setItem("connexode_dynamic_users", JSON.stringify(dynamicUsers));
+          }
+        } catch (e) {
+          console.error(e);
+        }
+      }
+      localStorage.setItem(`connexode_user_track_${userId}`, trackId);
+    }
+
     const updatedPayments = payments.map((p) => {
       if (p.id === txId) {
         return { ...p, status: "APPROVED" };
@@ -78,7 +130,9 @@ export default function AdminDashboard() {
   };
 
   const handleRejectPayment = (txId: string, trackId: string) => {
-    setPaymentStatus(trackId, "PENDING");
+    const payment = payments.find((p) => p.id === txId);
+    const userId = payment ? payment.userId : undefined;
+    setPaymentStatus(trackId, "PENDING", userId);
     const updatedPayments = payments.map((p) => {
       if (p.id === txId) {
         return { ...p, status: "REJECTED" };
@@ -97,9 +151,9 @@ export default function AdminDashboard() {
     localStorage.setItem("connexode_manual_payments", JSON.stringify(updatedPayments));
   };
 
-  // Filter students out of MOCK_USERS
-  const students = MOCK_USERS.filter((u) => u.role === "STUDENT");
-  const mentors = MOCK_USERS.filter((u) => u.role === "MENTOR");
+  // Filter students out of allUsers
+  const students = allUsers.filter((u) => u.role === "STUDENT");
+  const mentors = allUsers.filter((u) => u.role === "MENTOR");
 
   const totalStudents = students.length;
   const totalTracks = tracks.length;
@@ -195,130 +249,161 @@ export default function AdminDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-[#020B18] text-slate-100 px-6 py-8">
+    <div className="min-h-screen bg-[#020B18] text-slate-100 px-6 py-12 relative overflow-hidden">
+      {/* Ambient background glows */}
+      <div className="absolute top-[-10%] left-[-10%] w-[600px] h-[600px] bg-purple-600/10 rounded-full blur-[150px] pointer-events-none" />
+      <div className="absolute top-[20%] right-[-15%] w-[500px] h-[500px] bg-cyan-500/8 rounded-full blur-[130px] pointer-events-none" />
+      <div className="absolute bottom-[-10%] left-[20%] w-[550px] h-[550px] bg-emerald-500/5 rounded-full blur-[150px] pointer-events-none" />
+
       {/* Header banner */}
-      <header className="mx-auto max-w-7xl mb-8 flex flex-wrap items-center justify-between gap-4 border-b border-white/8 pb-6">
+      <header className="relative z-10 mx-auto max-w-7xl mb-10 flex flex-wrap items-center justify-between gap-6 border-b border-white/5 pb-8">
         <div>
-          <div className="flex items-center gap-2 text-purple-400 mb-1">
-            <ShieldAlert size={16} />
-            <span className="text-xs font-semibold uppercase tracking-wider">Administrator Workspace</span>
+          <div className="flex items-center gap-2 text-purple-400 mb-2.5 animate-pulse-slow">
+            <ShieldAlert size={15} />
+            <span className="text-[10px] font-extrabold uppercase tracking-widest">Administrator Operations Command</span>
           </div>
-          <h1 className="font-display text-3xl font-extrabold text-white">Connexode Management</h1>
+          <h1 className="font-display text-3xl sm:text-4xl font-black tracking-tight text-white">
+            Connexode <span className="bg-gradient-to-r from-purple-400 via-pink-400 to-cyan-400 bg-clip-text text-transparent">Management</span>
+          </h1>
         </div>
         <div className="flex items-center gap-3">
           <Link
             href="/dashboard"
-            className="rounded-xl border border-white/10 bg-white/5 px-4.5 py-2.5 text-xs font-bold hover:bg-white/8 transition-all"
+            className="group flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/4 px-4.5 py-3 text-xs font-bold hover:bg-white/8 hover:border-white/15 transition-all duration-300"
           >
             Student Panel
           </Link>
           <Link
             href="/mentor"
-            className="rounded-xl border border-cyan-500/20 bg-cyan-500/10 px-4.5 py-2.5 text-xs font-bold text-cyan-400 hover:bg-cyan-500/15 transition-all"
+            className="group flex items-center gap-1.5 rounded-xl border border-cyan-500/20 bg-cyan-500/10 px-4.5 py-3 text-xs font-bold text-cyan-400 hover:bg-cyan-500/15 hover:border-cyan-500/30 transition-all duration-300 shadow-[0_0_15px_rgba(6,182,212,0.1)]"
           >
             Mentor Panel
           </Link>
         </div>
       </header>
 
-      <main className="mx-auto max-w-7xl space-y-6">
+      <main className="relative z-10 mx-auto max-w-7xl space-y-8">
         {/* Analytics KPIs */}
-        <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <div className="rounded-2xl border border-white/8 bg-white/4 p-5 flex items-center gap-4">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-purple-500/10 text-purple-400 shadow-[0_0_15px_rgba(168,85,247,0.15)]">
-              <Users size={20} />
+        <section className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="group rounded-2xl border border-white/5 bg-[#08101E]/55 p-6 backdrop-blur-xl hover:border-purple-500/20 hover:shadow-[0_0_30px_rgba(168,85,247,0.08)] transition-all duration-300 flex items-center gap-5">
+            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-purple-500/10 text-purple-400 shadow-[inset_0_0_12px_rgba(168,85,247,0.1)] group-hover:scale-105 transition-transform duration-300">
+              <Users size={22} />
             </div>
             <div>
-              <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Total Interns</p>
-              <h3 className="text-2xl font-extrabold text-white mt-0.5">{totalStudents}</h3>
+              <p className="text-2xs text-slate-500 font-bold uppercase tracking-wider">Total Enrolled Interns</p>
+              <h3 className="text-3xl font-black text-white mt-1 tracking-tight">{totalStudents}</h3>
             </div>
           </div>
 
-          <div className="rounded-2xl border border-white/8 bg-white/4 p-5 flex items-center gap-4">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-cyan-500/10 text-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.15)]">
-              <GraduationCap size={20} />
+          <div className="group rounded-2xl border border-white/5 bg-[#08101E]/55 p-6 backdrop-blur-xl hover:border-cyan-500/20 hover:shadow-[0_0_30px_rgba(6,182,212,0.08)] transition-all duration-300 flex items-center gap-5">
+            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-cyan-500/10 text-cyan-400 shadow-[inset_0_0_12px_rgba(6,182,212,0.1)] group-hover:scale-105 transition-transform duration-300">
+              <GraduationCap size={22} />
             </div>
             <div>
-              <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Active Tracks</p>
-              <h3 className="text-2xl font-extrabold text-white mt-0.5">{totalTracks}</h3>
+              <p className="text-2xs text-slate-500 font-bold uppercase tracking-wider">Active Tech Tracks</p>
+              <h3 className="text-3xl font-black text-white mt-1 tracking-tight">{totalTracks}</h3>
             </div>
           </div>
 
-          <div className="rounded-2xl border border-white/8 bg-white/4 p-5 flex items-center gap-4">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.15)]">
-              <Code2 size={20} />
+          <div className="group rounded-2xl border border-white/5 bg-[#08101E]/55 p-6 backdrop-blur-xl hover:border-emerald-500/20 hover:shadow-[0_0_30px_rgba(16,185,129,0.08)] transition-all duration-300 flex items-center gap-5">
+            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-400 shadow-[inset_0_0_12px_rgba(16,185,129,0.1)] group-hover:scale-105 transition-transform duration-300">
+              <Code2 size={22} />
             </div>
             <div>
-              <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Total Tasks</p>
-              <h3 className="text-2xl font-extrabold text-white mt-0.5">{totalTasks}</h3>
+              <p className="text-2xs text-slate-500 font-bold uppercase tracking-wider">Total Outline Tasks</p>
+              <h3 className="text-3xl font-black text-white mt-1 tracking-tight">{totalTasks}</h3>
             </div>
           </div>
 
-          <div className="rounded-2xl border border-white/8 bg-white/4 p-5 flex items-center gap-4">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-yellow-500/10 text-yellow-400 shadow-[0_0_15px_rgba(234,179,8,0.15)]">
-              <GitBranch size={20} />
+          <div className="group rounded-2xl border border-white/5 bg-[#08101E]/55 p-6 backdrop-blur-xl hover:border-yellow-500/20 hover:shadow-[0_0_30px_rgba(234,179,8,0.08)] transition-all duration-300 flex items-center gap-5">
+            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-yellow-500/10 text-yellow-400 shadow-[inset_0_0_12px_rgba(234,179,8,0.1)] group-hover:scale-105 transition-transform duration-300">
+              <GitBranch size={22} />
             </div>
             <div>
-              <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Submissions</p>
-              <h3 className="text-2xl font-extrabold text-white mt-0.5">{totalSubmissions}</h3>
+              <p className="text-2xs text-slate-500 font-bold uppercase tracking-wider">Intern Submissions</p>
+              <h3 className="text-3xl font-black text-white mt-1 tracking-tight">{totalSubmissions}</h3>
             </div>
           </div>
         </section>
 
         {/* Tab Selection */}
-        <section className="flex border-b border-white/8 gap-6 text-sm font-semibold overflow-x-auto scrollbar-none pb-0.5">
+        {/* Tab Selection */}
+        <section className="flex border-b border-white/5 gap-2 text-xs font-bold overflow-x-auto scrollbar-none pb-0">
           <button
             onClick={() => setActiveTab("students")}
-            className={`pb-4 transition-all ${
-              activeTab === "students" ? "text-cyan-400 border-b-2 border-cyan-400" : "text-slate-400 hover:text-slate-200"
+            className={`pb-4 px-4 transition-all duration-300 relative ${
+              activeTab === "students" 
+                ? "text-cyan-400 font-extrabold border-b-2 border-cyan-400" 
+                : "text-slate-400 hover:text-slate-200"
             }`}
           >
-            Enrolled Interns ({totalStudents})
+            Enrolled Interns
+            <span className="ml-2 rounded-full bg-white/5 px-2 py-0.5 text-[9px] text-slate-500 font-semibold">{totalStudents}</span>
           </button>
           <button
             onClick={() => setActiveTab("mentors")}
-            className={`pb-4 transition-all ${
-              activeTab === "mentors" ? "text-cyan-400 border-b-2 border-cyan-400" : "text-slate-400 hover:text-slate-200"
+            className={`pb-4 px-4 transition-all duration-300 relative ${
+              activeTab === "mentors" 
+                ? "text-cyan-400 font-extrabold border-b-2 border-cyan-400" 
+                : "text-slate-400 hover:text-slate-200"
             }`}
           >
-            Mentor Performance ({mentors.length})
+            Mentor Performance
+            <span className="ml-2 rounded-full bg-white/5 px-2 py-0.5 text-[9px] text-slate-500 font-semibold">{mentors.length}</span>
           </button>
           <button
             onClick={() => setActiveTab("tracks")}
-            className={`pb-4 transition-all ${
-              activeTab === "tracks" ? "text-cyan-400 border-b-2 border-cyan-400" : "text-slate-400 hover:text-slate-200"
+            className={`pb-4 px-4 transition-all duration-300 relative ${
+              activeTab === "tracks" 
+                ? "text-cyan-400 font-extrabold border-b-2 border-cyan-400" 
+                : "text-slate-400 hover:text-slate-200"
             }`}
           >
-            Course Curriculum Tracks ({totalTracks})
+            Curriculum Tracks
+            <span className="ml-2 rounded-full bg-white/5 px-2 py-0.5 text-[9px] text-slate-500 font-semibold">{totalTracks}</span>
           </button>
           <button
             onClick={() => setActiveTab("curriculum")}
-            className={`pb-4 transition-all flex items-center gap-1.5 ${
-              activeTab === "curriculum" ? "text-cyan-400 border-b-2 border-cyan-400" : "text-slate-400 hover:text-slate-200"
+            className={`pb-4 px-4 transition-all duration-300 flex items-center gap-1.5 relative ${
+              activeTab === "curriculum" 
+                ? "text-cyan-400 font-extrabold border-b-2 border-cyan-400" 
+                : "text-slate-400 hover:text-slate-200"
             }`}
           >
-            <BookOpen size={15} /> Outline Editor
+            <BookOpen size={13} />
+            Outline Editor
           </button>
           <button
             onClick={() => setActiveTab("audits")}
-            className={`pb-4 transition-all flex items-center gap-1.5 ${
-              activeTab === "audits" ? "text-cyan-400 border-b-2 border-cyan-400" : "text-slate-400 hover:text-slate-200"
+            className={`pb-4 px-4 transition-all duration-300 flex items-center gap-1.5 relative ${
+              activeTab === "audits" 
+                ? "text-cyan-400 font-extrabold border-b-2 border-cyan-400" 
+                : "text-slate-400 hover:text-slate-200"
             }`}
           >
-            <History size={15} /> Audit logs Feed
+            <History size={13} />
+            Audit Feed
           </button>
           <button
             onClick={() => setActiveTab("payments")}
-            className={`pb-4 transition-all flex items-center gap-1.5 ${
-              activeTab === "payments" ? "text-cyan-400 border-b-2 border-cyan-400" : "text-slate-400 hover:text-slate-200"
+            className={`pb-4 px-4 transition-all duration-300 flex items-center gap-1.5 relative ${
+              activeTab === "payments" 
+                ? "text-cyan-400 font-extrabold border-b-2 border-cyan-400" 
+                : "text-slate-400 hover:text-slate-200"
             }`}
           >
-            <Clock size={15} /> Payment Approvals ({payments.filter((p) => p.status === "PENDING").length})
+            <Clock size={13} />
+            Approvals Queue
+            {payments.filter((p) => p.status === "PENDING").length > 0 && (
+              <span className="ml-1.5 rounded-full bg-yellow-500/15 border border-yellow-500/25 px-2 py-0.5 text-[9px] font-black text-yellow-500 animate-pulse">
+                {payments.filter((p) => p.status === "PENDING").length}
+              </span>
+            )}
           </button>
         </section>
 
         {/* Dynamic Directory Grids */}
-        <section className="rounded-2xl border border-white/8 bg-white/4 p-6 backdrop-blur-xl">
+        <section className="rounded-2xl border border-white/5 bg-[#08101E]/40 p-6 sm:p-8 backdrop-blur-xl shadow-[0_12px_40px_rgba(0,0,0,0.3)]">
           {activeTab === "students" && (
             <div className="space-y-4">
               <h3 className="font-display text-lg font-bold text-white">Intern Directory</h3>

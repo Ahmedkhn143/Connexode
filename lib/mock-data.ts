@@ -200,9 +200,10 @@ export const getActiveUser = (): User => {
   return defaultUser;
 };
 
-export const getPaymentStatus = (trackId: string): "PENDING" | "PENDING_VERIFICATION" | "PAID" => {
+export const getPaymentStatus = (trackId: string, userId?: string): "PENDING" | "PENDING_VERIFICATION" | "PAID" => {
   if (typeof window !== "undefined") {
-    const saved = localStorage.getItem(`connexode_payment_status_${trackId}`);
+    const uid = userId || localStorage.getItem("connexode_active_user") || "default";
+    const saved = localStorage.getItem(`connexode_payment_status_${uid}_${trackId}`) || localStorage.getItem(`connexode_payment_status_${trackId}`);
     if (saved === "PAID" || saved === "PENDING_VERIFICATION" || saved === "PENDING") {
       return saved as any;
     }
@@ -210,8 +211,10 @@ export const getPaymentStatus = (trackId: string): "PENDING" | "PENDING_VERIFICA
   return "PENDING";
 };
 
-export const setPaymentStatus = (trackId: string, status: "PENDING" | "PENDING_VERIFICATION" | "PAID") => {
+export const setPaymentStatus = (trackId: string, status: "PENDING" | "PENDING_VERIFICATION" | "PAID", userId?: string) => {
   if (typeof window !== "undefined") {
+    const uid = userId || localStorage.getItem("connexode_active_user") || "default";
+    localStorage.setItem(`connexode_payment_status_${uid}_${trackId}`, status);
     localStorage.setItem(`connexode_payment_status_${trackId}`, status);
   }
 };

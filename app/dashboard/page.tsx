@@ -35,9 +35,34 @@ export default function DashboardPage() {
 
   useEffect(() => {
     const user = getActiveUser();
+    if (user && !user.enrolledTrackId) {
+      user.enrolledTrackId = "track_001";
+      if (typeof window !== "undefined") {
+        localStorage.setItem(`connexode_user_track_${user.id}`, "track_001");
+        
+        // Update connexode_dynamic_users list
+        const dynamicUsersRaw = localStorage.getItem("connexode_dynamic_users");
+        if (dynamicUsersRaw) {
+          try {
+            const dynamicUsers = JSON.parse(dynamicUsersRaw);
+            const idx = dynamicUsers.findIndex((u: any) => u.id === user.id);
+            if (idx !== -1) {
+              dynamicUsers[idx].enrolledTrackId = "track_001";
+              localStorage.setItem("connexode_dynamic_users", JSON.stringify(dynamicUsers));
+            }
+          } catch (e) {
+            console.error(e);
+          }
+        }
+        
+        // Auto mark as PAID
+        localStorage.setItem(`connexode_payment_status_${user.id}_track_001`, "PAID");
+        localStorage.setItem("connexode_payment_status_track_001", "PAID");
+      }
+    }
     setActiveUser(user);
     if (user && user.enrolledTrackId) {
-      setPaymentStatusState(getPaymentStatus(user.enrolledTrackId));
+      setPaymentStatusState(getPaymentStatus(user.enrolledTrackId, user.id));
     }
   }, []);
 
@@ -166,43 +191,7 @@ export default function DashboardPage() {
 
   return (
     <div className="mx-auto max-w-5xl space-y-6">
-      {/* Payment Gating Banner */}
-      {paymentStatus === "PENDING" && (
-        <div className="rounded-2xl border border-yellow-500/20 bg-yellow-500/5 p-6 backdrop-blur-xl flex flex-col md:flex-row items-center justify-between gap-4 shadow-[0_0_30px_rgba(234,179,8,0.05)]">
-          <div className="space-y-1 text-center md:text-left">
-            <h3 className="font-display text-sm font-extrabold text-white flex items-center justify-center md:justify-start gap-2">
-              <span className="h-2 w-2 rounded-full bg-yellow-500 animate-ping" />
-              Enrollment Pending Payment
-            </h3>
-            <p className="text-xs text-slate-400 max-w-xl">
-              Pay the enrollment fee to unlock mentoring reviews, submit weekly tasks, and earn industry-certified verified credentials.
-            </p>
-          </div>
-          <Link
-            href={`/checkout/${track.id}`}
-            className="rounded-xl bg-yellow-500 px-5 py-3 text-xs font-bold text-[#020B18] shadow-[0_0_15px_rgba(234,179,8,0.2)] hover:scale-[1.02] hover:shadow-[0_0_25px_rgba(234,179,8,0.3)] transition-all shrink-0 cursor-pointer"
-          >
-            Unlock Internship (JazzCash / EasyPaisa)
-          </Link>
-        </div>
-      )}
 
-      {paymentStatus === "PENDING_VERIFICATION" && (
-        <div className="rounded-2xl border border-yellow-500/20 bg-yellow-500/5 p-6 backdrop-blur-xl flex flex-col md:flex-row items-center justify-between gap-4 shadow-[0_0_30px_rgba(234,179,8,0.05)]">
-          <div className="space-y-1 text-center md:text-left">
-            <h3 className="font-display text-sm font-extrabold text-white flex items-center justify-center md:justify-start gap-2">
-              <span className="h-2 w-2 rounded-full bg-yellow-500 animate-pulse" />
-              Payment Verification Pending
-            </h3>
-            <p className="text-xs text-slate-400 max-w-xl">
-              Our auditing team is reviewing your uploaded transaction receipt. Once verified, your workspace will unlock automatically.
-            </p>
-          </div>
-          <div className="rounded-xl border border-white/10 bg-white/5 px-4.5 py-2.5 text-xs font-bold text-slate-400">
-            Audit In Progress
-          </div>
-        </div>
-      )}
 
       {/* Welcome banner */}
       <div
@@ -261,24 +250,6 @@ export default function DashboardPage() {
 
       {/* Progress + Tasks — side by side on large screens */}
       <div className="grid gap-6 xl:grid-cols-[1fr_1.6fr] relative">
-        {paymentStatus !== "PAID" && (
-          <div className="absolute inset-0 bg-[#020B18]/70 backdrop-blur-md rounded-2xl flex flex-col items-center justify-center text-center p-6 z-20 border border-white/5">
-            <h3 className="font-display text-lg font-bold text-white mb-2">Workspace Locked</h3>
-            <p className="text-xs text-slate-400 max-w-sm mb-4 leading-relaxed">
-              {paymentStatus === "PENDING_VERIFICATION" 
-                ? "Your payment receipt is being audited. Tasks will unlock as soon as verification completes."
-                : "You must unlock this internship program via payment to view your current roadmap and tasks."}
-            </p>
-            {paymentStatus === "PENDING" && (
-              <Link
-                href={`/checkout/${track.id}`}
-                className="rounded-xl bg-cyan-400 px-5 py-3 text-xs font-bold text-[#020B18] shadow-[0_0_20px_rgba(34,211,238,0.2)] hover:scale-[1.02] hover:shadow-[0_0_30px_rgba(34,211,238,0.3)] transition-all cursor-pointer"
-              >
-                Unlock Now
-              </Link>
-            )}
-          </div>
-        )}
         <PhaseProgress />
         <TaskList weekNo={currentWeek} />
       </div>
@@ -384,7 +355,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Q&A Helpdesk Card */}
-        <div className="rounded-2xl border border-white/8 bg-white/4 p-6 backdrop-blur-xl space-y-4">
+        <div id="helpdesk" className="rounded-2xl border border-white/8 bg-white/4 p-6 backdrop-blur-xl space-y-4">
           <h3 className="font-display text-lg font-bold text-white flex items-center gap-2">
             <MessageSquare className="text-cyan-400" size={20} />
             Ask Mentor Helpdesk

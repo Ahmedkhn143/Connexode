@@ -1,23 +1,37 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import {
   Code2, ChevronDown, ChevronRight, LayoutDashboard,
-  User, LogOut, Award, BookOpen, Flame
+  User as UserIcon, LogOut, Award, BookOpen, Flame, MessageSquare
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { WEEKLY_TASKS, MOCK_USER, TRACKS } from "@/lib/mock-data";
+import { WEEKLY_TASKS, TRACKS, getActiveUser } from "@/lib/mock-data";
 
 export default function DashboardSidebar() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const isBadgesView = searchParams.get("view") === "badges";
-  const track = TRACKS.find((t) => t.id === MOCK_USER.enrolledTrackId);
+  
+  const [activeUser, setActiveUser] = useState<any>(null);
+
+  useEffect(() => {
+    setActiveUser(getActiveUser());
+  }, []);
+
+  const enrolledTrackId = activeUser?.enrolledTrackId || "track_001";
+  const track = TRACKS.find((t) => t.id === enrolledTrackId);
   const totalWeeks = track?.durationWeeks ?? 8;
   const weeks = Array.from({ length: totalWeeks }, (_, i) => i + 1);
-  const [openWeeks, setOpenWeeks] = useState<number[]>([MOCK_USER.currentWeek]);
+  const [openWeeks, setOpenWeeks] = useState<number[]>([1]);
+
+  useEffect(() => {
+    if (activeUser?.currentWeek) {
+      setOpenWeeks([activeUser.currentWeek]);
+    }
+  }, [activeUser]);
 
   const toggleWeek = (week: number) => {
     setOpenWeeks((prev) =>
@@ -26,7 +40,7 @@ export default function DashboardSidebar() {
   };
 
   const tasksByWeek = (week: number) =>
-    WEEKLY_TASKS.filter((t) => t.weekNo === week && t.trackId === MOCK_USER.enrolledTrackId);
+    WEEKLY_TASKS.filter((t) => t.weekNo === week && t.trackId === enrolledTrackId);
 
   const statusColor: Record<string, string> = {
     LOCKED: "text-slate-600",
@@ -34,6 +48,12 @@ export default function DashboardSidebar() {
     SUBMITTED: "text-blue-400",
     APPROVED: "text-emerald-400",
   };
+
+  if (!activeUser) {
+    return (
+      <aside className="flex h-full w-72 flex-col border-r border-white/8 bg-[#020B18]/60 backdrop-blur-xl animate-pulse" />
+    );
+  }
 
   return (
     <aside className="flex h-full w-72 flex-col border-r border-white/8 bg-[#020B18]/60 backdrop-blur-xl">
@@ -53,17 +73,17 @@ export default function DashboardSidebar() {
       <div className="border-b border-white/8 px-5 py-4">
         <div className="flex items-center gap-3 rounded-xl bg-white/4 px-4 py-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-cyan-500 to-teal-600 text-sm font-bold text-[#020B18]">
-            {MOCK_USER.avatarInitials}
+            {activeUser.avatarInitials || activeUser.name.substring(0, 2).toUpperCase()}
           </div>
           <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-semibold text-slate-100">{MOCK_USER.name}</p>
+            <p className="truncate text-sm font-semibold text-slate-100">{activeUser.name}</p>
             <div className="flex items-center gap-1.5">
               <Flame size={11} className="text-orange-400" />
-              <span className="text-xs text-slate-500">{MOCK_USER.streak} day streak</span>
+              <span className="text-xs text-slate-500">{activeUser.streak} day streak</span>
             </div>
           </div>
           <div className="text-right">
-            <p className="text-sm font-bold text-cyan-400">{MOCK_USER.points.toLocaleString()}</p>
+            <p className="text-sm font-bold text-cyan-400">{activeUser.points.toLocaleString()}</p>
             <p className="text-xs text-slate-600">pts</p>
           </div>
         </div>
@@ -85,7 +105,7 @@ export default function DashboardSidebar() {
             Dashboard
           </Link>
           <Link
-            href={`/u/${MOCK_USER.username}`}
+            href={`/u/${activeUser.username}`}
             className={cn(
               "flex items-center gap-3 rounded-xl px-4 py-2.5 text-sm font-medium transition-all duration-200",
               pathname.startsWith("/u/") && !isBadgesView
@@ -93,11 +113,11 @@ export default function DashboardSidebar() {
                 : "text-slate-400 hover:bg-white/5 hover:text-slate-200"
             )}
           >
-            <User size={16} />
+            <UserIcon size={16} />
             My Profile
           </Link>
           <Link
-            href={`/u/${MOCK_USER.username}?view=badges`}
+            href={`/u/${activeUser.username}?view=badges`}
             className={cn(
               "flex items-center gap-3 rounded-xl px-4 py-2.5 text-sm font-medium transition-all duration-200",
               pathname.startsWith("/u/") && isBadgesView
@@ -107,6 +127,15 @@ export default function DashboardSidebar() {
           >
             <Award size={16} />
             My Badges
+          </Link>
+          
+          {/* Ask Mentor Help Link */}
+          <Link
+            href="/dashboard#helpdesk"
+            className="flex items-center gap-3 rounded-xl px-4 py-2.5 text-sm font-medium text-slate-400 hover:bg-white/5 hover:text-slate-200 transition-all duration-200"
+          >
+            <MessageSquare size={16} className="text-cyan-400" />
+            Ask Mentor (Help)
           </Link>
         </div>
 
@@ -170,7 +199,20 @@ export default function DashboardSidebar() {
         </div>
       </nav>
 
-      {/* Bottom */}
+      {/* Floating Ask Mentor Issue Badge at Bottom Left (matching image layout) */}
+      <div className="px-4 py-3 border-t border-white/8">
+        <a
+          href="/dashboard#helpdesk"
+          className="flex items-center gap-2.5 rounded-xl bg-red-500/10 border border-red-500/20 px-3.5 py-2.5 text-xs font-bold text-red-400 hover:bg-red-500/15 transition-all"
+        >
+          <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-red-500 text-[10px] font-black text-white animate-pulse">
+            N
+          </span>
+          <span>1 Issue / Help Desk</span>
+        </a>
+      </div>
+
+      {/* Exit Dashboard */}
       <div className="border-t border-white/8 p-4">
         <Link
           href="/"

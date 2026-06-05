@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import { CheckCircle2, Loader2, ArrowLeft, ShieldCheck, Wallet, ArrowRight, Upload, AlertCircle, Clock, FileText, Building2, Smartphone, User as UserIcon } from "lucide-react";
-import { TRACKS, setPaymentStatus, enrollUserInTrack } from "@/lib/mock-data";
+import { TRACKS, setPaymentStatus, enrollUserInTrack, getActiveUser } from "@/lib/mock-data";
 import { cn } from "@/lib/utils";
 
 const PAK_UNIVERSITIES = [
@@ -165,10 +165,12 @@ export default function CheckoutPage() {
 
     // Submit
     try {
+      const activeUserObj = getActiveUser();
       const pending = JSON.parse(localStorage.getItem("connexode_manual_payments") || "[]");
       const filtered = pending.filter((p: any) => p.trackId !== trackId);
       filtered.push({
         id: `tx_${Math.random().toString(36).substring(2, 9)}`,
+        userId: activeUserObj.id,
         trackId,
         trackTitle: track.title,
         userName: fullName,
@@ -193,7 +195,7 @@ export default function CheckoutPage() {
         submittedAt: new Date().toISOString(),
       });
       localStorage.setItem("connexode_manual_payments", JSON.stringify(filtered));
-      setPaymentStatus(trackId, "PENDING_VERIFICATION");
+      setPaymentStatus(trackId, "PAID", activeUserObj.id);
       enrollUserInTrack(trackId);
       setState("pending_approval");
     } catch (err) {
