@@ -5,11 +5,10 @@ import StatsRow from "@/components/dashboard/StatsRow";
 import PhaseProgress from "@/components/dashboard/PhaseProgress";
 import TaskList from "@/components/dashboard/TaskList";
 import TrackRoadmap from "@/components/dashboard/TrackRoadmap";
+import PaymentApprovedBanner from "@/components/dashboard/PaymentApprovedBanner";
 import { getActiveUser, getPaymentStatus, TRACKS, SUBMISSIONS, WEEKLY_TASKS, type User } from "@/lib/mock-data";
-import { BadgeCheck, GitBranch, ArrowRight, MessageSquare, Send, User as UserIcon } from "lucide-react";
+import { BadgeCheck, GitBranch, ArrowRight, MessageSquare, Send, User as UserIcon, Zap, Clock, CheckCircle2 } from "lucide-react";
 import Link from "next/link";
-import AdminDashboard from "../admin/page";
-import MentorDashboard from "../mentor/page";
 
 export default function DashboardPage() {
   const [activeUser, setActiveUser] = useState<User | null>(null);
@@ -35,31 +34,6 @@ export default function DashboardPage() {
 
   useEffect(() => {
     const user = getActiveUser();
-    if (user && !user.enrolledTrackId) {
-      user.enrolledTrackId = "track_001";
-      if (typeof window !== "undefined") {
-        localStorage.setItem(`connexode_user_track_${user.id}`, "track_001");
-        
-        // Update connexode_dynamic_users list
-        const dynamicUsersRaw = localStorage.getItem("connexode_dynamic_users");
-        if (dynamicUsersRaw) {
-          try {
-            const dynamicUsers = JSON.parse(dynamicUsersRaw);
-            const idx = dynamicUsers.findIndex((u: any) => u.id === user.id);
-            if (idx !== -1) {
-              dynamicUsers[idx].enrolledTrackId = "track_001";
-              localStorage.setItem("connexode_dynamic_users", JSON.stringify(dynamicUsers));
-            }
-          } catch (e) {
-            console.error(e);
-          }
-        }
-        
-        // Auto mark as PAID
-        localStorage.setItem(`connexode_payment_status_${user.id}_track_001`, "PAID");
-        localStorage.setItem("connexode_payment_status_track_001", "PAID");
-      }
-    }
     setActiveUser(user);
     if (user && user.enrolledTrackId) {
       setPaymentStatusState(getPaymentStatus(user.enrolledTrackId, user.id));
@@ -117,52 +91,79 @@ export default function DashboardPage() {
     );
   }
 
-  // Role Redirection
-  if (activeUser.role === "ADMIN") {
-    return <AdminDashboard />;
-  }
-
-  if (activeUser.role === "MENTOR") {
-    return <MentorDashboard />;
-  }
-
-  // Check if user has no enrolled track
+  // Check if user has no enrolled track — show internship selection screen
   if (!activeUser.enrolledTrackId) {
     return (
       <div className="mx-auto max-w-5xl space-y-8 py-4">
+        {/* Header */}
         <div>
           <span className="rounded bg-cyan-400/10 border border-cyan-400/25 px-2.5 py-1 text-[10px] font-extrabold text-cyan-400 uppercase tracking-wider">
-            Internship Catalog
+            Step 1 of 2 — Choose Your Track
           </span>
           <h1 className="font-display text-3xl font-black text-white mt-3">
             Select Your Internship Track
           </h1>
-          <p className="text-sm text-slate-400 mt-1">
-            Choose an internship course to enroll, complete hands-on tasks, and earn industry-certified credentials.
+          <p className="text-sm text-slate-400 mt-1 max-w-xl">
+            Choose a program below, complete the registration form and pay the one-time fee (Rs. 500). Your internship workspace unlocks after admin verifies your payment.
           </p>
         </div>
 
-        <div className="grid gap-6 sm:grid-cols-2 md:grid-cols-3">
+        {/* Payment flow steps */}
+        <div className="flex items-center gap-3 text-xs">
+          {[
+            { step: "1", label: "Select Track", done: false, active: true },
+            { step: "2", label: "Fill Application + Pay Fee", done: false, active: false },
+            { step: "3", label: "Admin Verifies Payment", done: false, active: false },
+            { step: "4", label: "Access LMS Dashboard", done: false, active: false },
+          ].map((s, i) => (
+            <div key={i} className="flex items-center gap-2">
+              <div className={`h-6 w-6 rounded-full flex items-center justify-center text-[10px] font-extrabold ${
+                s.active ? "bg-cyan-400 text-[#020B18]" : "bg-white/8 text-slate-500"
+              }`}>{s.step}</div>
+              <span className={s.active ? "text-white font-semibold" : "text-slate-500"}>{s.label}</span>
+              {i < 3 && <span className="text-slate-700 mx-1">→</span>}
+            </div>
+          ))}
+        </div>
+
+        {/* Track Cards */}
+        <div className="grid gap-5 sm:grid-cols-2 md:grid-cols-3">
           {TRACKS.map((t) => (
             <div
               key={t.id}
-              className="rounded-2xl border border-white/8 bg-white/4 p-5 hover:border-cyan-400/30 hover:bg-white/6 transition-all flex flex-col justify-between"
+              className="group rounded-2xl border border-white/8 bg-white/4 p-5 hover:border-opacity-60 transition-all flex flex-col justify-between hover:-translate-y-1"
+              style={{ "--track-color": t.color } as any}
             >
               <div className="space-y-3">
-                <span className="h-10 w-10 rounded-xl bg-cyan-400/10 text-cyan-400 flex items-center justify-center font-bold text-sm">
-                  {t.title.substring(0, 2).toUpperCase()}
-                </span>
+                {/* Color dot + icon */}
+                <div
+                  className="h-11 w-11 rounded-xl flex items-center justify-center font-black text-base text-white"
+                  style={{ backgroundColor: `${t.color}20`, border: `1px solid ${t.color}40` }}
+                >
+                  <span style={{ color: t.color }}>{t.title.substring(0, 2).toUpperCase()}</span>
+                </div>
                 <div>
                   <h3 className="font-display text-base font-extrabold text-white">{t.title}</h3>
-                  <p className="text-[10px] text-slate-500 font-semibold">{t.durationWeeks} Weeks Program</p>
+                  <p className="text-[10px] font-semibold" style={{ color: t.color }}>{t.durationWeeks} Weeks · Intensive Program</p>
                 </div>
-                <p className="text-xs text-slate-400 leading-normal">{t.description}</p>
+                <p className="text-xs text-slate-400 leading-normal line-clamp-3">{t.description}</p>
+                {/* Tags */}
+                <div className="flex flex-wrap gap-1">
+                  {t.tags.slice(0, 3).map((tag) => (
+                    <span key={tag} className="rounded bg-white/5 border border-white/8 px-2 py-0.5 text-[9px] text-slate-400 font-semibold">{tag}</span>
+                  ))}
+                </div>
               </div>
 
-              <div className="pt-5 border-t border-white/5 mt-5">
+              <div className="pt-4 border-t border-white/5 mt-4 space-y-2">
+                <div className="flex items-center justify-between text-xs text-slate-500">
+                  <span className="flex items-center gap-1"><Clock size={11} /> One-time fee</span>
+                  <span className="font-bold text-white">Rs. 500</span>
+                </div>
                 <Link
                   href={`/checkout/${t.id}`}
-                  className="w-full flex items-center justify-center gap-1.5 rounded-xl bg-cyan-400 py-2.5 text-xs font-bold text-[#020B18] hover:scale-[1.02] transition-transform"
+                  className="w-full flex items-center justify-center gap-1.5 rounded-xl py-2.5 text-xs font-bold text-[#020B18] hover:scale-[1.02] transition-transform"
+                  style={{ backgroundColor: t.color }}
                 >
                   Apply & Enroll
                   <ArrowRight size={13} />
@@ -192,8 +193,8 @@ export default function DashboardPage() {
   return (
     <div className="mx-auto max-w-5xl space-y-6">
 
-
-      {/* Welcome banner */}
+      {/* Payment Approved Banner */}
+      <PaymentApprovedBanner userId={activeUser.id} />
       <div
         className="relative overflow-hidden rounded-2xl border p-6"
         style={{

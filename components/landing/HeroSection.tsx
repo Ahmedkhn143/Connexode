@@ -54,12 +54,19 @@ function useTypewriter(words: string[], speed = 80, pause = 2000) {
 export default function HeroSection() {
   const displayedTrack = useTypewriter(TYPEWRITER_WORDS);
   const [terminalLines, setTerminalLines] = useState<number>(0);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
     if (terminalLines >= TERMINAL_LINES.length) return;
     const t = setTimeout(() => setTerminalLines((n) => n + 1), 800 + terminalLines * 300);
     return () => clearTimeout(t);
   }, [terminalLines]);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setIsLoggedIn(!!localStorage.getItem("connexode_active_user"));
+    }
+  }, []);
 
   return (
     <section className="relative flex min-h-screen items-center overflow-hidden px-6 pt-24 pb-20">
@@ -132,10 +139,10 @@ export default function HeroSection() {
             className="flex flex-col items-center gap-4 sm:flex-row lg:items-start"
           >
             <Link
-              href="/dashboard"
+              href={isLoggedIn ? "#tracks" : "/register?tab=signup"}
               className="group flex items-center gap-2.5 rounded-2xl bg-gradient-to-r from-cyan-500 to-teal-500 px-8 py-4 text-base font-bold text-[#020B18] shadow-[0_0_30px_rgba(0,245,255,0.35)] transition-all duration-300 hover:scale-105 hover:shadow-[0_0_50px_rgba(0,245,255,0.55)]"
             >
-              Start Your Internship
+              {isLoggedIn ? "Explore Tracks" : "Start Your Internship"}
               <ArrowRight size={18} className="transition-transform group-hover:translate-x-1" />
             </Link>
             <a

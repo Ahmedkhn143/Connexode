@@ -208,3 +208,37 @@ body {
 .border-white\/8  { border-color: rgba(255,255,255,0.08); }
 .border-white\/10 { border-color: rgba(255,255,255,0.10); }
 .border-white\/15 { border-color: rgba(255,255,255,0.15); }
+
+/* ── 3D Flip Card Utilities (Flashcards page) ─────────────── */
+.perspective-1000 {
+  perspective: 1000px;
+}
+
+.transform-style-3d {
+  transform-style: preserve-3d;
+  transition: transform 0.5s ease;
+}
+
+.backface-hidden {
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.rotate-y-180 {
+  transform: rotateY(180deg);
+}
+
+/* ── Fade In Animation ───────────────────────────────────── */
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.3s ease forwards;
+}
+
+/* ── Custom Scrollbar (named class) ─────────────────────── */
+.custom-scrollbar::-webkit-scrollbar { width: 4px; }
+.custom-scrollbar::-webkit-scrollbar-track { background: rgba(255,255,255,0.02); }
+.custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(0,245,255,0.15); border-radius: 2px; }

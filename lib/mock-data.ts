@@ -74,7 +74,7 @@ export const MOCK_USERS: User[] = [
     id: "usr_mentor1",
     name: "Dr. Sarah Connor",
     username: "sarah-connor",
-    email: "sarah@connexode.com",
+    email: "mentor@connexode.pk",
     role: "MENTOR",
     points: 0,
     avatarInitials: "SC",
@@ -84,7 +84,8 @@ export const MOCK_USERS: User[] = [
     rank: "Expert Mentor",
     currentWeek: 0,
     currentDay: 0,
-  },
+    password: "mentor123",
+  } as any,
   {
     id: "usr_mentor2",
     name: "Marcus Aurelius",
@@ -102,9 +103,9 @@ export const MOCK_USERS: User[] = [
   },
   {
     id: "usr_admin",
-    name: "Ahmad Khan (Admin)",
+    name: "Ahmad Khan",
     username: "ahmad-admin",
-    email: "admin@connexode.com",
+    email: "admin@connexode.pk",
     role: "ADMIN",
     points: 0,
     avatarInitials: "AK",
@@ -114,7 +115,8 @@ export const MOCK_USERS: User[] = [
     rank: "Super Admin",
     currentWeek: 0,
     currentDay: 0,
-  },
+    password: "admin123",
+  } as any,
 ];
 
 export interface MentorTrackAssignment {

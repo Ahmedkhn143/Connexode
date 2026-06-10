@@ -74,7 +74,7 @@ export default function TracksSection() {
             const Icon = ICON_MAP[track.icon] ?? Code2;
             return (
               <motion.div key={track.id} variants={item}>
-                <Link href={isLoggedIn ? `/checkout/${track.id}` : "/register"} className="group block h-full">
+                <Link href={isLoggedIn ? `/checkout/${track.id}` : "/register?tab=signup"} className="group block h-full">
                   <div
                     className="relative h-full overflow-hidden rounded-2xl border border-white/8 bg-white/4 p-7 backdrop-blur-xl transition-all duration-300 group-hover:-translate-y-2 group-hover:border-opacity-40"
                     style={

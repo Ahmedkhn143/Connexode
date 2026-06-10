@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Sparkles, ShieldCheck, Award, Zap } from "lucide-react";
+import { Sparkles, ShieldCheck, Award } from "lucide-react";
 import RegisterForm from "@/components/auth/RegisterForm";
 
 export const metadata: Metadata = {
@@ -8,7 +8,13 @@ export const metadata: Metadata = {
   description: "Register for your virtual internship track, track your progress, build your developer profile, and earn industry-verified certificates.",
 };
 
-export default function RegisterPage() {
+export default async function RegisterPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ tab?: string }>;
+}) {
+  const params = await searchParams;
+  const initialSignUp = params.tab === "signup";
   return (
     <div className="min-h-screen bg-[#020B18] text-slate-100 flex flex-col lg:flex-row relative">
       
@@ -80,17 +86,22 @@ export default function RegisterPage() {
 
         <div className="w-full max-w-lg mb-4 text-center lg:text-left">
           <h2 className="font-display text-2xl font-extrabold text-white mb-1.5">
-            Create Account
+            {initialSignUp ? "Create Your Account" : "Welcome Back"}
           </h2>
           <p className="text-xs text-slate-500">
-            Already have an account?{" "}
-            <Link href="/dashboard" className="text-cyan-400 hover:underline font-bold">
-              Sign In
-            </Link>
+            {initialSignUp ? (
+              <>Already have an account?{" "}
+                <Link href="/register" className="text-cyan-400 hover:underline font-bold">Sign In</Link>
+              </>
+            ) : (
+              <>Don&apos;t have an account?{" "}
+                <Link href="/register?tab=signup" className="text-cyan-400 hover:underline font-bold">Create one free</Link>
+              </>
+            )}
           </p>
         </div>
 
-        <RegisterForm />
+        <RegisterForm initialSignUp={initialSignUp} />
       </div>
 
     </div>

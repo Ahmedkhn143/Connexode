@@ -116,6 +116,14 @@ export default function AdminDashboard() {
         }
       }
       localStorage.setItem(`connexode_user_track_${userId}`, trackId);
+
+      // ── Set payment approved notification for the student dashboard banner ──
+      const notifKey = `connexode_payment_approved_notif_${userId}`;
+      localStorage.setItem(notifKey, JSON.stringify({
+        trackTitle: payment?.trackTitle || "your internship track",
+        approvedAt: new Date().toISOString(),
+        dismissed: false,
+      }));
     }
 
     const updatedPayments = payments.map((p) => {
@@ -126,7 +134,15 @@ export default function AdminDashboard() {
     });
     setPayments(updatedPayments);
     localStorage.setItem("connexode_manual_payments", JSON.stringify(updatedPayments));
-    alert("Payment approved successfully! The student's workspace has been unlocked.");
+
+    // Simulated email notification
+    alert(
+      `✅ Payment APPROVED!\n\n` +
+      `📧 Email sent to: ${payment?.userName || "student"}\n` +
+      `Subject: "Your Connexode Payment is Verified — Start Your Internship!"\n\n` +
+      `Message: "Hi ${payment?.userName || "student"}, your payment of Rs. 500 for ${payment?.trackTitle || "your internship"} has been verified. Your LMS workspace is now fully active. Visit your dashboard to begin."\n\n` +
+      `The student's dashboard will show a confirmation banner on their next login.`
+    );
   };
 
   const handleRejectPayment = (txId: string, trackId: string) => {
@@ -249,159 +265,113 @@ export default function AdminDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-[#020B18] text-slate-100 px-6 py-12 relative overflow-hidden">
+    <div className="min-h-screen bg-[#020B18] text-slate-100 relative overflow-hidden flex">
       {/* Ambient background glows */}
-      <div className="absolute top-[-10%] left-[-10%] w-[600px] h-[600px] bg-purple-600/10 rounded-full blur-[150px] pointer-events-none" />
-      <div className="absolute top-[20%] right-[-15%] w-[500px] h-[500px] bg-cyan-500/8 rounded-full blur-[130px] pointer-events-none" />
-      <div className="absolute bottom-[-10%] left-[20%] w-[550px] h-[550px] bg-emerald-500/5 rounded-full blur-[150px] pointer-events-none" />
+      <div className="pointer-events-none fixed top-[-10%] left-[-10%] w-[600px] h-[600px] bg-purple-600/10 rounded-full blur-[150px]" />
+      <div className="pointer-events-none fixed top-[20%] right-[-15%] w-[500px] h-[500px] bg-cyan-500/8 rounded-full blur-[130px]" />
 
-      {/* Header banner */}
-      <header className="relative z-10 mx-auto max-w-7xl mb-10 flex flex-wrap items-center justify-between gap-6 border-b border-white/5 pb-8">
-        <div>
-          <div className="flex items-center gap-2 text-purple-400 mb-2.5 animate-pulse-slow">
-            <ShieldAlert size={15} />
-            <span className="text-[10px] font-extrabold uppercase tracking-widest">Administrator Operations Command</span>
+      {/* ── LEFT SIDEBAR ── */}
+      <aside className="fixed top-0 left-0 h-screen w-[240px] bg-[#080f1e] border-r border-white/5 flex flex-col z-40 shrink-0">
+        {/* Brand */}
+        <div className="px-5 py-5 border-b border-white/5">
+          <div className="flex items-center gap-2">
+            <img src="/logo.png" alt="Logo" className="h-8 w-8 rounded-lg object-cover shadow-[0_0_12px_rgba(0,245,255,0.3)]" />
+            <div>
+              <p className="font-display text-sm font-bold text-white">Connex<span className="text-cyan-400">ode</span></p>
+              <p className="text-[9px] font-extrabold uppercase tracking-widest text-purple-400">Admin Panel</p>
+            </div>
           </div>
-          <h1 className="font-display text-3xl sm:text-4xl font-black tracking-tight text-white">
-            Connexode <span className="bg-gradient-to-r from-purple-400 via-pink-400 to-cyan-400 bg-clip-text text-transparent">Management</span>
-          </h1>
         </div>
-        <div className="flex items-center gap-3">
+
+        {/* KPI mini stats */}
+        <div className="grid grid-cols-2 gap-2 px-4 py-4 border-b border-white/5">
+          {[
+            { label: "Interns", value: totalStudents, color: "text-purple-400" },
+            { label: "Tracks", value: totalTracks, color: "text-cyan-400" },
+            { label: "Tasks", value: totalTasks, color: "text-emerald-400" },
+            { label: "Submissions", value: totalSubmissions, color: "text-yellow-400" },
+          ].map((s) => (
+            <div key={s.label} className="rounded-xl bg-white/4 border border-white/5 p-2.5 text-center">
+              <p className={`text-base font-black ${s.color}`}>{s.value}</p>
+              <p className="text-[9px] text-slate-500 font-semibold leading-none mt-0.5">{s.label}</p>
+            </div>
+          ))}
+        </div>
+
+        {/* Nav Items */}
+        <nav className="flex-1 px-3 py-3 space-y-1 overflow-y-auto">
+          {([
+            { id: "students", label: "Enrolled Interns", icon: Users, badge: totalStudents },
+            { id: "mentors", label: "Mentor Performance", icon: GraduationCap, badge: mentors.length },
+            { id: "tracks", label: "Curriculum Tracks", icon: GitBranch, badge: totalTracks },
+            { id: "curriculum", label: "Outline Editor", icon: BookOpen, badge: null },
+            { id: "audits", label: "Audit Feed", icon: History, badge: null },
+            { id: "payments", label: "Approvals Queue", icon: Clock, badge: payments.filter((p) => p.status === "PENDING").length || null, badgeAlert: true },
+          ] as const).map(({ id, label, icon: Icon, badge, badgeAlert }) => (
+            <button
+              key={id}
+              onClick={() => setActiveTab(id as Tab)}
+              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition-all duration-200 group ${
+                activeTab === id
+                  ? "bg-purple-500/15 border border-purple-500/25 text-white shadow-[0_0_12px_rgba(168,85,247,0.15)]"
+                  : "text-slate-400 hover:bg-white/5 hover:text-white border border-transparent"
+              }`}
+            >
+              <Icon size={15} className={activeTab === id ? "text-purple-400" : "text-slate-500 group-hover:text-slate-300"} />
+              <span className="flex-1 text-left">{label}</span>
+              {badge ? (
+                <span className={`rounded-full px-1.5 py-0.5 text-[9px] font-black ${
+                  badgeAlert ? "bg-yellow-500/15 text-yellow-500 animate-pulse" : "bg-white/5 text-slate-500"
+                }`}>
+                  {badge}
+                </span>
+              ) : null}
+            </button>
+          ))}
+        </nav>
+
+        {/* Bottom Admin Info + Logout */}
+        <div className="px-4 py-4 border-t border-white/5 space-y-2">
+          <div className="flex items-center gap-2.5 rounded-xl bg-white/4 border border-white/8 px-3 py-2.5">
+            <div className="h-8 w-8 rounded-full bg-purple-500/20 flex items-center justify-center text-[11px] font-extrabold text-purple-400">
+              {activeAdmin?.avatarInitials || "AK"}
+            </div>
+            <div className="min-w-0">
+              <p className="text-xs font-bold text-white truncate">{activeAdmin?.name || "Admin"}</p>
+              <p className="text-[10px] text-slate-500 font-semibold">Super Admin</p>
+            </div>
+          </div>
           <Link
-            href="/dashboard"
-            className="group flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/4 px-4.5 py-3 text-xs font-bold hover:bg-white/8 hover:border-white/15 transition-all duration-300"
+            href="/"
+            onClick={() => { localStorage.removeItem("connexode_active_user"); }}
+            className="flex items-center justify-center gap-1.5 w-full rounded-xl border border-red-500/20 bg-red-500/8 py-2 text-xs font-semibold text-red-400 hover:bg-red-500/15 transition-all"
           >
-            Student Panel
-          </Link>
-          <Link
-            href="/mentor"
-            className="group flex items-center gap-1.5 rounded-xl border border-cyan-500/20 bg-cyan-500/10 px-4.5 py-3 text-xs font-bold text-cyan-400 hover:bg-cyan-500/15 hover:border-cyan-500/30 transition-all duration-300 shadow-[0_0_15px_rgba(6,182,212,0.1)]"
-          >
-            Mentor Panel
+            <Mail size={12} /> Log Out
           </Link>
         </div>
-      </header>
+      </aside>
 
-      <main className="relative z-10 mx-auto max-w-7xl space-y-8">
-        {/* Analytics KPIs */}
-        <section className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-          <div className="group rounded-2xl border border-white/5 bg-[#08101E]/55 p-6 backdrop-blur-xl hover:border-purple-500/20 hover:shadow-[0_0_30px_rgba(168,85,247,0.08)] transition-all duration-300 flex items-center gap-5">
-            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-purple-500/10 text-purple-400 shadow-[inset_0_0_12px_rgba(168,85,247,0.1)] group-hover:scale-105 transition-transform duration-300">
-              <Users size={22} />
+      {/* ── MAIN CONTENT ── */}
+      <div className="flex-1 ml-[240px] min-h-screen">
+        {/* Top Header bar */}
+        <header className="sticky top-0 z-30 bg-[#080f1e]/80 backdrop-blur-xl border-b border-white/5 px-8 py-4 flex items-center justify-between">
+          <div>
+            <div className="flex items-center gap-2 text-purple-400 mb-0.5">
+              <ShieldAlert size={12} />
+              <span className="text-[9px] font-extrabold uppercase tracking-widest">Administrator Operations</span>
             </div>
-            <div>
-              <p className="text-2xs text-slate-500 font-bold uppercase tracking-wider">Total Enrolled Interns</p>
-              <h3 className="text-3xl font-black text-white mt-1 tracking-tight">{totalStudents}</h3>
-            </div>
+            <h1 className="font-display text-xl font-black tracking-tight text-white">
+              Connexode <span className="bg-gradient-to-r from-purple-400 via-pink-400 to-cyan-400 bg-clip-text text-transparent">Management</span>
+            </h1>
           </div>
-
-          <div className="group rounded-2xl border border-white/5 bg-[#08101E]/55 p-6 backdrop-blur-xl hover:border-cyan-500/20 hover:shadow-[0_0_30px_rgba(6,182,212,0.08)] transition-all duration-300 flex items-center gap-5">
-            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-cyan-500/10 text-cyan-400 shadow-[inset_0_0_12px_rgba(6,182,212,0.1)] group-hover:scale-105 transition-transform duration-300">
-              <GraduationCap size={22} />
-            </div>
-            <div>
-              <p className="text-2xs text-slate-500 font-bold uppercase tracking-wider">Active Tech Tracks</p>
-              <h3 className="text-3xl font-black text-white mt-1 tracking-tight">{totalTracks}</h3>
-            </div>
+          <div className="flex items-center gap-2">
+            <Link href="/mentor" className="rounded-xl border border-cyan-500/20 bg-cyan-500/10 px-3 py-2 text-xs font-bold text-cyan-400 hover:bg-cyan-500/15 transition-all">
+              Mentor Panel →
+            </Link>
           </div>
+        </header>
 
-          <div className="group rounded-2xl border border-white/5 bg-[#08101E]/55 p-6 backdrop-blur-xl hover:border-emerald-500/20 hover:shadow-[0_0_30px_rgba(16,185,129,0.08)] transition-all duration-300 flex items-center gap-5">
-            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-400 shadow-[inset_0_0_12px_rgba(16,185,129,0.1)] group-hover:scale-105 transition-transform duration-300">
-              <Code2 size={22} />
-            </div>
-            <div>
-              <p className="text-2xs text-slate-500 font-bold uppercase tracking-wider">Total Outline Tasks</p>
-              <h3 className="text-3xl font-black text-white mt-1 tracking-tight">{totalTasks}</h3>
-            </div>
-          </div>
-
-          <div className="group rounded-2xl border border-white/5 bg-[#08101E]/55 p-6 backdrop-blur-xl hover:border-yellow-500/20 hover:shadow-[0_0_30px_rgba(234,179,8,0.08)] transition-all duration-300 flex items-center gap-5">
-            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-yellow-500/10 text-yellow-400 shadow-[inset_0_0_12px_rgba(234,179,8,0.1)] group-hover:scale-105 transition-transform duration-300">
-              <GitBranch size={22} />
-            </div>
-            <div>
-              <p className="text-2xs text-slate-500 font-bold uppercase tracking-wider">Intern Submissions</p>
-              <h3 className="text-3xl font-black text-white mt-1 tracking-tight">{totalSubmissions}</h3>
-            </div>
-          </div>
-        </section>
-
-        {/* Tab Selection */}
-        {/* Tab Selection */}
-        <section className="flex border-b border-white/5 gap-2 text-xs font-bold overflow-x-auto scrollbar-none pb-0">
-          <button
-            onClick={() => setActiveTab("students")}
-            className={`pb-4 px-4 transition-all duration-300 relative ${
-              activeTab === "students" 
-                ? "text-cyan-400 font-extrabold border-b-2 border-cyan-400" 
-                : "text-slate-400 hover:text-slate-200"
-            }`}
-          >
-            Enrolled Interns
-            <span className="ml-2 rounded-full bg-white/5 px-2 py-0.5 text-[9px] text-slate-500 font-semibold">{totalStudents}</span>
-          </button>
-          <button
-            onClick={() => setActiveTab("mentors")}
-            className={`pb-4 px-4 transition-all duration-300 relative ${
-              activeTab === "mentors" 
-                ? "text-cyan-400 font-extrabold border-b-2 border-cyan-400" 
-                : "text-slate-400 hover:text-slate-200"
-            }`}
-          >
-            Mentor Performance
-            <span className="ml-2 rounded-full bg-white/5 px-2 py-0.5 text-[9px] text-slate-500 font-semibold">{mentors.length}</span>
-          </button>
-          <button
-            onClick={() => setActiveTab("tracks")}
-            className={`pb-4 px-4 transition-all duration-300 relative ${
-              activeTab === "tracks" 
-                ? "text-cyan-400 font-extrabold border-b-2 border-cyan-400" 
-                : "text-slate-400 hover:text-slate-200"
-            }`}
-          >
-            Curriculum Tracks
-            <span className="ml-2 rounded-full bg-white/5 px-2 py-0.5 text-[9px] text-slate-500 font-semibold">{totalTracks}</span>
-          </button>
-          <button
-            onClick={() => setActiveTab("curriculum")}
-            className={`pb-4 px-4 transition-all duration-300 flex items-center gap-1.5 relative ${
-              activeTab === "curriculum" 
-                ? "text-cyan-400 font-extrabold border-b-2 border-cyan-400" 
-                : "text-slate-400 hover:text-slate-200"
-            }`}
-          >
-            <BookOpen size={13} />
-            Outline Editor
-          </button>
-          <button
-            onClick={() => setActiveTab("audits")}
-            className={`pb-4 px-4 transition-all duration-300 flex items-center gap-1.5 relative ${
-              activeTab === "audits" 
-                ? "text-cyan-400 font-extrabold border-b-2 border-cyan-400" 
-                : "text-slate-400 hover:text-slate-200"
-            }`}
-          >
-            <History size={13} />
-            Audit Feed
-          </button>
-          <button
-            onClick={() => setActiveTab("payments")}
-            className={`pb-4 px-4 transition-all duration-300 flex items-center gap-1.5 relative ${
-              activeTab === "payments" 
-                ? "text-cyan-400 font-extrabold border-b-2 border-cyan-400" 
-                : "text-slate-400 hover:text-slate-200"
-            }`}
-          >
-            <Clock size={13} />
-            Approvals Queue
-            {payments.filter((p) => p.status === "PENDING").length > 0 && (
-              <span className="ml-1.5 rounded-full bg-yellow-500/15 border border-yellow-500/25 px-2 py-0.5 text-[9px] font-black text-yellow-500 animate-pulse">
-                {payments.filter((p) => p.status === "PENDING").length}
-              </span>
-            )}
-          </button>
-        </section>
-
+        <main className="px-8 py-8 space-y-8 max-w-6xl">
         {/* Dynamic Directory Grids */}
         <section className="rounded-2xl border border-white/5 bg-[#08101E]/40 p-6 sm:p-8 backdrop-blur-xl shadow-[0_12px_40px_rgba(0,0,0,0.3)]">
           {activeTab === "students" && (
@@ -1153,6 +1123,8 @@ export default function AdminDashboard() {
         )}
       </main>
     </div>
+    </div>
   );
 }
+
 

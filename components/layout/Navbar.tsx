@@ -2,46 +2,35 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Menu, X, Code2, ChevronRight } from "lucide-react";
+import { Menu, X, ChevronRight, LayoutDashboard, Award, LogOut, ShieldAlert, BookOpen, Star } from "lucide-react";
 import { cn } from "@/lib/utils";
-
-const NAV_LINKS = [
-  { label: "Tracks", href: "#tracks" },
-  { label: "How It Works", href: "#how-it-works" },
-  { label: "Community", href: "#trust" },
-];
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-
   const [activeUser, setActiveUser] = useState<any>(null);
 
   useEffect(() => {
     const handler = () => setScrolled(window.scrollY > 20);
     window.addEventListener("scroll", handler, { passive: true });
-    
+
+    // Load active user
     if (typeof window !== "undefined") {
       const activeUserId = localStorage.getItem("connexode_active_user");
       if (activeUserId) {
+        // Check dynamic users first
         const dynamicRaw = localStorage.getItem("connexode_dynamic_users");
         if (dynamicRaw) {
           try {
             const dynamicUsers = JSON.parse(dynamicRaw);
             const found = dynamicUsers.find((u: any) => u.id === activeUserId);
-            if (found) {
-              setActiveUser(found);
-              return;
-            }
-          } catch (e) {
-            console.error(e);
-          }
+            if (found) { setActiveUser(found); return; }
+          } catch (e) { console.error(e); }
         }
+        // Fall back to static mock users
         import("@/lib/mock-data").then(({ MOCK_USERS }) => {
-          const found = MOCK_USERS.find((u) => u.id === activeUserId);
-          if (found) {
-            setActiveUser(found);
-          }
+          const found = (MOCK_USERS as any[]).find((u) => u.id === activeUserId);
+          if (found) setActiveUser(found);
         });
       }
     }
@@ -52,9 +41,15 @@ export default function Navbar() {
     if (typeof window !== "undefined") {
       localStorage.removeItem("connexode_active_user");
       setActiveUser(null);
-      window.location.reload();
+      window.location.href = "/";
     }
   };
+
+  const role: string = activeUser?.role || "";
+
+  // Role-specific dashboard link
+  const dashboardLink = role === "ADMIN" ? "/admin" : role === "MENTOR" ? "/mentor" : "/dashboard";
+  const dashboardLabel = role === "ADMIN" ? "Admin Panel" : role === "MENTOR" ? "Mentor Panel" : "Dashboard";
 
   return (
     <>
@@ -79,37 +74,72 @@ export default function Navbar() {
             </span>
           </Link>
 
-          {/* Desktop Nav */}
-          <ul className="hidden items-center gap-8 md:flex">
-            {NAV_LINKS.map((link) => (
-              <li key={link.label}>
-                <a
-                  href={link.href}
-                  className="text-sm font-medium text-slate-400 transition-colors duration-200 hover:text-cyan-400"
-                >
-                  {link.label}
-                </a>
-              </li>
-            ))}
-          </ul>
+          {/* Desktop Nav Links — only show for non-logged-in or students */}
+          {(!activeUser || role === "STUDENT") && (
+            <ul className="hidden items-center gap-8 md:flex">
+              {!activeUser ? (
+                <>
+                  <li><a href="#tracks" className="text-sm font-medium text-slate-400 hover:text-cyan-400 transition-colors">Tracks</a></li>
+                  <li><a href="#how-it-works" className="text-sm font-medium text-slate-400 hover:text-cyan-400 transition-colors">How It Works</a></li>
+                  <li><a href="#trust" className="text-sm font-medium text-slate-400 hover:text-cyan-400 transition-colors">Community</a></li>
+                </>
+              ) : (
+                // Logged-in student quick links
+                <>
+                  <li>
+                    <Link href="/events" className="text-sm font-medium text-slate-400 hover:text-cyan-400 transition-colors">Events</Link>
+                  </li>
+                  <li>
+                    <Link href="/leaderboard" className="text-sm font-medium text-slate-400 hover:text-cyan-400 transition-colors">Leaderboard</Link>
+                  </li>
+                  <li>
+                    <Link
+                      href="/ambassador"
+                      className="flex items-center gap-1.5 text-sm font-medium text-yellow-400 hover:text-yellow-300 transition-colors"
+                    >
+                      <Star size={13} className="fill-yellow-400" />
+                      Ambassador
+                    </Link>
+                  </li>
+                </>
+              )}
+            </ul>
+          )}
 
-          {/* CTA */}
-          <div className="hidden items-center gap-4 md:flex">
+          {/* Desktop CTA / User Actions */}
+          <div className="hidden items-center gap-3 md:flex">
             {activeUser ? (
               <>
+                {/* Role badge */}
+                {role === "ADMIN" && (
+                  <span className="flex items-center gap-1.5 rounded-lg bg-purple-500/10 border border-purple-500/20 px-2.5 py-1 text-[10px] font-extrabold text-purple-400 uppercase tracking-widest">
+                    <ShieldAlert size={11} />
+                    Admin
+                  </span>
+                )}
+                {role === "MENTOR" && (
+                  <span className="flex items-center gap-1.5 rounded-lg bg-cyan-500/10 border border-cyan-500/20 px-2.5 py-1 text-[10px] font-extrabold text-cyan-400 uppercase tracking-widest">
+                    <BookOpen size={11} />
+                    Mentor
+                  </span>
+                )}
+
+                {/* Dashboard link */}
                 <Link
-                  href="/dashboard"
+                  href={dashboardLink}
                   className="group flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-xs font-semibold text-white hover:bg-white/10 transition-all"
                 >
                   <div className="flex h-6 w-6 items-center justify-center rounded-full bg-gradient-to-br from-cyan-400 to-teal-500 text-[10px] font-extrabold text-[#020B18]">
-                    {activeUser.avatarInitials || activeUser.name.substring(0, 2).toUpperCase()}
+                    {activeUser.avatarInitials || activeUser.name?.substring(0, 2).toUpperCase()}
                   </div>
-                  Dashboard
+                  {dashboardLabel}
                 </Link>
+
                 <button
                   onClick={handleLogout}
-                  className="rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-2 text-xs font-semibold text-red-400 hover:bg-red-500/15 transition-all"
+                  className="flex items-center gap-1.5 rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-2 text-xs font-semibold text-red-400 hover:bg-red-500/15 transition-all"
                 >
+                  <LogOut size={12} />
                   Log Out
                 </button>
               </>
@@ -122,7 +152,7 @@ export default function Navbar() {
                   Sign In
                 </Link>
                 <Link
-                  href="/register"
+                  href="/register?tab=signup"
                   className="group flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-cyan-500 to-teal-500 px-5 py-2.5 text-sm font-semibold text-[#020B18] shadow-[0_0_20px_rgba(0,245,255,0.3)] transition-all duration-300 hover:shadow-[0_0_30px_rgba(0,245,255,0.5)] hover:scale-105"
                 >
                   Get Started
@@ -146,56 +176,53 @@ export default function Navbar() {
         <div
           className={cn(
             "overflow-hidden border-t border-white/8 bg-[#020B18]/95 backdrop-blur-xl transition-all duration-300 md:hidden",
-            mobileOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
+            mobileOpen ? "max-h-[500px] opacity-100" : "max-h-0 opacity-0"
           )}
         >
           <div className="flex flex-col gap-1 px-6 py-4">
-            {NAV_LINKS.map((link) => (
-              <a
-                key={link.label}
-                href={link.href}
-                className="rounded-lg px-4 py-3 text-sm font-medium text-slate-300 transition-colors hover:bg-white/5 hover:text-cyan-400"
-                onClick={() => setMobileOpen(false)}
-              >
-                {link.label}
-              </a>
-            ))}
-            <div className="mt-4 flex flex-col gap-2">
-              {activeUser ? (
-                <>
+            {activeUser ? (
+              <>
+                {role === "STUDENT" && (
+                  <>
+                    <Link href="/events" className="rounded-lg px-4 py-3 text-sm font-medium text-slate-300 hover:bg-white/5 hover:text-cyan-400" onClick={() => setMobileOpen(false)}>Events</Link>
+                    <Link href="/leaderboard" className="rounded-lg px-4 py-3 text-sm font-medium text-slate-300 hover:bg-white/5 hover:text-cyan-400" onClick={() => setMobileOpen(false)}>Leaderboard</Link>
+                    <Link
+                      href="/ambassador"
+                      className="rounded-lg px-4 py-3 text-sm font-medium text-yellow-400 hover:bg-yellow-500/5 flex items-center gap-2"
+                      onClick={() => setMobileOpen(false)}
+                    >
+                      <Star size={14} className="fill-yellow-400" />
+                      Ambassador Program
+                    </Link>
+                  </>
+                )}
+                <div className="mt-3 flex flex-col gap-2">
                   <Link
-                    href="/dashboard"
+                    href={dashboardLink}
                     className="rounded-xl bg-gradient-to-r from-cyan-500 to-teal-500 px-4 py-3 text-center text-sm font-semibold text-[#020B18]"
                     onClick={() => setMobileOpen(false)}
                   >
-                    My Dashboard
+                    {dashboardLabel}
                   </Link>
                   <button
                     onClick={handleLogout}
-                    className="rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-center text-sm font-semibold text-red-400 hover:bg-red-500/15 transition-all"
+                    className="rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-center text-sm font-semibold text-red-400 hover:bg-red-500/15"
                   >
                     Log Out
                   </button>
-                </>
-              ) : (
-                <>
-                  <Link
-                    href="/register"
-                    className="rounded-lg px-4 py-3 text-center text-sm font-medium text-slate-400 hover:text-white"
-                    onClick={() => setMobileOpen(false)}
-                  >
-                    Sign In
-                  </Link>
-                  <Link
-                    href="/register"
-                    className="rounded-xl bg-gradient-to-r from-cyan-500 to-teal-500 px-4 py-3 text-center text-sm font-semibold text-[#020B18]"
-                    onClick={() => setMobileOpen(false)}
-                  >
-                    Get Started
-                  </Link>
-                </>
-              )}
-            </div>
+                </div>
+              </>
+            ) : (
+              <>
+                <a href="#tracks" className="rounded-lg px-4 py-3 text-sm font-medium text-slate-300 hover:bg-white/5 hover:text-cyan-400" onClick={() => setMobileOpen(false)}>Tracks</a>
+                <a href="#how-it-works" className="rounded-lg px-4 py-3 text-sm font-medium text-slate-300 hover:bg-white/5 hover:text-cyan-400" onClick={() => setMobileOpen(false)}>How It Works</a>
+                <a href="#trust" className="rounded-lg px-4 py-3 text-sm font-medium text-slate-300 hover:bg-white/5 hover:text-cyan-400" onClick={() => setMobileOpen(false)}>Community</a>
+                <div className="mt-3 flex flex-col gap-2">
+                  <Link href="/register" className="rounded-lg px-4 py-3 text-center text-sm font-medium text-slate-400 hover:text-white" onClick={() => setMobileOpen(false)}>Sign In</Link>
+                  <Link href="/register?tab=signup" className="rounded-xl bg-gradient-to-r from-cyan-500 to-teal-500 px-4 py-3 text-center text-sm font-semibold text-[#020B18]" onClick={() => setMobileOpen(false)}>Get Started</Link>
+                </div>
+              </>
+            )}
           </div>
         </div>
       </header>

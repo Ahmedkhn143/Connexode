@@ -288,7 +288,7 @@ export default function AmbassadorDashboard() {
 
                 <p className="text-2xs text-slate-500 leading-normal bg-white/2 rounded-xl border border-white/5 p-3 flex items-start gap-2">
                   <Flame size={12} className="text-yellow-500 shrink-0 mt-0.5" />
-                  <span>Only <strong>{targetReferrals - totalReferrals} more referrals</strong> left to unlock **Premium Course Access Voucher + Stipend Bonus**!</span>
+                  <span>Only <strong>{targetReferrals - totalReferrals} more referrals</strong> left to unlock <strong>Premium Course Access Voucher + Stipend Bonus</strong>!</span>
                 </p>
               </div>
             </div>

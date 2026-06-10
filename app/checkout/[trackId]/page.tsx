@@ -398,7 +398,7 @@ export default function CheckoutPage() {
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div>
                     <label className="mb-1.5 block text-2xs font-semibold uppercase tracking-wider text-slate-400">
-                      Where did you hear about Internee.pk?
+                      Where did you hear about Connexode?
                     </label>
                     <input
                       type="text"

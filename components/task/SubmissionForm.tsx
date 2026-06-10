@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ExternalLink, Globe, Send, CheckCircle2, Loader2, AlertCircle, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -45,7 +45,7 @@ export default function SubmissionForm({ taskId, taskTitle, currentStatus }: Sub
   const [aiFeedback, setAiFeedback] = useState<string | null>(null);
 
   // Load existing submission if any (including localStorage items)
-  useState(() => {
+  useEffect(() => {
     if (typeof window !== "undefined") {
       try {
         const localSubs = JSON.parse(localStorage.getItem("connexode_custom_submissions") || "[]");
@@ -61,7 +61,7 @@ export default function SubmissionForm({ taskId, taskTitle, currentStatus }: Sub
         console.error(e);
       }
     }
-  });
+  }, [taskId]);
 
   const validate = () => {
     const newErrors: typeof errors = {};
