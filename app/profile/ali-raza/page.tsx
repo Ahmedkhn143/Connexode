@@ -17,7 +17,8 @@ import {
   Terminal,
   Loader2,
   CheckCircle2,
-  X
+  X,
+  Edit2
 } from "lucide-react";
 import Navbar from "@/components/layout/Navbar";
 
@@ -80,6 +81,16 @@ const STUDENT_DATA = {
 export default function AliRazaProfilePage() {
   const [modalState, setModalState] = useState<"idle" | "generating" | "completed">("idle");
   const [progressMsg, setProgressMsg] = useState("");
+  const [isEditing, setIsEditing] = useState(false);
+
+  // States initialized from STUDENT_DATA
+  const [name, setName] = useState(STUDENT_DATA.name);
+  const [avatarInitials, setAvatarInitials] = useState(STUDENT_DATA.avatarInitials);
+  const [bio, setBio] = useState(STUDENT_DATA.bio);
+  const [githubUrl, setGithubUrl] = useState(STUDENT_DATA.githubUrl);
+  const [linkedinUrl, setLinkedinUrl] = useState(STUDENT_DATA.linkedinUrl);
+  const [avatarImage, setAvatarImage] = useState("");
+  const [rank, setRank] = useState(STUDENT_DATA.rank);
 
   const handleExportResume = () => {
     setModalState("generating");
@@ -137,13 +148,21 @@ export default function AliRazaProfilePage() {
             <div className="rounded-2xl border border-white/8 bg-white/4 p-6 backdrop-blur-xl flex flex-col items-center text-center shadow-xl relative overflow-hidden">
               <div className="absolute -top-10 -right-10 w-24 h-24 bg-cyan-500/5 rounded-full blur-2xl" />
               
-              {/* Avatar Initial circle */}
+              {/* Avatar Initial circle / Image */}
               <div className="relative mb-4">
-                <div className="flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-tr from-cyan-400 to-purple-500 p-[2px] shadow-[0_0_20px_rgba(34,211,238,0.2)]">
-                  <div className="flex h-full w-full items-center justify-center rounded-full bg-[#030c1c] text-xl font-black text-white">
-                    {STUDENT_DATA.avatarInitials}
+                {avatarImage ? (
+                  <img
+                    src={avatarImage}
+                    alt={name}
+                    className="h-20 w-20 rounded-full object-cover border border-white/10 shadow-[0_0_20px_rgba(34,211,238,0.2)]"
+                  />
+                ) : (
+                  <div className="flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-tr from-cyan-400 to-purple-500 p-[2px] shadow-[0_0_20px_rgba(34,211,238,0.2)]">
+                    <div className="flex h-full w-full items-center justify-center rounded-full bg-[#030c1c] text-xl font-black text-white">
+                      {avatarInitials}
+                    </div>
                   </div>
-                </div>
+                )}
                 {/* Active Indicator Badge */}
                 <span className="absolute bottom-0 right-0 flex h-4.5 w-4.5 items-center justify-center rounded-full bg-emerald-500 border-2 border-[#020B18]">
                   <span className="h-1.5 w-1.5 rounded-full bg-white animate-pulse" />
@@ -151,9 +170,9 @@ export default function AliRazaProfilePage() {
               </div>
 
               {/* Name & Title */}
-              <h2 className="text-xl font-bold text-white">{STUDENT_DATA.name}</h2>
+              <h2 className="text-xl font-bold text-white">{name}</h2>
               <p className="text-[10px] uppercase tracking-wider text-cyan-400 font-black mt-1">
-                {STUDENT_DATA.rank}
+                {rank}
               </p>
 
               {/* Stats badges */}
@@ -174,17 +193,43 @@ export default function AliRazaProfilePage() {
 
               {/* Short Bio */}
               <p className="text-2xs text-slate-400 mt-4 leading-relaxed">
-                {STUDENT_DATA.bio}
+                {bio}
               </p>
 
-              {/* Resume Exporter Action */}
-              <button
-                onClick={handleExportResume}
-                className="w-full mt-6 flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-cyan-500 via-teal-500 to-purple-500 py-3.5 text-xs font-bold text-[#020B18] shadow-[0_0_20px_rgba(34,211,238,0.25)] hover:scale-[1.01] hover:shadow-[0_0_30px_rgba(34,211,238,0.4)] transition-all cursor-pointer"
-              >
-                <Download size={14} />
-                AI Resume Exporter (PDF)
-              </button>
+              {/* Social links */}
+              {(githubUrl || linkedinUrl) && (
+                <div className="flex items-center gap-3 mt-4 text-[11px] text-slate-500">
+                  {githubUrl && (
+                    <a href={githubUrl} target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">
+                      GitHub
+                    </a>
+                  )}
+                  {linkedinUrl && (
+                    <a href={linkedinUrl} target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">
+                      LinkedIn
+                    </a>
+                  )}
+                </div>
+              )}
+
+              {/* Edit Profile & Resume Exporter Action */}
+              <div className="w-full mt-6 space-y-2">
+                <button
+                  onClick={() => setIsEditing(true)}
+                  className="w-full flex items-center justify-center gap-1.5 rounded-xl border border-cyan-500/20 bg-cyan-500/10 py-3 text-xs font-bold text-cyan-400 hover:bg-cyan-500/20 transition-all cursor-pointer"
+                >
+                  <Edit2 size={12} />
+                  Edit Profile
+                </button>
+                
+                <button
+                  onClick={handleExportResume}
+                  className="w-full flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-cyan-500 via-teal-500 to-purple-500 py-3.5 text-xs font-bold text-[#020B18] shadow-[0_0_20px_rgba(34,211,238,0.25)] hover:scale-[1.01] hover:shadow-[0_0_30px_rgba(34,211,238,0.4)] transition-all cursor-pointer"
+                >
+                  <Download size={14} />
+                  AI Resume Exporter (PDF)
+                </button>
+              </div>
             </div>
           </div>
 
@@ -298,6 +343,7 @@ export default function AliRazaProfilePage() {
                     <div className="h-16 w-16 rounded-full border-4 border-cyan-400/10 border-t-cyan-400 animate-spin" />
                     <Loader2 size={24} className="text-cyan-400 absolute animate-spin animate-duration-1500" />
                   </div>
+                  </div>
                 </div>
                 <div className="space-y-2">
                   <h3 className="font-bold text-white text-md">AI Resume Exporter</h3>
@@ -316,7 +362,7 @@ export default function AliRazaProfilePage() {
                 <div className="space-y-2">
                   <h3 className="font-bold text-white text-md">ATS Resume Compiled!</h3>
                   <p className="text-xs text-slate-400 leading-relaxed max-w-xs mx-auto">
-                    Ali Raza's verified portfolio, skill badges, and grade stats have been compiled into an ATS-optimized PDF resume.
+                    {name}'s verified portfolio, skill badges, and grade stats have been compiled into an ATS-optimized PDF resume.
                   </p>
                 </div>
                 <button
@@ -328,6 +374,127 @@ export default function AliRazaProfilePage() {
               </>
             )}
 
+          </div>
+        </div>
+      )}
+
+      {/* Edit Profile Modal for Ali Raza page */}
+      {isEditing && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 p-4 backdrop-blur-sm animate-fade-in">
+          <div className="relative max-w-md w-full bg-slate-900 border border-white/10 rounded-2xl overflow-hidden shadow-2xl flex flex-col">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-white/5 bg-slate-950">
+              <h3 className="text-sm font-bold text-white">Edit Profile Details</h3>
+              <button
+                onClick={() => setIsEditing(false)}
+                className="rounded-lg bg-white/5 p-1 text-slate-400 hover:text-white hover:bg-white/10 transition-all"
+              >
+                <X size={16} />
+              </button>
+            </div>
+            
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              setAvatarInitials(name.substring(0, 2).toUpperCase());
+              setIsEditing(false);
+              alert("Demo student profile updated successfully!");
+            }} className="p-6 space-y-4 text-xs text-slate-300 overflow-y-auto max-h-[75vh]">
+              <div>
+                <label className="mb-1.5 block text-2xs font-semibold uppercase tracking-wider text-slate-400">Full Name</label>
+                <input
+                  type="text"
+                  required
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="w-full rounded-xl border border-white/10 bg-white/5 py-2.5 px-3 text-xs text-slate-200 outline-none focus:border-cyan-400/40"
+                />
+              </div>
+
+              <div>
+                <label className="mb-1.5 block text-2xs font-semibold uppercase tracking-wider text-slate-400">Profile Picture (Max 1MB)</label>
+                <div className="flex items-center gap-3">
+                  {avatarImage && (
+                    <img src={avatarImage} alt="Preview" className="h-10 w-10 rounded-xl object-cover border border-white/10" />
+                  )}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (!file) return;
+                      if (file.size > 1024 * 1024) {
+                        alert("Profile picture size must be less than 1MB");
+                        return;
+                      }
+                      const reader = new FileReader();
+                      reader.onloadend = () => {
+                        setAvatarImage(reader.result as string);
+                      };
+                      reader.readAsDataURL(file);
+                    }}
+                    className="w-full text-xs text-slate-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-2xs file:font-semibold file:bg-cyan-500/10 file:text-cyan-400 hover:file:bg-cyan-500/20 file:cursor-pointer"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="mb-1.5 block text-2xs font-semibold uppercase tracking-wider text-slate-400">Title / Rank</label>
+                <input
+                  type="text"
+                  required
+                  value={rank}
+                  onChange={(e) => setRank(e.target.value)}
+                  className="w-full rounded-xl border border-white/10 bg-white/5 py-2.5 px-3 text-xs text-slate-200 outline-none focus:border-cyan-400/40"
+                />
+              </div>
+
+              <div>
+                <label className="mb-1.5 block text-2xs font-semibold uppercase tracking-wider text-slate-400">Bio / Description</label>
+                <textarea
+                  value={bio}
+                  onChange={(e) => setBio(e.target.value)}
+                  rows={3}
+                  className="w-full rounded-xl border border-white/10 bg-white/5 py-2.5 px-3 text-xs text-slate-200 outline-none focus:border-cyan-400/40"
+                />
+              </div>
+
+              <div>
+                <label className="mb-1.5 block text-2xs font-semibold uppercase tracking-wider text-slate-400">GitHub Profile Link</label>
+                <input
+                  type="url"
+                  value={githubUrl}
+                  onChange={(e) => setGithubUrl(e.target.value)}
+                  className="w-full rounded-xl border border-white/10 bg-white/5 py-2.5 px-3 text-xs text-slate-200 outline-none focus:border-cyan-400/40"
+                />
+              </div>
+
+              <div>
+                <label className="mb-1.5 block text-2xs font-semibold uppercase tracking-wider text-slate-400">LinkedIn Profile Link</label>
+                <input
+                  type="url"
+                  value={linkedinUrl}
+                  onChange={(e) => setLinkedinUrl(e.target.value)}
+                  className="w-full rounded-xl border border-white/10 bg-white/5 py-2.5 px-3 text-xs text-slate-200 outline-none focus:border-cyan-400/40"
+                />
+              </div>
+
+              {/* Locked Internship Field */}
+              <div>
+                <label className="mb-1.5 block text-2xs font-semibold uppercase tracking-wider text-slate-400">Enrolled Internship Track (Read-Only)</label>
+                <div className="w-full rounded-xl border border-white/5 bg-white/3 py-2.5 px-3 text-xs text-slate-500 font-semibold select-none flex items-center justify-between">
+                  <span>Full Stack Web Internship</span>
+                  <span className="text-[9px] font-black uppercase text-red-400/60 tracking-wider">Locked</span>
+                </div>
+              </div>
+
+              <div className="pt-2">
+                <button
+                  type="submit"
+                  className="w-full py-3 rounded-xl bg-gradient-to-r from-cyan-500 to-teal-500 text-xs font-bold text-[#020B18] shadow hover:scale-[1.01] transition-all cursor-pointer"
+                >
+                  Save Profile Changes
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

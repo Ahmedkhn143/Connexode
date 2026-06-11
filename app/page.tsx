@@ -6,6 +6,7 @@ import HowItWorksSection from "@/components/landing/HowItWorksSection";
 import TrustSection from "@/components/landing/TrustSection";
 import CTASection from "@/components/landing/CTASection";
 import Footer from "@/components/landing/Footer";
+import WelcomeBanner from "@/components/landing/WelcomeBanner";
 
 export const metadata: Metadata = {
   title: "Connexode — Build Real Skills. Get Real Experience. Land Your Job.",
@@ -23,6 +24,8 @@ export default function HomePage() {
       <TrustSection />
       <CTASection />
       <Footer />
+      <WelcomeBanner />
     </main>
   );
 }
+

@@ -9,8 +9,12 @@ import PaymentApprovedBanner from "@/components/dashboard/PaymentApprovedBanner"
 import { getActiveUser, getPaymentStatus, TRACKS, SUBMISSIONS, WEEKLY_TASKS, type User } from "@/lib/mock-data";
 import { BadgeCheck, GitBranch, ArrowRight, MessageSquare, Send, User as UserIcon, Zap, Clock, CheckCircle2 } from "lucide-react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 
 export default function DashboardPage() {
+  const searchParams = useSearchParams();
+  const currentView = searchParams.get("view");
+
   const [activeUser, setActiveUser] = useState<User | null>(null);
   const [paymentStatus, setPaymentStatusState] = useState<"PENDING" | "PENDING_VERIFICATION" | "PAID">("PENDING");
   const [profileDetails, setProfileDetails] = useState<any>(null);
@@ -190,6 +194,28 @@ export default function DashboardPage() {
     (s) => s.userId === activeUser.id && s.status === "PENDING"
   ).length;
 
+
+
+  if (currentView === "roadmap") {
+    return (
+      <div className="mx-auto max-w-5xl space-y-6 animate-fade-in">
+        <div className="flex items-center justify-between border-b border-white/5 pb-4">
+          <div>
+            <Link
+              href="/dashboard"
+              className="mb-3 inline-flex items-center gap-1.5 text-xs text-slate-500 hover:text-cyan-400 transition-colors"
+            >
+              ← Back to Dashboard
+            </Link>
+            <h1 className="font-display text-2xl font-extrabold text-white">8-Week Track Roadmap</h1>
+            <p className="text-xs text-slate-400 mt-1">Detailed phase progression and weekly learning goals for {track.title}</p>
+          </div>
+        </div>
+        <TrackRoadmap />
+      </div>
+    );
+  }
+
   return (
     <div className="mx-auto max-w-5xl space-y-6">
 
@@ -254,9 +280,6 @@ export default function DashboardPage() {
         <PhaseProgress />
         <TaskList weekNo={currentWeek} />
       </div>
-
-      {/* 8-week roadmap */}
-      <TrackRoadmap />
 
       {/* Recent Activity */}
       <div className="rounded-2xl border border-white/8 bg-white/4 p-6 backdrop-blur-xl">

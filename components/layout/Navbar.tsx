@@ -76,12 +76,19 @@ export default function Navbar() {
 
           {/* Desktop Nav Links — only show for non-logged-in or students */}
           {(!activeUser || role === "STUDENT") && (
-            <ul className="hidden items-center gap-8 md:flex">
+            <ul className="hidden items-center gap-6 md:flex">
               {!activeUser ? (
                 <>
                   <li><a href="#tracks" className="text-sm font-medium text-slate-400 hover:text-cyan-400 transition-colors">Tracks</a></li>
                   <li><a href="#how-it-works" className="text-sm font-medium text-slate-400 hover:text-cyan-400 transition-colors">How It Works</a></li>
-                  <li><a href="#trust" className="text-sm font-medium text-slate-400 hover:text-cyan-400 transition-colors">Community</a></li>
+                  <li>
+                    <Link href="/ambassador" className="flex items-center gap-1 text-sm font-medium text-yellow-400 hover:text-yellow-300 transition-colors">
+                      <Star size={12} className="fill-yellow-400" />
+                      Ambassador
+                    </Link>
+                  </li>
+                  <li><Link href="/leaderboard" className="text-sm font-medium text-slate-400 hover:text-cyan-400 transition-colors">Leaderboard</Link></li>
+                  <li><Link href="/events" className="text-sm font-medium text-slate-400 hover:text-cyan-400 transition-colors">Events</Link></li>
                 </>
               ) : (
                 // Logged-in student quick links
@@ -216,7 +223,12 @@ export default function Navbar() {
               <>
                 <a href="#tracks" className="rounded-lg px-4 py-3 text-sm font-medium text-slate-300 hover:bg-white/5 hover:text-cyan-400" onClick={() => setMobileOpen(false)}>Tracks</a>
                 <a href="#how-it-works" className="rounded-lg px-4 py-3 text-sm font-medium text-slate-300 hover:bg-white/5 hover:text-cyan-400" onClick={() => setMobileOpen(false)}>How It Works</a>
-                <a href="#trust" className="rounded-lg px-4 py-3 text-sm font-medium text-slate-300 hover:bg-white/5 hover:text-cyan-400" onClick={() => setMobileOpen(false)}>Community</a>
+                <Link href="/ambassador" className="rounded-lg px-4 py-3 text-sm font-medium text-yellow-400 hover:bg-yellow-500/5 flex items-center gap-2" onClick={() => setMobileOpen(false)}>
+                  <Star size={13} className="fill-yellow-400" />
+                  Ambassador Program
+                </Link>
+                <Link href="/leaderboard" className="rounded-lg px-4 py-3 text-sm font-medium text-slate-300 hover:bg-white/5 hover:text-cyan-400" onClick={() => setMobileOpen(false)}>Leaderboard</Link>
+                <Link href="/events" className="rounded-lg px-4 py-3 text-sm font-medium text-slate-300 hover:bg-white/5 hover:text-cyan-400" onClick={() => setMobileOpen(false)}>Events</Link>
                 <div className="mt-3 flex flex-col gap-2">
                   <Link href="/register" className="rounded-lg px-4 py-3 text-center text-sm font-medium text-slate-400 hover:text-white" onClick={() => setMobileOpen(false)}>Sign In</Link>
                   <Link href="/register?tab=signup" className="rounded-xl bg-gradient-to-r from-cyan-500 to-teal-500 px-4 py-3 text-center text-sm font-semibold text-[#020B18]" onClick={() => setMobileOpen(false)}>Get Started</Link>

@@ -339,99 +339,120 @@ export default function MentorDashboard() {
   );
 
   return (
-    <div className="min-h-screen bg-[#020B18] text-slate-100 px-6 py-12 relative overflow-hidden">
+    <div className="min-h-screen bg-[#020B18] text-slate-100 relative overflow-hidden flex">
       {/* Ambient background glows */}
-      <div className="absolute top-[-10%] left-[-10%] w-[600px] h-[600px] bg-cyan-500/8 rounded-full blur-[150px] pointer-events-none" />
-      <div className="absolute top-[20%] right-[-15%] w-[500px] h-[500px] bg-purple-600/10 rounded-full blur-[130px] pointer-events-none" />
-      <div className="absolute bottom-[-10%] left-[20%] w-[550px] h-[550px] bg-emerald-500/5 rounded-full blur-[150px] pointer-events-none" />
+      <div className="pointer-events-none fixed top-[-10%] left-[-10%] w-[600px] h-[600px] bg-cyan-500/8 rounded-full blur-[150px]" />
+      <div className="pointer-events-none fixed top-[20%] right-[-15%] w-[500px] h-[500px] bg-purple-600/10 rounded-full blur-[130px]" />
+      <div className="pointer-events-none fixed bottom-[-10%] left-[20%] w-[550px] h-[550px] bg-emerald-500/5 rounded-full blur-[150px]" />
 
-      {/* Top Header */}
-      <header className="relative z-10 mx-auto max-w-7xl mb-10 flex flex-wrap items-center justify-between gap-6 border-b border-white/5 pb-8">
-        <div>
-          <div className="flex items-center gap-2 text-cyan-400 mb-2.5 animate-pulse-slow">
-            <ShieldAlert size={15} />
-            <span className="text-[10px] font-extrabold uppercase tracking-widest">Mentor Command Workspace</span>
+      {/* ── LEFT SIDEBAR ── */}
+      <aside className="fixed top-0 left-0 h-screen w-[240px] bg-[#080f1e] border-r border-white/5 flex flex-col z-40 shrink-0 animate-fade-in">
+        {/* Brand */}
+        <div className="px-5 py-5 border-b border-white/5">
+          <div className="flex items-center gap-2">
+            <img src="/logo.png" alt="Logo" className="h-8 w-8 rounded-lg object-cover shadow-[0_0_12px_rgba(0,245,255,0.3)]" />
+            <div>
+              <p className="font-display text-sm font-bold text-white">Connex<span className="text-cyan-400">ode</span></p>
+              <p className="text-[9px] font-extrabold uppercase tracking-widest text-cyan-400">Mentor Panel</p>
+            </div>
           </div>
-          <h1 className="font-display text-3xl sm:text-4xl font-black tracking-tight text-white">
-            Connexode <span className="bg-gradient-to-r from-cyan-400 via-teal-400 to-indigo-400 bg-clip-text text-transparent">Mentorship</span>
-          </h1>
         </div>
-        <div className="flex items-center gap-3">
+
+        {/* KPI mini stats */}
+        <div className="grid grid-cols-2 gap-2 px-4 py-4 border-b border-white/5">
+          {[
+            { label: "Pending", value: pendingCount, color: "text-yellow-400" },
+            { label: "Interns", value: assignedStudents.length, color: "text-cyan-400" },
+            { label: "Submissions", value: mentorSubmissions.length, color: "text-purple-400" },
+            { label: "Assigned Tracks", value: assignedTrackIds.length, color: "text-emerald-400" },
+          ].map((s) => (
+            <div key={s.label} className="rounded-xl bg-white/4 border border-white/5 p-2.5 text-center">
+              <p className={`text-base font-black ${s.color}`}>{s.value}</p>
+              <p className="text-[9px] text-slate-500 font-semibold leading-none mt-0.5">{s.label}</p>
+            </div>
+          ))}
+        </div>
+
+        {/* Nav Items */}
+        <nav className="flex-1 px-3 py-3 space-y-1 overflow-y-auto">
+          {([
+            { id: "submissions", label: "Grading Queue", icon: ClipboardCheck, badge: pendingCount, badgeAlert: true },
+            { id: "students", label: "Intern Records", icon: Users, badge: assignedStudents.length },
+            { id: "curriculum", label: "Curriculum Editor", icon: BookOpen, badge: null },
+            { id: "questions", label: "Student Questions", icon: MessageSquare, badge: questions.filter((q) => q.status === "PENDING" && assignedTrackIds.includes(q.trackId)).length || null, badgeAlert: true },
+          ] as const).map(({ id, label, icon: Icon, badge, badgeAlert }) => (
+            <button
+              key={id}
+              onClick={() => {
+                setActiveTab(id as Tab);
+                if (id === "students") setSelectedStudentId(null);
+              }}
+              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition-all duration-200 group border border-transparent ${
+                activeTab === id
+                  ? "bg-cyan-500/15 border-cyan-500/20 text-white shadow-[0_0_12px_rgba(6,182,212,0.15)]"
+                  : "text-slate-400 hover:bg-white/5 hover:text-white"
+              }`}
+            >
+              <Icon size={15} className={activeTab === id ? "text-cyan-400" : "text-slate-500 group-hover:text-slate-300"} />
+              <span className="flex-1 text-left">{label}</span>
+              {badge ? (
+                <span className={`rounded-full px-1.5 py-0.5 text-[9px] font-black ${
+                  badgeAlert ? "bg-yellow-500/15 text-yellow-500 animate-pulse" : "bg-white/5 text-slate-500"
+                }`}>
+                  {badge}
+                </span>
+              ) : null}
+            </button>
+          ))}
+        </nav>
+
+        {/* Bottom Profile Info + Logout */}
+        <div className="px-4 py-4 border-t border-white/5 space-y-2">
+          <div className="flex items-center gap-2.5 rounded-xl bg-white/4 border border-white/8 px-3 py-2.5">
+            <div className="h-8 w-8 rounded-full bg-cyan-500/20 flex items-center justify-center text-[11px] font-extrabold text-cyan-400">
+              {activeMentor?.avatarInitials || "MC"}
+            </div>
+            <div className="min-w-0">
+              <p className="text-xs font-bold text-white truncate">{activeMentor?.name || "Mentor"}</p>
+              <p className="text-[10px] text-slate-500 font-semibold">{activeMentor?.rank || "Expert Mentor"}</p>
+            </div>
+          </div>
           <Link
-            href="/dashboard"
-            className="group flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/4 px-4.5 py-3 text-xs font-bold hover:bg-white/8 hover:border-white/15 transition-all duration-300"
+            href="/"
+            onClick={() => { localStorage.removeItem("connexode_active_user"); }}
+            className="flex items-center justify-center gap-1.5 w-full rounded-xl border border-red-500/20 bg-red-500/8 py-2 text-xs font-semibold text-red-400 hover:bg-red-500/15 transition-all"
           >
-            Student Panel
-          </Link>
-          <Link
-            href="/admin"
-            className="group flex items-center gap-1.5 rounded-xl border border-purple-500/20 bg-purple-500/10 px-4.5 py-3 text-xs font-bold text-purple-400 hover:bg-purple-500/15 hover:border-purple-500/30 transition-all duration-300 shadow-[0_0_15px_rgba(168,85,247,0.1)]"
-          >
-            Admin Panel
+            Log Out
           </Link>
         </div>
-      </header>
+      </aside>
 
-      {/* Navigation tabs */}
-      <nav className="relative z-10 mx-auto max-w-7xl mb-8 flex border-b border-white/5 gap-2 text-xs font-bold overflow-x-auto scrollbar-none pb-0">
-        <button
-          onClick={() => setActiveTab("submissions")}
-          className={`pb-4 px-4 transition-all duration-300 relative flex items-center gap-1.5 ${
-            activeTab === "submissions" 
-              ? "text-cyan-400 font-extrabold border-b-2 border-cyan-400" 
-              : "text-slate-400 hover:text-slate-200"
-          }`}
-        >
-          <ClipboardCheck size={13} />
-          Grading Queue
-          <span className="ml-2 rounded-full bg-white/5 px-2 py-0.5 text-[9px] text-slate-500 font-semibold">{pendingCount}</span>
-        </button>
-        <button
-          onClick={() => {
-            setActiveTab("students");
-            setSelectedStudentId(null);
-          }}
-          className={`pb-4 px-4 transition-all duration-300 relative flex items-center gap-1.5 ${
-            activeTab === "students" 
-              ? "text-cyan-400 font-extrabold border-b-2 border-cyan-400" 
-              : "text-slate-400 hover:text-slate-200"
-          }`}
-        >
-          <Users size={13} />
-          Intern Records
-        </button>
-        <button
-          onClick={() => setActiveTab("curriculum")}
-          className={`pb-4 px-4 transition-all duration-300 relative flex items-center gap-1.5 ${
-            activeTab === "curriculum" 
-              ? "text-cyan-400 font-extrabold border-b-2 border-cyan-400" 
-              : "text-slate-400 hover:text-slate-200"
-          }`}
-        >
-          <BookOpen size={13} />
-          Curriculum Editor
-        </button>
-        <button
-          onClick={() => setActiveTab("questions")}
-          className={`pb-4 px-4 transition-all duration-300 relative flex items-center gap-1.5 ${
-            activeTab === "questions" 
-              ? "text-cyan-400 font-extrabold border-b-2 border-cyan-400" 
-              : "text-slate-400 hover:text-slate-200"
-          }`}
-        >
-          <MessageSquare size={13} />
-          Student Questions
-          {questions.filter((q) => q.status === "PENDING" && assignedTrackIds.includes(q.trackId)).length > 0 && (
-            <span className="ml-1.5 rounded-full bg-yellow-500/15 border border-yellow-500/25 px-2 py-0.5 text-[9px] font-black text-yellow-500 animate-pulse">
-              {questions.filter((q) => q.status === "PENDING" && assignedTrackIds.includes(q.trackId)).length}
-            </span>
-          )}
-        </button>
-      </nav>
+      {/* ── MAIN CONTENT ── */}
+      <div className="flex-1 ml-[240px] min-h-screen">
+        {/* Top Header */}
+        <header className="sticky top-0 z-30 bg-[#080f1e]/80 backdrop-blur-xl border-b border-white/5 px-8 py-4 flex items-center justify-between">
+          <div>
+            <div className="flex items-center gap-2 text-cyan-400 mb-0.5">
+              <ShieldAlert size={12} />
+              <span className="text-[9px] font-extrabold uppercase tracking-widest">Mentor Command Workspace</span>
+            </div>
+            <h1 className="font-display text-xl font-black tracking-tight text-white">
+              Connexode <span className="bg-gradient-to-r from-cyan-400 via-teal-400 to-indigo-400 bg-clip-text text-transparent">Mentorship</span>
+            </h1>
+          </div>
+          <div className="flex items-center gap-2">
+            <Link
+              href="/admin"
+              className="rounded-xl border border-purple-500/20 bg-purple-500/10 px-3.5 py-2 text-xs font-bold text-purple-400 hover:bg-purple-500/15 transition-all shadow-[0_0_15px_rgba(168,85,247,0.1)]"
+            >
+              Admin Panel →
+            </Link>
+          </div>
+        </header>
 
-      {/* Dynamic Tabs View */}
-      <main className="relative z-10 mx-auto max-w-7xl">
-        {activeTab === "submissions" && (
+        {/* Dynamic Tabs View */}
+        <main className="px-8 py-8 space-y-8 max-w-6xl">
+          {activeTab === "submissions" && (
           <div className="grid gap-6 lg:grid-cols-[1.2fr_2.2fr]">
             {/* Left Column: Submissions Queue & Student Lists */}
             <section className="space-y-6">
@@ -1259,5 +1280,6 @@ export default function MentorDashboard() {
         )}
       </main>
     </div>
+  </div>
   );
 }

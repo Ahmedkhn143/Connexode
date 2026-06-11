@@ -20,7 +20,7 @@ import {
 import { BookOpen, Users, GitBranch, ShieldAlert, Plus, LineChart, Code2, Award, Flame, Mail, GraduationCap, History, CheckCircle2, XCircle, Clock, Trash2, Edit2, ArrowLeft, FileText } from "lucide-react";
 import Link from "next/link";
 
-type Tab = "students" | "mentors" | "tracks" | "audits" | "curriculum" | "payments";
+type Tab = "students" | "mentors" | "tracks" | "audits" | "curriculum" | "payments" | "mentor_applications" | "ambassador_applications";
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState<Tab>("students");
@@ -30,6 +30,8 @@ export default function AdminDashboard() {
   const [payments, setPayments] = useState<any[]>([]);
   const [selectedReceipt, setSelectedReceipt] = useState<string | null>(null);
   const [selectedApplication, setSelectedApplication] = useState<any | null>(null);
+  const [mentorApplications, setMentorApplications] = useState<any[]>([]);
+  const [ambassadorApplications, setAmbassadorApplications] = useState<any[]>([]);
   
   // Admin Curriculum Edit states
   const [selectedTrackIdForCurriculum, setSelectedTrackIdForCurriculum] = useState<string>("track_001");
@@ -58,6 +60,26 @@ export default function AdminDashboard() {
       if (stored) {
         try {
           setPayments(JSON.parse(stored));
+        } catch (e) {
+          console.error(e);
+        }
+      }
+
+      // Load mentor applications
+      const storedApps = localStorage.getItem("connexode_mentor_applications");
+      if (storedApps) {
+        try {
+          setMentorApplications(JSON.parse(storedApps));
+        } catch (e) {
+          console.error(e);
+        }
+      }
+
+      // Load ambassador applications
+      const storedAmb = localStorage.getItem("connexode_ambassador_applications");
+      if (storedAmb) {
+        try {
+          setAmbassadorApplications(JSON.parse(storedAmb));
         } catch (e) {
           console.error(e);
         }
@@ -143,6 +165,86 @@ export default function AdminDashboard() {
       `Message: "Hi ${payment?.userName || "student"}, your payment of Rs. 500 for ${payment?.trackTitle || "your internship"} has been verified. Your LMS workspace is now fully active. Visit your dashboard to begin."\n\n` +
       `The student's dashboard will show a confirmation banner on their next login.`
     );
+  };
+
+  const handleApproveMentor = (appId: string) => {
+    const apps = [...mentorApplications];
+    const appIndex = apps.findIndex((a) => a.id === appId);
+    if (appIndex === -1) return;
+
+    const app = apps[appIndex];
+    app.status = "APPROVED";
+    setMentorApplications(apps);
+    localStorage.setItem("connexode_mentor_applications", JSON.stringify(apps));
+
+    // Create a new MENTOR user and save to connexode_dynamic_users
+    if (typeof window !== "undefined") {
+      const dynamicUsers = JSON.parse(localStorage.getItem("connexode_dynamic_users") || "[]");
+      
+      const newMentorUser = {
+        id: `usr_${Math.random().toString(36).substring(2, 9)}`,
+        name: app.name,
+        username: app.email.split("@")[0].toLowerCase().replace(/[^a-z0-9]/g, "-"),
+        email: app.email,
+        role: "MENTOR",
+        points: 0,
+        avatarInitials: app.name.substring(0, 2).toUpperCase(),
+        enrolledTrackId: "",
+        joinDate: new Date().toISOString().split("T")[0],
+        streak: 0,
+        rank: app.specialization || "Expert Mentor",
+        currentWeek: 0,
+        currentDay: 0,
+        password: app.password,
+      };
+
+      dynamicUsers.push(newMentorUser);
+      localStorage.setItem("connexode_dynamic_users", JSON.stringify(dynamicUsers));
+
+      // Update local state users list to immediately reflect
+      setAllUsers((prevUsers) => [...prevUsers, newMentorUser]);
+    }
+
+    alert(`✅ Mentor Application for ${app.name} APPROVED! They can now log in.`);
+  };
+
+  const handleRejectMentor = (appId: string) => {
+    const apps = [...mentorApplications];
+    const appIndex = apps.findIndex((a) => a.id === appId);
+    if (appIndex === -1) return;
+
+    const app = apps[appIndex];
+    app.status = "REJECTED";
+    setMentorApplications(apps);
+    localStorage.setItem("connexode_mentor_applications", JSON.stringify(apps));
+
+    alert(`❌ Mentor Application for ${app.name} REJECTED.`);
+  };
+
+  const handleApproveAmbassador = (appId: string) => {
+    const apps = [...ambassadorApplications];
+    const appIndex = apps.findIndex((a) => a.id === appId);
+    if (appIndex === -1) return;
+
+    const app = apps[appIndex];
+    app.status = "APPROVED";
+    setAmbassadorApplications(apps);
+    localStorage.setItem("connexode_ambassador_applications", JSON.stringify(apps));
+
+    alert(`✅ Campus Ambassador Application for ${app.fullName} APPROVED!`);
+  };
+
+  const handleRejectAmbassador = (appId: string) => {
+    const apps = [...ambassadorApplications];
+    const appIndex = apps.findIndex((a) => a.id === appId);
+    if (appIndex === -1) return;
+
+    const app = apps[appIndex];
+    app.status = "REJECTED";
+    setAmbassadorApplications(apps);
+    localStorage.setItem("connexode_ambassador_applications", JSON.stringify(apps));
+
+    alert(`❌ Campus Ambassador Application for ${app.fullName} REJECTED.`);
   };
 
   const handleRejectPayment = (txId: string, trackId: string) => {
@@ -307,6 +409,8 @@ export default function AdminDashboard() {
             { id: "curriculum", label: "Outline Editor", icon: BookOpen, badge: null },
             { id: "audits", label: "Audit Feed", icon: History, badge: null },
             { id: "payments", label: "Approvals Queue", icon: Clock, badge: payments.filter((p) => p.status === "PENDING").length || null, badgeAlert: true },
+            { id: "mentor_applications", label: "Mentor Applications", icon: GraduationCap, badge: mentorApplications.filter((a) => a.status === "PENDING").length || null, badgeAlert: true },
+            { id: "ambassador_applications", label: "Ambassador Apps", icon: Star, badge: ambassadorApplications.filter((a) => a.status === "PENDING").length || null, badgeAlert: true },
           ] as const).map(({ id, label, icon: Icon, badge, badgeAlert }) => (
             <button
               key={id}
@@ -959,6 +1063,202 @@ export default function AdminDashboard() {
                       <tr>
                         <td colSpan={7} className="text-center text-xs text-slate-500 py-12">
                           No manual payment transactions found in queue.
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {activeTab === "mentor_applications" && (
+            <div className="space-y-4">
+              <h3 className="font-display text-lg font-bold text-white flex items-center gap-2">
+                <GraduationCap className="text-cyan-400" size={20} />
+                Mentor Registration Applications
+              </h3>
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-sm text-slate-300">
+                  <thead className="bg-white/4 text-xs font-semibold uppercase tracking-wider text-slate-400 border-b border-white/8">
+                    <tr>
+                      <th className="px-6 py-4">Name / Father's Name</th>
+                      <th className="px-6 py-4">Email</th>
+                      <th className="px-6 py-4">Specialization & Exp</th>
+                      <th className="px-6 py-4">Profiles</th>
+                      <th className="px-6 py-4">Bio / Description</th>
+                      <th className="px-6 py-4">Status</th>
+                      <th className="px-6 py-4 text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-white/8">
+                    {mentorApplications.map((app) => (
+                      <tr key={app.id} className="hover:bg-white/4 transition-colors">
+                        <td className="px-6 py-4 font-semibold text-white">
+                          <div>
+                            <p>{app.name}</p>
+                            <p className="text-[10px] text-slate-500 font-medium">S/O {app.fatherName}</p>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 text-xs font-mono">{app.email}</td>
+                        <td className="px-6 py-4">
+                          <div>
+                            <p className="text-white font-medium">{app.specialization}</p>
+                            <p className="text-[10px] text-slate-400">{app.experience}</p>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 space-y-1">
+                          <div>
+                            <a href={app.linkedinUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-cyan-400 hover:underline hover:text-cyan-300">LinkedIn</a>
+                          </div>
+                          <div>
+                            <a href={app.githubUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-teal-400 hover:underline hover:text-teal-300">GitHub</a>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 max-w-[200px] text-xs text-slate-400 truncate" title={app.bio}>
+                          {app.bio}
+                        </td>
+                        <td className="px-6 py-4">
+                          <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold ${
+                            app.status === "APPROVED"
+                              ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                              : app.status === "REJECTED"
+                              ? "bg-red-500/10 text-red-400 border border-red-500/20"
+                              : "bg-yellow-500/10 text-yellow-500 border border-yellow-500/20"
+                          }`}>
+                            <span className="h-1.5 w-1.5 rounded-full bg-current" />
+                            {app.status}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 text-right">
+                          <div className="flex justify-end items-center gap-2">
+                            {app.status === "PENDING" && (
+                              <>
+                                <button
+                                  onClick={() => handleApproveMentor(app.id)}
+                                  className="rounded-lg bg-emerald-500/10 border border-emerald-500/20 px-3 py-1.5 text-xs font-bold text-emerald-400 hover:bg-emerald-500/20 hover:text-emerald-300 transition-all"
+                                >
+                                  Approve
+                                </button>
+                                <button
+                                  onClick={() => handleRejectMentor(app.id)}
+                                  className="rounded-lg bg-red-500/10 border border-red-500/20 px-3 py-1.5 text-xs font-bold text-red-400 hover:bg-red-500/20 hover:text-red-300 transition-all"
+                                >
+                                  Reject
+                                </button>
+                              </>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                    {mentorApplications.length === 0 && (
+                      <tr>
+                        <td colSpan={7} className="text-center text-xs text-slate-500 py-12">
+                          No mentor applications found in queue.
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {activeTab === "ambassador_applications" && (
+            <div className="space-y-4">
+              <h3 className="font-display text-lg font-bold text-white flex items-center gap-2">
+                <Star className="text-yellow-400 fill-yellow-400" size={20} />
+                Campus Ambassador Applications
+              </h3>
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-sm text-slate-300">
+                  <thead className="bg-white/4 text-xs font-semibold uppercase tracking-wider text-slate-400 border-b border-white/8">
+                    <tr>
+                      <th className="px-6 py-4">Name / Contact</th>
+                      <th className="px-6 py-4">University & Semester</th>
+                      <th className="px-6 py-4">LinkedIn / Socials</th>
+                      <th className="px-6 py-4">Motivation / Why</th>
+                      <th className="px-6 py-4">Reach & Availability</th>
+                      <th className="px-6 py-4">Status</th>
+                      <th className="px-6 py-4 text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-white/8">
+                    {ambassadorApplications.map((app) => (
+                      <tr key={app.id} className="hover:bg-white/4 transition-colors">
+                        <td className="px-6 py-4 font-semibold text-white">
+                          <div>
+                            <p>{app.fullName}</p>
+                            <p className="text-[10px] text-slate-500 font-mono mt-0.5">{app.email}</p>
+                            <p className="text-[10px] text-slate-500 font-mono">{app.phone}</p>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div>
+                            <p className="text-white font-medium">{app.university} ({app.city})</p>
+                            <p className="text-[10px] text-slate-400">{app.degree} · Sem {app.semester}</p>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 space-y-1">
+                          {app.linkedin && (
+                            <div>
+                              <a href={app.linkedin} target="_blank" rel="noopener noreferrer" className="text-xs text-cyan-400 hover:underline hover:text-cyan-300">LinkedIn</a>
+                            </div>
+                          )}
+                          {app.instagram && (
+                            <div>
+                              <a href={app.instagram} target="_blank" rel="noopener noreferrer" className="text-xs text-purple-400 hover:underline hover:text-purple-300">Instagram</a>
+                            </div>
+                          )}
+                        </td>
+                        <td className="px-6 py-4 max-w-[200px] text-xs text-slate-400 truncate" title={app.whyAmbassador}>
+                          {app.whyAmbassador}
+                        </td>
+                        <td className="px-6 py-4">
+                          <div>
+                            <p className="text-white font-medium">Reach: {app.reachEstimate}</p>
+                            <p className="text-[10px] text-slate-400">Hours: {app.availability}</p>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold ${
+                            app.status === "APPROVED"
+                              ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                              : app.status === "REJECTED"
+                              ? "bg-red-500/10 text-red-400 border border-red-500/20"
+                              : "bg-yellow-500/10 text-yellow-500 border border-yellow-500/20"
+                          }`}>
+                            <span className="h-1.5 w-1.5 rounded-full bg-current" />
+                            {app.status}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 text-right">
+                          <div className="flex justify-end items-center gap-2">
+                            {app.status === "PENDING" && (
+                              <>
+                                <button
+                                  onClick={() => handleApproveAmbassador(app.id)}
+                                  className="rounded-lg bg-emerald-500/10 border border-emerald-500/20 px-3 py-1.5 text-xs font-bold text-emerald-400 hover:bg-emerald-500/20 hover:text-emerald-300 transition-all"
+                                >
+                                  Approve
+                                </button>
+                                <button
+                                  onClick={() => handleRejectAmbassador(app.id)}
+                                  className="rounded-lg bg-red-500/10 border border-red-500/20 px-3 py-1.5 text-xs font-bold text-red-400 hover:bg-red-500/20 hover:text-red-300 transition-all"
+                                >
+                                  Reject
+                                </button>
+                              </>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                    {ambassadorApplications.length === 0 && (
+                      <tr>
+                        <td colSpan={7} className="text-center text-xs text-slate-500 py-12">
+                          No ambassador applications found in queue.
                         </td>
                       </tr>
                     )}

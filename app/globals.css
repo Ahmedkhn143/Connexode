@@ -238,6 +238,17 @@ body {
   animation: fade-in 0.3s ease forwards;
 }
 
+/* ── Slide Up Animation (WelcomeBanner) ──────────────────── */
+@keyframes slide-up {
+  from { opacity: 0; transform: translateX(-50%) translateY(24px); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+.animate-slide-up {
+  animation: slide-up 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+
 /* ── Custom Scrollbar (named class) ─────────────────────── */
 .custom-scrollbar::-webkit-scrollbar { width: 4px; }
 .custom-scrollbar::-webkit-scrollbar-track { background: rgba(255,255,255,0.02); }

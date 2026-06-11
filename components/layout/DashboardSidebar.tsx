@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import {
   Code2, ChevronDown, ChevronRight, LayoutDashboard,
-  User as UserIcon, LogOut, Award, BookOpen, Flame, MessageSquare
+  User as UserIcon, LogOut, Award, BookOpen, Flame, MessageSquare, Map
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { WEEKLY_TASKS, TRACKS, getActiveUser } from "@/lib/mock-data";
@@ -127,6 +127,18 @@ export default function DashboardSidebar() {
           >
             <Award size={16} />
             My Badges
+          </Link>
+          <Link
+            href="/dashboard?view=roadmap"
+            className={cn(
+              "flex items-center gap-3 rounded-xl px-4 py-2.5 text-sm font-medium transition-all duration-200",
+              pathname === "/dashboard" && searchParams.get("view") === "roadmap"
+                ? "bg-cyan-500/15 text-cyan-400"
+                : "text-slate-400 hover:bg-white/5 hover:text-slate-200"
+            )}
+          >
+            <Map size={16} />
+            Track Roadmap
           </Link>
           
           {/* Ask Mentor Help Link */}
