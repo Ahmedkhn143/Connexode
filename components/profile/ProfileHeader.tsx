@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { BadgeCheck, Calendar, Flame, Edit2, X, Globe } from "lucide-react";
 import { type User, type Track } from "@/lib/mock-data";
 
@@ -28,6 +29,7 @@ const LinkedinIcon = ({ size = 14 }: { size?: number }) => (
 export default function ProfileHeader({ user, track }: ProfileHeaderProps) {
   const [activeUser, setActiveUser] = useState<any>(null);
   const [isEditing, setIsEditing] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
   // Form States
   const [name, setName] = useState(user.name);
@@ -37,6 +39,7 @@ export default function ProfileHeader({ user, track }: ProfileHeaderProps) {
   const [linkedinUrl, setLinkedinUrl] = useState(user.linkedinUrl || "");
 
   useEffect(() => {
+    setMounted(true);
     if (typeof window !== "undefined") {
       const activeId = localStorage.getItem("connexode_active_user");
       if (activeId && activeId === user.id) {
@@ -211,8 +214,8 @@ export default function ProfileHeader({ user, track }: ProfileHeaderProps) {
       </div>
 
       {/* Edit Profile Modal */}
-      {isEditing && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 p-4 backdrop-blur-sm animate-fade-in">
+      {isEditing && mounted && typeof document !== "undefined" && createPortal(
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/85 p-4 backdrop-blur-sm animate-fade-in">
           <div className="relative max-w-md w-full bg-slate-900 border border-white/10 rounded-2xl overflow-hidden shadow-2xl flex flex-col">
             <div className="flex items-center justify-between px-6 py-4 border-b border-white/5 bg-slate-950">
               <h3 className="text-sm font-bold text-white">Edit Profile Details</h3>
@@ -315,7 +318,8 @@ export default function ProfileHeader({ user, track }: ProfileHeaderProps) {
               </div>
             </form>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );
