@@ -216,6 +216,76 @@ export default function DashboardPage() {
       </div>
     );
   }
+  if (currentView === "mentor") {
+    return (
+      <div className="mx-auto max-w-xl space-y-6 animate-fade-in py-8">
+        <div className="flex items-center justify-between border-b border-white/5 pb-4">
+          <div>
+            <Link
+              href="/dashboard"
+              className="mb-3 inline-flex items-center gap-1.5 text-xs text-slate-500 hover:text-cyan-400 transition-colors"
+            >
+              ← Back to Dashboard
+            </Link>
+            <h1 className="font-display text-2xl font-extrabold text-white">My Mentor</h1>
+            <p className="text-xs text-slate-400 mt-1">Details about your assigned track advisor</p>
+          </div>
+        </div>
+
+        {mentor ? (
+          <div className="rounded-3xl border border-white/8 bg-white/4 p-8 backdrop-blur-xl space-y-6 shadow-2xl relative overflow-hidden">
+            {/* Ambient background glow */}
+            <div className="absolute top-0 right-0 w-32 h-32 bg-cyan-500/10 rounded-full blur-2xl pointer-events-none" />
+            
+            <div className="flex items-center gap-2 pb-4 border-b border-white/5">
+              <BadgeCheck className="text-cyan-400" size={22} />
+              <h2 className="font-display text-lg font-extrabold text-white">Assigned Track Mentor</h2>
+            </div>
+            
+            <div className="flex flex-col items-center text-center space-y-4 py-4">
+              {mentor.avatarImage ? (
+                <img
+                  src={mentor.avatarImage}
+                  alt={mentor.name}
+                  className="h-24 w-24 rounded-full object-cover border-2 border-cyan-400/20 shadow-[0_0_20px_rgba(34,211,238,0.2)]"
+                />
+              ) : (
+                <div className="h-24 w-24 rounded-full bg-gradient-to-tr from-cyan-400 to-purple-500 p-[2px] shadow-[0_0_20px_rgba(34,211,238,0.2)]">
+                  <div className="flex h-full w-full items-center justify-center rounded-full bg-[#030c1c] text-2xl font-black text-white">
+                    {mentor.avatarInitials || mentor.name.substring(0, 2).toUpperCase()}
+                  </div>
+                </div>
+              )}
+              
+              <div>
+                <h3 className="text-xl font-bold text-white">{mentor.name}</h3>
+                <p className="text-xs uppercase tracking-wider text-cyan-400 font-black mt-1">
+                  {mentor.rank || "Expert Mentor"}
+                </p>
+                <p className="text-xs text-slate-500 font-mono mt-1">{mentor.email}</p>
+              </div>
+            </div>
+
+            <div className="space-y-4 pt-4 border-t border-white/5 text-xs leading-relaxed text-slate-400">
+              <div className="rounded-xl bg-white/2 border border-white/5 p-4 space-y-2">
+                <span className="text-white font-bold block text-2xs uppercase tracking-wider text-cyan-400">How your mentor helps:</span>
+                <ul className="list-disc pl-4 space-y-1">
+                  <li>Reviews and grades your weekly task submissions.</li>
+                  <li>Provides feedback and score boosts on approved tasks.</li>
+                  <li>Answers Q&A technical questions within 24 hours.</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="rounded-2xl border border-white/8 bg-white/4 p-8 text-center text-slate-400">
+            No mentor is currently assigned to this track.
+          </div>
+        )}
+      </div>
+    );
+  }
+
 
   return (
     <div className="mx-auto max-w-5xl space-y-6">
@@ -379,39 +449,6 @@ export default function DashboardPage() {
               </p>
             )}
           </div>
-
-          {/* Mentor Details Card */}
-          {mentor && (
-            <div className="rounded-2xl border border-white/8 bg-white/4 p-6 backdrop-blur-xl space-y-4">
-              <h3 className="font-display text-lg font-bold text-white flex items-center gap-2">
-                <BadgeCheck className="text-cyan-400" size={20} />
-                Your Assigned Track Mentor
-              </h3>
-              <div className="flex items-center gap-4">
-                {mentor.avatarImage ? (
-                  <img
-                    src={mentor.avatarImage}
-                    alt={mentor.name}
-                    className="h-16 w-16 rounded-full object-cover border border-white/10 shadow-lg"
-                  />
-                ) : (
-                  <div className="h-16 w-16 rounded-full bg-gradient-to-tr from-cyan-400 to-purple-500 p-[2px] shadow-lg">
-                    <div className="flex h-full w-full items-center justify-center rounded-full bg-[#030c1c] text-sm font-black text-white">
-                      {mentor.avatarInitials || mentor.name.substring(0, 2).toUpperCase()}
-                    </div>
-                  </div>
-                )}
-                <div>
-                  <h4 className="font-bold text-white text-sm">{mentor.name}</h4>
-                  <p className="text-xs text-cyan-400 font-semibold">{mentor.rank || "Expert Mentor"}</p>
-                  <p className="text-xs text-slate-500 mt-0.5">{mentor.email}</p>
-                </div>
-              </div>
-              <p className="text-xs text-slate-400 leading-relaxed pt-2 border-t border-white/5">
-                🎓 **Role & Support:** Your mentor will review your internship task submissions, provide technical feedback on your code, and answer any questions you submit on the helpdesk query box.
-              </p>
-            </div>
-          )}
         </div>
 
         {/* Q&A Helpdesk Card */}

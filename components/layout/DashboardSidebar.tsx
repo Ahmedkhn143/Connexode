@@ -148,6 +148,19 @@ export default function DashboardSidebar() {
             <Map size={16} />
             Track Roadmap
           </Link>
+
+          <Link
+            href="/dashboard?view=mentor"
+            className={cn(
+              "flex items-center gap-3 rounded-xl px-4 py-2.5 text-sm font-medium transition-all duration-200",
+              pathname === "/dashboard" && searchParams.get("view") === "mentor"
+                ? "bg-cyan-500/15 text-cyan-400"
+                : "text-slate-400 hover:bg-white/5 hover:text-slate-200"
+            )}
+          >
+            <BookOpen size={16} className="text-cyan-400" />
+            My Mentor
+          </Link>
           
           {/* Ask Mentor Help Link */}
           <Link
