@@ -72,9 +72,17 @@ export default function DashboardSidebar() {
       {/* User Quick Info */}
       <div className="border-b border-white/8 px-5 py-4">
         <div className="flex items-center gap-3 rounded-xl bg-white/4 px-4 py-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-cyan-500 to-teal-600 text-sm font-bold text-[#020B18]">
-            {activeUser.avatarInitials || activeUser.name.substring(0, 2).toUpperCase()}
-          </div>
+          {activeUser.avatarImage ? (
+            <img
+              src={activeUser.avatarImage}
+              alt={activeUser.name}
+              className="h-10 w-10 rounded-full object-cover border border-white/10"
+            />
+          ) : (
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-cyan-500 to-teal-600 text-sm font-bold text-[#020B18]">
+              {activeUser.avatarInitials || activeUser.name.substring(0, 2).toUpperCase()}
+            </div>
+          )}
           <div className="min-w-0 flex-1">
             <p className="truncate text-sm font-semibold text-slate-100">{activeUser.name}</p>
             <div className="flex items-center gap-1.5">

@@ -136,9 +136,17 @@ export default function Navbar() {
                   href={dashboardLink}
                   className="group flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-xs font-semibold text-white hover:bg-white/10 transition-all"
                 >
-                  <div className="flex h-6 w-6 items-center justify-center rounded-full bg-gradient-to-br from-cyan-400 to-teal-500 text-[10px] font-extrabold text-[#020B18]">
-                    {activeUser.avatarInitials || activeUser.name?.substring(0, 2).toUpperCase()}
-                  </div>
+                  {activeUser.avatarImage ? (
+                    <img
+                      src={activeUser.avatarImage}
+                      alt={activeUser.name}
+                      className="h-6 w-6 rounded-full object-cover border border-white/10"
+                    />
+                  ) : (
+                    <div className="flex h-6 w-6 items-center justify-center rounded-full bg-gradient-to-br from-cyan-400 to-teal-500 text-[10px] font-extrabold text-[#020B18]">
+                      {activeUser.avatarInitials || activeUser.name?.substring(0, 2).toUpperCase()}
+                    </div>
+                  )}
                   {dashboardLabel}
                 </Link>
 

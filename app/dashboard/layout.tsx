@@ -44,9 +44,17 @@ export default function DashboardLayout({
             <p className="text-xs text-slate-600">Track your daily progress below</p>
           </div>
           <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-cyan-500 to-teal-600 text-xs font-bold text-[#020B18]">
-              {activeUser.avatarInitials}
-            </div>
+            {activeUser.avatarImage ? (
+              <img
+                src={activeUser.avatarImage}
+                alt={activeUser.name}
+                className="h-9 w-9 rounded-full object-cover border border-white/10"
+              />
+            ) : (
+              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-cyan-500 to-teal-600 text-xs font-bold text-[#020B18]">
+                {activeUser.avatarInitials}
+              </div>
+            )}
           </div>
         </div>
 
