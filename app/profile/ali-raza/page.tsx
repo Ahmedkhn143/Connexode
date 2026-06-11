@@ -343,7 +343,6 @@ export default function AliRazaProfilePage() {
                     <div className="h-16 w-16 rounded-full border-4 border-cyan-400/10 border-t-cyan-400 animate-spin" />
                     <Loader2 size={24} className="text-cyan-400 absolute animate-spin animate-duration-1500" />
                   </div>
-                  </div>
                 </div>
                 <div className="space-y-2">
                   <h3 className="font-bold text-white text-md">AI Resume Exporter</h3>

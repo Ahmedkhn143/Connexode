@@ -22,6 +22,10 @@ export interface User {
   rank: string;
   currentWeek: number;
   currentDay: number;
+  bio?: string;
+  githubUrl?: string;
+  linkedinUrl?: string;
+  avatarImage?: string;
 }
 
 export const MOCK_USERS: User[] = [
