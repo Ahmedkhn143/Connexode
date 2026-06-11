@@ -6,7 +6,7 @@ import PhaseProgress from "@/components/dashboard/PhaseProgress";
 import TaskList from "@/components/dashboard/TaskList";
 import TrackRoadmap from "@/components/dashboard/TrackRoadmap";
 import PaymentApprovedBanner from "@/components/dashboard/PaymentApprovedBanner";
-import { getActiveUser, getPaymentStatus, TRACKS, SUBMISSIONS, WEEKLY_TASKS, type User } from "@/lib/mock-data";
+import { getActiveUser, getPaymentStatus, getTrackMentor, TRACKS, SUBMISSIONS, WEEKLY_TASKS, type User } from "@/lib/mock-data";
 import { BadgeCheck, GitBranch, ArrowRight, MessageSquare, Send, User as UserIcon, Zap, Clock, CheckCircle2 } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -181,6 +181,7 @@ export default function DashboardPage() {
   }
 
   const track = TRACKS.find((t) => t.id === activeUser.enrolledTrackId)!;
+  const mentor = getTrackMentor(activeUser.enrolledTrackId);
   const currentWeek = activeUser.currentWeek;
   const weekTasks = WEEKLY_TASKS.filter(
     (t) => t.trackId === activeUser.enrolledTrackId && t.weekNo === currentWeek
@@ -307,74 +308,109 @@ export default function DashboardPage() {
 
       {/* Profile & Q&A Grid */}
       <div className="grid gap-6 md:grid-cols-2">
-        {/* Profile Card */}
-        <div className="rounded-2xl border border-white/8 bg-white/4 p-6 backdrop-blur-xl space-y-4">
-          <h3 className="font-display text-lg font-bold text-white flex items-center gap-2">
-            <UserIcon className="text-cyan-400" size={20} />
-            My Internship Profile Details
-          </h3>
-          
-          {profileDetails ? (
-            <div className="space-y-4">
+        <div className="space-y-6">
+          {/* Profile Card */}
+          <div className="rounded-2xl border border-white/8 bg-white/4 p-6 backdrop-blur-xl space-y-4">
+            <h3 className="font-display text-lg font-bold text-white flex items-center gap-2">
+              <UserIcon className="text-cyan-400" size={20} />
+              My Internship Profile Details
+            </h3>
+            
+            {profileDetails ? (
+              <div className="space-y-4">
+                <div className="flex items-center gap-4">
+                  {profileDetails.avatarImage ? (
+                    <img
+                      src={profileDetails.avatarImage}
+                      alt="Profile Avatar"
+                      className="h-16 w-16 rounded-full object-cover border border-white/10 shadow-lg"
+                    />
+                  ) : (
+                    <div className="h-16 w-16 rounded-full bg-cyan-500/10 text-cyan-400 flex items-center justify-center font-bold">
+                      {profileDetails.userName.substring(0, 2).toUpperCase()}
+                    </div>
+                  )}
+                  <div>
+                    <h4 className="font-bold text-white text-sm">{profileDetails.userName}</h4>
+                    <p className="text-xs text-slate-400">Track: {profileDetails.trackTitle}</p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3 text-xs leading-normal">
+                  <div>
+                    <span className="text-slate-500 font-semibold">Father's Name:</span>
+                    <p className="text-slate-200">{profileDetails.fatherName}</p>
+                  </div>
+                  <div>
+                    <span className="text-slate-500 font-semibold">Mobile:</span>
+                    <p className="text-slate-200 font-mono">{profileDetails.mobile}</p>
+                  </div>
+                  <div>
+                    <span className="text-slate-500 font-semibold">CNIC:</span>
+                    <p className="text-slate-200 font-mono">{profileDetails.cnic}</p>
+                  </div>
+                  <div>
+                    <span className="text-slate-500 font-semibold">Institute:</span>
+                    <p className="text-slate-200 truncate">{profileDetails.institute}</p>
+                  </div>
+                  <div className="col-span-2">
+                    <span className="text-slate-500 font-semibold">Permanent Address:</span>
+                    <p className="text-slate-200">{profileDetails.address}</p>
+                  </div>
+                  <div>
+                    <span className="text-slate-500 font-semibold">Experience:</span>
+                    <p className="text-slate-200">{profileDetails.experience}</p>
+                  </div>
+                  {profileDetails.projectsUrl && (
+                    <div>
+                      <span className="text-slate-500 font-semibold">LinkedIn / Projects:</span>
+                      <p className="text-slate-200 truncate">
+                        <a href={profileDetails.projectsUrl} target="_blank" rel="noopener noreferrer" className="text-cyan-400 hover:underline">
+                          View Profile
+                        </a>
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <p className="text-xs text-slate-500 italic py-6 text-center">
+                Profile details will load once you submit your internship application.
+              </p>
+            )}
+          </div>
+
+          {/* Mentor Details Card */}
+          {mentor && (
+            <div className="rounded-2xl border border-white/8 bg-white/4 p-6 backdrop-blur-xl space-y-4">
+              <h3 className="font-display text-lg font-bold text-white flex items-center gap-2">
+                <BadgeCheck className="text-cyan-400" size={20} />
+                Your Assigned Track Mentor
+              </h3>
               <div className="flex items-center gap-4">
-                {profileDetails.avatarImage ? (
+                {mentor.avatarImage ? (
                   <img
-                    src={profileDetails.avatarImage}
-                    alt="Profile Avatar"
+                    src={mentor.avatarImage}
+                    alt={mentor.name}
                     className="h-16 w-16 rounded-full object-cover border border-white/10 shadow-lg"
                   />
                 ) : (
-                  <div className="h-16 w-16 rounded-full bg-cyan-500/10 text-cyan-400 flex items-center justify-center font-bold">
-                    {profileDetails.userName.substring(0, 2).toUpperCase()}
+                  <div className="h-16 w-16 rounded-full bg-gradient-to-tr from-cyan-400 to-purple-500 p-[2px] shadow-lg">
+                    <div className="flex h-full w-full items-center justify-center rounded-full bg-[#030c1c] text-sm font-black text-white">
+                      {mentor.avatarInitials || mentor.name.substring(0, 2).toUpperCase()}
+                    </div>
                   </div>
                 )}
                 <div>
-                  <h4 className="font-bold text-white text-sm">{profileDetails.userName}</h4>
-                  <p className="text-xs text-slate-400">Track: {profileDetails.trackTitle}</p>
+                  <h4 className="font-bold text-white text-sm">{mentor.name}</h4>
+                  <p className="text-xs text-cyan-400 font-semibold">{mentor.rank || "Expert Mentor"}</p>
+                  <p className="text-xs text-slate-500 mt-0.5">{mentor.email}</p>
                 </div>
               </div>
-
-              <div className="grid grid-cols-2 gap-3 text-xs leading-normal">
-                <div>
-                  <span className="text-slate-500 font-semibold">Father's Name:</span>
-                  <p className="text-slate-200">{profileDetails.fatherName}</p>
-                </div>
-                <div>
-                  <span className="text-slate-500 font-semibold">Mobile:</span>
-                  <p className="text-slate-200 font-mono">{profileDetails.mobile}</p>
-                </div>
-                <div>
-                  <span className="text-slate-500 font-semibold">CNIC:</span>
-                  <p className="text-slate-200 font-mono">{profileDetails.cnic}</p>
-                </div>
-                <div>
-                  <span className="text-slate-500 font-semibold">Institute:</span>
-                  <p className="text-slate-200 truncate">{profileDetails.institute}</p>
-                </div>
-                <div className="col-span-2">
-                  <span className="text-slate-500 font-semibold">Permanent Address:</span>
-                  <p className="text-slate-200">{profileDetails.address}</p>
-                </div>
-                <div>
-                  <span className="text-slate-500 font-semibold">Experience:</span>
-                  <p className="text-slate-200">{profileDetails.experience}</p>
-                </div>
-                {profileDetails.projectsUrl && (
-                  <div>
-                    <span className="text-slate-500 font-semibold">LinkedIn / Projects:</span>
-                    <p className="text-slate-200 truncate">
-                      <a href={profileDetails.projectsUrl} target="_blank" rel="noopener noreferrer" className="text-cyan-400 hover:underline">
-                        View Profile
-                      </a>
-                    </p>
-                  </div>
-                )}
-              </div>
+              <p className="text-xs text-slate-400 leading-relaxed pt-2 border-t border-white/5">
+                🎓 **Role & Support:** Your mentor will review your internship task submissions, provide technical feedback on your code, and answer any questions you submit on the helpdesk query box.
+              </p>
             </div>
-          ) : (
-            <p className="text-xs text-slate-500 italic py-6 text-center">
-              Profile details will load once you submit your internship application.
-            </p>
           )}
         </div>
 

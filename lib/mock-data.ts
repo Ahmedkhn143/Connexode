@@ -206,6 +206,12 @@ export const getActiveUser = (): User => {
   return defaultUser;
 };
 
+export const getTrackMentor = (trackId: string): User | null => {
+  const assignment = MOCK_MENTOR_ASSIGNMENTS.find((a) => a.trackId === trackId);
+  if (!assignment) return null;
+  return MOCK_USERS.find((u) => u.id === assignment.mentorId) || null;
+};
+
 export const getPaymentStatus = (trackId: string, userId?: string): "PENDING" | "PENDING_VERIFICATION" | "PAID" => {
   if (typeof window !== "undefined") {
     const uid = userId || localStorage.getItem("connexode_active_user") || "default";
