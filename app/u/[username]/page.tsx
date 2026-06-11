@@ -167,7 +167,6 @@ export default function PublicProfilePage({ params, searchParams }: PageProps) {
           <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
             {/* Left column */}
             <div className="space-y-6">
-              <BadgeGrid badges={dynamicBadges} />
               <ProjectShowcase submissions={isMockUser ? SUBMISSIONS : []} />
             </div>
 

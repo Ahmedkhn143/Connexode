@@ -236,35 +236,7 @@ export default function AliRazaProfilePage() {
           {/* Right Column (Badges & Projects Portfolio) */}
           <div className="lg:col-span-2 space-y-6">
             
-            {/* Skill Badges section */}
-            <div className="rounded-2xl border border-white/8 bg-white/4 p-6 backdrop-blur-xl shadow-xl space-y-5">
-              <div className="flex items-center gap-2">
-                <Trophy className="text-yellow-500" size={16} />
-                <h3 className="text-xs uppercase font-extrabold tracking-wider text-slate-400">
-                  Earned Skill Badges
-                </h3>
-              </div>
 
-              <div className="grid gap-4 sm:grid-cols-2">
-                {STUDENT_DATA.badges.map((badge) => {
-                  const Icon = badge.icon;
-                  return (
-                    <div
-                      key={badge.name}
-                      className={`rounded-xl border p-4 flex items-start gap-3.5 transition-all hover:-translate-y-0.5 ${badge.color}`}
-                    >
-                      <div className="mt-0.5 rounded-lg bg-white/5 p-2">
-                        <Icon size={16} />
-                      </div>
-                      <div className="space-y-0.5">
-                        <h4 className="text-xs font-bold text-white">{badge.name}</h4>
-                        <p className="text-[10px] text-slate-400 leading-normal">{badge.desc}</p>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
 
             {/* Projects Portfolio showcase */}
             <div className="rounded-2xl border border-white/8 bg-white/4 p-6 backdrop-blur-xl shadow-xl space-y-5">
