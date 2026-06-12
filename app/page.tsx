@@ -19,8 +19,8 @@ export default function HomePage() {
     <main className="relative bg-[#020B18]">
       <Navbar />
       <HeroSection />
-      <TracksSection />
-      <HowItWorksSection />
+      {/* <TracksSection /> */}
+      {/* <HowItWorksSection /> */}
       <TrustSection />
       <CTASection />
       <Footer />
