@@ -380,7 +380,7 @@ export default function MentorDashboard() {
             { id: "students", label: "Intern Records", icon: Users, badge: assignedStudents.length },
             { id: "curriculum", label: "Curriculum Editor", icon: BookOpen, badge: null },
             { id: "questions", label: "Student Questions", icon: MessageSquare, badge: questions.filter((q) => q.status === "PENDING" && assignedTrackIds.includes(q.trackId)).length || null, badgeAlert: true },
-          ] as const).map(({ id, label, icon: Icon, badge, badgeAlert }) => (
+          ] as any[]).map(({ id, label, icon: Icon, badge, badgeAlert }) => (
             <button
               key={id}
               onClick={() => {

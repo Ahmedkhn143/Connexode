@@ -17,7 +17,7 @@ import {
   type User,
   type Submission,
 } from "@/lib/mock-data";
-import { BookOpen, Users, GitBranch, ShieldAlert, Plus, LineChart, Code2, Award, Flame, Mail, GraduationCap, History, CheckCircle2, XCircle, Clock, Trash2, Edit2, ArrowLeft, FileText } from "lucide-react";
+import { BookOpen, Users, GitBranch, ShieldAlert, Plus, LineChart, Code2, Award, Flame, Mail, GraduationCap, History, CheckCircle2, XCircle, Clock, Trash2, Edit2, ArrowLeft, FileText, Star } from "lucide-react";
 import Link from "next/link";
 
 type Tab = "students" | "mentors" | "tracks" | "audits" | "curriculum" | "payments" | "mentor_applications" | "ambassador_applications";
@@ -181,7 +181,7 @@ export default function AdminDashboard() {
     if (typeof window !== "undefined") {
       const dynamicUsers = JSON.parse(localStorage.getItem("connexode_dynamic_users") || "[]");
       
-      const newMentorUser = {
+      const newMentorUser: User = {
         id: `usr_${Math.random().toString(36).substring(2, 9)}`,
         name: app.name,
         username: app.email.split("@")[0].toLowerCase().replace(/[^a-z0-9]/g, "-"),
@@ -411,7 +411,7 @@ export default function AdminDashboard() {
             { id: "payments", label: "Approvals Queue", icon: Clock, badge: payments.filter((p) => p.status === "PENDING").length || null, badgeAlert: true },
             { id: "mentor_applications", label: "Mentor Applications", icon: GraduationCap, badge: mentorApplications.filter((a) => a.status === "PENDING").length || null, badgeAlert: true },
             { id: "ambassador_applications", label: "Ambassador Apps", icon: Star, badge: ambassadorApplications.filter((a) => a.status === "PENDING").length || null, badgeAlert: true },
-          ] as const).map(({ id, label, icon: Icon, badge, badgeAlert }) => (
+          ] as any[]).map(({ id, label, icon: Icon, badge, badgeAlert }) => (
             <button
               key={id}
               onClick={() => setActiveTab(id as Tab)}

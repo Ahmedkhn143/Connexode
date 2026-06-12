@@ -26,6 +26,7 @@ export interface User {
   githubUrl?: string;
   linkedinUrl?: string;
   avatarImage?: string;
+  password?: string;
 }
 
 export const MOCK_USERS: User[] = [
