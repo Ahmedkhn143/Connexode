@@ -278,6 +278,13 @@ export default function CheckoutPage() {
                     </div>
                   </div>
                   <p className="text-[10px] text-slate-500 mt-2 font-bold">Upload Profile Picture * (Max 1MB)</p>
+                  <input
+                    type="text"
+                    value={avatarImage || ""}
+                    onChange={(e) => setAvatarImage(e.target.value)}
+                    placeholder="Or paste a profile picture URL..."
+                    className="mt-2 w-full max-w-xs rounded-xl border border-white/10 bg-[#030c1c] px-4 py-2 text-2xs text-slate-200 outline-none focus:border-cyan-400/40 text-center"
+                  />
                 </div>
 
                 <div className="grid gap-4 sm:grid-cols-2">
@@ -606,11 +613,25 @@ export default function CheckoutPage() {
                         </button>
                       </div>
                     ) : (
-                      <label className="flex flex-col items-center justify-center cursor-pointer w-full py-2 text-slate-500 hover:text-slate-300">
-                        <Upload size={22} className="mb-2 text-cyan-400" />
-                        <span className="text-xs font-bold text-slate-300">Click to upload or drag & drop your screenshot here</span>
-                        <input type="file" accept="image/*" onChange={handleReceiptUpload} className="hidden" />
-                      </label>
+                      <div className="flex flex-col items-center justify-center w-full py-2">
+                        <label className="flex flex-col items-center justify-center cursor-pointer w-full text-slate-500 hover:text-slate-300">
+                          <Upload size={22} className="mb-2 text-cyan-400" />
+                          <span className="text-xs font-bold text-slate-300">Click to upload or drag & drop your screenshot here</span>
+                          <input type="file" accept="image/*" onChange={handleReceiptUpload} className="hidden" />
+                        </label>
+                        <div className="w-full flex items-center gap-2 mt-4">
+                          <div className="h-[1px] bg-white/10 flex-1" />
+                          <span className="text-[10px] text-slate-500 font-bold uppercase">Or</span>
+                          <div className="h-[1px] bg-white/10 flex-1" />
+                        </div>
+                        <input
+                          type="text"
+                          value={receiptImage || ""}
+                          onChange={(e) => setReceiptImage(e.target.value || null)}
+                          placeholder="Paste proof of payment image URL..."
+                          className="w-full mt-3 rounded-xl border border-white/10 bg-[#030c1c] px-4 py-2.5 text-xs text-slate-200 outline-none focus:border-cyan-400/40 text-center"
+                        />
+                      </div>
                     )}
                   </div>
                 </div>

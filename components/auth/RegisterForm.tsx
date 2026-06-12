@@ -27,6 +27,7 @@ export default function RegisterForm({ initialSignUp = false }: { initialSignUp?
   const [specialization, setSpecialization] = useState("");
   const [experience, setExperience] = useState("");
   const [bio, setBio] = useState("");
+  const [avatarImage, setAvatarImage] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -78,6 +79,7 @@ export default function RegisterForm({ initialSignUp = false }: { initialSignUp?
           password,
           status: "PENDING",
           appliedAt: new Date().toISOString(),
+          avatarImage,
         };
 
         mentorApps.push(newApplication);
@@ -96,6 +98,7 @@ export default function RegisterForm({ initialSignUp = false }: { initialSignUp?
         setSpecialization("");
         setExperience("");
         setBio("");
+        setAvatarImage("");
 
         setTimeout(() => {
           setIsMentorApply(false);
@@ -125,12 +128,12 @@ export default function RegisterForm({ initialSignUp = false }: { initialSignUp?
         const username = email.split("@")[0].toLowerCase().replace(/[^a-z0-9]/g, "-");
         const newUser = {
           id: `usr_${Math.random().toString(36).substring(2, 9)}`,
-          name: username.charAt(0).toUpperCase() + username.slice(1).replace(/-/g, " "),
+          name: name.trim() || (username.charAt(0).toUpperCase() + username.slice(1).replace(/-/g, " ")),
           username,
           email: email.toLowerCase(),
           role: "STUDENT",
           points: 0,
-          avatarInitials: username.substring(0, 2).toUpperCase(),
+          avatarInitials: name.trim() ? name.trim().substring(0, 2).toUpperCase() : username.substring(0, 2).toUpperCase(),
           enrolledTrackId: "",
           joinDate: new Date().toISOString().split("T")[0],
           streak: 0,
@@ -138,6 +141,7 @@ export default function RegisterForm({ initialSignUp = false }: { initialSignUp?
           currentWeek: 1,
           currentDay: 1,
           password,
+          avatarImage,
         };
 
         dynamicUsers.push(newUser);
@@ -237,15 +241,6 @@ export default function RegisterForm({ initialSignUp = false }: { initialSignUp?
 
   return (
     <div className="w-full max-w-md space-y-5">
-      {/* Credentials hint for demo */}
-      {!isSignUp && !isMentorApply && (
-        <div className="rounded-xl border border-cyan-500/10 bg-cyan-500/5 px-4 py-3 text-[10px] text-slate-400 space-y-1 animate-fade-in">
-          <p className="font-bold text-cyan-400 uppercase tracking-wider text-[9px]">Demo Credentials</p>
-          <p><span className="text-slate-300 font-mono">admin@connexode.pk</span> · <span className="font-mono">admin123</span> → Admin Panel</p>
-          <p><span className="text-slate-300 font-mono">mentor@connexode.pk</span> · <span className="font-mono">mentor123</span> → Mentor Panel</p>
-        </div>
-      )}
-
       <div className="rounded-2xl border border-white/8 bg-white/4 p-6 sm:p-8 backdrop-blur-xl space-y-6">
         {/* Auth Toggle Tabs */}
         {isMentorApply ? (
@@ -401,6 +396,126 @@ export default function RegisterForm({ initialSignUp = false }: { initialSignUp?
                   rows={3}
                   className="w-full rounded-xl border border-white/10 bg-white/5 py-3 px-4 text-xs text-slate-200 outline-none focus:border-cyan-400/40 transition-colors"
                 />
+              </div>
+
+              <div>
+                <label className="mb-1.5 block text-2xs font-semibold uppercase tracking-wider text-slate-400">
+                  Profile Image URL
+                </label>
+                <input
+                  type="url"
+                  value={avatarImage}
+                  onChange={(e) => setAvatarImage(e.target.value)}
+                  placeholder="https://example.com/avatar.png"
+                  className="w-full rounded-xl border border-white/10 bg-white/5 py-3 px-4 text-xs text-slate-200 outline-none focus:border-cyan-400/40 transition-colors"
+                />
+              </div>
+
+              <div>
+                <label className="mb-1.5 block text-2xs font-semibold uppercase tracking-wider text-slate-400">
+                  Upload Profile Image (Max 1MB)
+                </label>
+                <label className="flex flex-col items-center justify-center w-full h-20 rounded-xl border-2 border-dashed border-white/10 bg-white/5 hover:bg-white/8 hover:border-cyan-500/35 transition-all cursor-pointer group">
+                  <div className="flex flex-col items-center justify-center pt-2 pb-2">
+                    <p className="text-[10px] text-slate-400 group-hover:text-slate-300"><span className="font-semibold">Click to upload image</span></p>
+                  </div>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        if (file.size > 1024 * 1024) {
+                          alert("File size exceeds 1MB limit!");
+                          e.target.value = "";
+                          return;
+                        }
+                        const reader = new FileReader();
+                        reader.onloadend = () => {
+                          setAvatarImage(reader.result as string);
+                        };
+                        reader.readAsDataURL(file);
+                      }
+                    }}
+                    className="hidden"
+                  />
+                </label>
+                {avatarImage && (
+                  <div className="mt-2 flex items-center gap-2 rounded-xl bg-white/4 border border-white/5 p-2">
+                    <img src={avatarImage} alt="Preview" className="h-8 w-8 rounded-full object-cover border border-cyan-400/30" />
+                    <span className="text-[10px] text-slate-300 truncate flex-1">Image Loaded</span>
+                    <button type="button" onClick={() => setAvatarImage("")} className="text-red-400 hover:text-red-300 text-[10px] font-bold">Remove</button>
+                  </div>
+                )}
+              </div>
+            </>
+          )}
+
+          {/* Student Sign Up specific fields */}
+          {isSignUp && !isMentorApply && (
+            <>
+              <div>
+                <label className="mb-1.5 block text-2xs font-semibold uppercase tracking-wider text-slate-400">
+                  Full Name (Optional)
+                </label>
+                <input
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="e.g. Alex Johnson"
+                  className="w-full rounded-xl border border-white/10 bg-white/5 py-3 px-4 text-xs text-slate-200 outline-none focus:border-cyan-400/40 transition-colors"
+                />
+              </div>
+
+              <div>
+                <label className="mb-1.5 block text-2xs font-semibold uppercase tracking-wider text-slate-400">
+                  Profile Image URL (Optional)
+                </label>
+                <input
+                  type="url"
+                  value={avatarImage}
+                  onChange={(e) => setAvatarImage(e.target.value)}
+                  placeholder="https://example.com/avatar.png"
+                  className="w-full rounded-xl border border-white/10 bg-white/5 py-3 px-4 text-xs text-slate-200 outline-none focus:border-cyan-400/40 transition-colors"
+                />
+              </div>
+
+              <div>
+                <label className="mb-1.5 block text-2xs font-semibold uppercase tracking-wider text-slate-400">
+                  Upload Profile Image (Optional)
+                </label>
+                <label className="flex flex-col items-center justify-center w-full h-20 rounded-xl border-2 border-dashed border-white/10 bg-white/5 hover:bg-white/8 hover:border-cyan-500/35 transition-all cursor-pointer group">
+                  <div className="flex flex-col items-center justify-center pt-2 pb-2">
+                    <p className="text-[10px] text-slate-400 group-hover:text-slate-300"><span className="font-semibold">Click to upload avatar</span></p>
+                  </div>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        if (file.size > 1024 * 1024) {
+                          alert("File size exceeds 1MB limit!");
+                          e.target.value = "";
+                          return;
+                        }
+                        const reader = new FileReader();
+                        reader.onloadend = () => {
+                          setAvatarImage(reader.result as string);
+                        };
+                        reader.readAsDataURL(file);
+                      }
+                    }}
+                    className="hidden"
+                  />
+                </label>
+                {avatarImage && (
+                  <div className="mt-2 flex items-center gap-2 rounded-xl bg-white/4 border border-white/5 p-2">
+                    <img src={avatarImage} alt="Preview" className="h-8 w-8 rounded-full object-cover border border-cyan-400/30" />
+                    <span className="text-[10px] text-slate-300 truncate flex-1">Image Loaded</span>
+                    <button type="button" onClick={() => setAvatarImage("")} className="text-red-400 hover:text-red-300 text-[10px] font-bold">Remove</button>
+                  </div>
+                )}
               </div>
             </>
           )}

@@ -382,7 +382,7 @@ export default function AliRazaProfilePage() {
 
               <div>
                 <label className="mb-1.5 block text-2xs font-semibold uppercase tracking-wider text-slate-400">Profile Picture (Max 1MB)</label>
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 mb-2">
                   {avatarImage && (
                     <img src={avatarImage} alt="Preview" className="h-10 w-10 rounded-xl object-cover border border-white/10" />
                   )}
@@ -405,6 +405,13 @@ export default function AliRazaProfilePage() {
                     className="w-full text-xs text-slate-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-2xs file:font-semibold file:bg-cyan-500/10 file:text-cyan-400 hover:file:bg-cyan-500/20 file:cursor-pointer"
                   />
                 </div>
+                <input
+                  type="text"
+                  value={avatarImage}
+                  onChange={(e) => setAvatarImage(e.target.value)}
+                  placeholder="Or paste a profile image URL..."
+                  className="w-full rounded-xl border border-white/10 bg-white/5 py-2.5 px-3 text-xs text-slate-200 outline-none focus:border-cyan-400/40"
+                />
               </div>
 
               <div>

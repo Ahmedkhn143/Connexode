@@ -18,10 +18,10 @@ import {
   type User,
   type Submission,
 } from "@/lib/mock-data";
-import { BookOpen, Users, GitBranch, ShieldAlert, Plus, LineChart, Code2, Award, Flame, Mail, GraduationCap, History, CheckCircle2, XCircle, Clock, Trash2, Edit2, ArrowLeft, FileText, Star } from "lucide-react";
+import { BookOpen, Users, GitBranch, ShieldAlert, Plus, LineChart, Code2, Award, Flame, Mail, GraduationCap, History, CheckCircle2, XCircle, Clock, Trash2, Edit2, ArrowLeft, FileText, Star, MessageSquare } from "lucide-react";
 import Link from "next/link";
 
-type Tab = "students" | "mentors" | "tracks" | "audits" | "curriculum" | "payments" | "mentor_applications" | "ambassador_applications";
+type Tab = "students" | "mentors" | "tracks" | "audits" | "curriculum" | "payments" | "mentor_applications" | "ambassador_applications" | "announcements";
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState<Tab>("students");
@@ -33,10 +33,97 @@ export default function AdminDashboard() {
   const [selectedApplication, setSelectedApplication] = useState<any | null>(null);
   const [mentorApplications, setMentorApplications] = useState<any[]>([]);
   const [ambassadorApplications, setAmbassadorApplications] = useState<any[]>([]);
+
+  // Detailed Modal/View States
+  const [selectedStudentDetailId, setSelectedStudentDetailId] = useState<string | null>(null);
+  const [selectedMentorDetailId, setSelectedMentorDetailId] = useState<string | null>(null);
+  const [adminReviewText, setAdminReviewText] = useState("");
+  const [adminReviewBonusPoints, setAdminReviewBonusPoints] = useState(50);
+  const [adminReviewsList, setAdminReviewsList] = useState<any[]>([]);
+  const [submissions, setSubmissions] = useState<Submission[]>([]);
+  const [isTrackDropdownOpen, setIsTrackDropdownOpen] = useState(false);
+  const [mentorGuidelines, setMentorGuidelines] = useState("");
+  const [announcements, setAnnouncements] = useState<any[]>([]);
+  const [newAnnTitle, setNewAnnTitle] = useState("");
+  const [newAnnContent, setNewAnnContent] = useState("");
+  const [targetAudience, setTargetAudience] = useState<"ALL" | "MENTOR" | "INTERN" | "AMBASSADOR">("ALL");
+  const [isBonusPointsDropdownOpen, setIsBonusPointsDropdownOpen] = useState(false);
+  const [isTargetAudienceDropdownOpen, setIsTargetAudienceDropdownOpen] = useState(false);
+
+  const handleAddAnnouncement = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newAnnTitle.trim() || !newAnnContent.trim()) return;
+
+    const newAnn = {
+      id: `ann_${Math.random().toString(36).substring(2, 9)}`,
+      title: newAnnTitle,
+      content: newAnnContent,
+      createdAt: new Date().toISOString(),
+      authorRole: "ADMIN",
+      authorName: activeAdmin?.name || "System Admin",
+      targetTrackId: "ALL",
+      targetAudience: targetAudience,
+    };
+
+    const updated = [newAnn, ...announcements];
+    setAnnouncements(updated);
+    localStorage.setItem("connexode_announcements", JSON.stringify(updated));
+    setNewAnnTitle("");
+    setNewAnnContent("");
+    alert("📢 Global announcement posted successfully to all students!");
+  };
+
+  const handleDeleteAnnouncement = (id: string) => {
+    if (!confirm("Are you sure you want to delete this announcement?")) return;
+    const updated = announcements.filter((a) => a.id !== id);
+    setAnnouncements(updated);
+    localStorage.setItem("connexode_announcements", JSON.stringify(updated));
+    alert("Announcement deleted successfully!");
+  };
+
+  const handleAddAdminReview = (studentId: string) => {
+    if (!adminReviewText.trim()) return;
+    const storedReviews = JSON.parse(localStorage.getItem("connexode_admin_reviews") || "[]");
+    const newReview = {
+      id: `review_${Math.random().toString(36).substring(2, 9)}`,
+      studentId,
+      adminName: activeAdmin?.name || "Admin",
+      remarks: adminReviewText,
+      bonusPoints: Number(adminReviewBonusPoints),
+      createdAt: new Date().toISOString(),
+    };
+    storedReviews.push(newReview);
+    localStorage.setItem("connexode_admin_reviews", JSON.stringify(storedReviews));
+    setAdminReviewsList(storedReviews);
+
+    const updatedUsers = allUsers.map((u) => {
+      if (u.id === studentId) {
+        return {
+          ...u,
+          points: u.points + Number(adminReviewBonusPoints),
+        };
+      }
+      return u;
+    });
+    setAllUsers(updatedUsers);
+
+    if (typeof window !== "undefined") {
+      const dynamicUsers = JSON.parse(localStorage.getItem("connexode_dynamic_users") || "[]");
+      const uIndex = dynamicUsers.findIndex((u: any) => u.id === studentId);
+      if (uIndex !== -1) {
+        dynamicUsers[uIndex].points = (dynamicUsers[uIndex].points || 0) + Number(adminReviewBonusPoints);
+        localStorage.setItem("connexode_dynamic_users", JSON.stringify(dynamicUsers));
+      }
+    }
+
+    setAdminReviewText("");
+    alert(`Success! Admin review submitted. Student rewarded with +${adminReviewBonusPoints} bonus points!`);
+  };
   
   // Admin Curriculum Edit states
   const [selectedTrackIdForCurriculum, setSelectedTrackIdForCurriculum] = useState<string>("track_001");
   const [editingTask, setEditingTask] = useState<WeeklyTask | null>(null);
+  const [activeWeekForCurriculum, setActiveWeekForCurriculum] = useState<number>(1);
   
   // Add task form states
   const [isAddingTask, setIsAddingTask] = useState(false);
@@ -62,6 +149,16 @@ export default function AdminDashboard() {
     setLogsList(MOCK_TASK_EDIT_LOGS);
 
     if (typeof window !== "undefined") {
+      const localSubs = localStorage.getItem("connexode_custom_submissions");
+      const parsedSubs = localSubs ? JSON.parse(localSubs) : [];
+      const combinedSubs = [...parsedSubs, ...SUBMISSIONS].reduce((acc: Submission[], item: Submission) => {
+        if (!acc.some((s) => s.id === item.id)) {
+          acc.push(item);
+        }
+        return acc;
+      }, []);
+      setSubmissions(combinedSubs);
+
       const stored = localStorage.getItem("connexode_manual_payments");
       if (stored) {
         try {
@@ -86,6 +183,32 @@ export default function AdminDashboard() {
       if (storedAmb) {
         try {
           setAmbassadorApplications(JSON.parse(storedAmb));
+        } catch (e) {
+          console.error(e);
+        }
+      }
+
+      // Load admin reviews
+      const storedReviews = localStorage.getItem("connexode_admin_reviews");
+      if (storedReviews) {
+        try {
+          setAdminReviewsList(JSON.parse(storedReviews));
+        } catch (e) {
+          console.error(e);
+        }
+      }
+
+      // Load mentor guidelines
+      const storedGuidelines = localStorage.getItem("connexode_mentor_guidelines");
+      if (storedGuidelines) {
+        setMentorGuidelines(storedGuidelines);
+      }
+
+      // Load announcements
+      const storedAnn = localStorage.getItem("connexode_announcements");
+      if (storedAnn) {
+        try {
+          setAnnouncements(JSON.parse(storedAnn));
         } catch (e) {
           console.error(e);
         }
@@ -202,6 +325,7 @@ export default function AdminDashboard() {
         currentWeek: 0,
         currentDay: 0,
         password: app.password,
+        avatarImage: app.avatarImage,
       };
 
       dynamicUsers.push(newMentorUser);
@@ -417,6 +541,7 @@ export default function AdminDashboard() {
             { id: "payments", label: "Approvals Queue", icon: Clock, badge: payments.filter((p) => p.status === "PENDING").length || null, badgeAlert: true },
             { id: "mentor_applications", label: "Mentor Applications", icon: GraduationCap, badge: mentorApplications.filter((a) => a.status === "PENDING").length || null, badgeAlert: true },
             { id: "ambassador_applications", label: "Ambassador Apps", icon: Star, badge: ambassadorApplications.filter((a) => a.status === "PENDING").length || null, badgeAlert: true },
+            { id: "announcements", label: "Announcements Board", icon: ShieldAlert, badge: null },
           ] as any[]).map(({ id, label, icon: Icon, badge, badgeAlert }) => (
             <button
               key={id}
@@ -475,9 +600,6 @@ export default function AdminDashboard() {
             </h1>
           </div>
           <div className="flex items-center gap-2">
-            <Link href="/mentor" className="rounded-xl border border-cyan-500/20 bg-cyan-500/10 px-3 py-2 text-xs font-bold text-cyan-400 hover:bg-cyan-500/15 transition-all">
-              Mentor Panel →
-            </Link>
           </div>
         </header>
 
@@ -485,111 +607,642 @@ export default function AdminDashboard() {
         {/* Dynamic Directory Grids */}
         <section className="rounded-2xl border border-white/5 bg-[#08101E]/40 p-6 sm:p-8 backdrop-blur-xl shadow-[0_12px_40px_rgba(0,0,0,0.3)]">
           {activeTab === "students" && (
-            <div className="space-y-4">
-              <h3 className="font-display text-lg font-bold text-white">Intern Directory</h3>
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-sm text-slate-300">
-                  <thead className="bg-white/4 text-xs font-semibold uppercase tracking-wider text-slate-400 border-b border-white/8">
-                    <tr>
-                      <th className="px-6 py-4">Name</th>
-                      <th className="px-6 py-4">Track (Internship)</th>
-                      <th className="px-6 py-4">Progress</th>
-                      <th className="px-6 py-4">Streak</th>
-                      <th className="px-6 py-4 text-right">Points</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-white/8">
-                    {students.map((student) => {
-                      const track = TRACKS.find((t) => t.id === student.enrolledTrackId);
-                      return (
-                        <tr key={student.id} className="hover:bg-white/4 transition-colors">
-                          <td className="px-6 py-4 font-semibold text-white">
-                            <div>
-                              <p>{student.name}</p>
-                              <p className="text-[10px] text-slate-500 font-medium">@{student.username}</p>
+            selectedStudentDetailId ? (() => {
+              const student = allUsers.find((u) => u.id === selectedStudentDetailId);
+              if (!student) return null;
+              const track = TRACKS.find((t) => t.id === student.enrolledTrackId);
+              const studentTasks = tasksList.filter((t) => t.trackId === student.enrolledTrackId);
+              const studentSubs = submissions.filter((s) => s.userId === student.id);
+              const completedCount = studentSubs.filter((s) => s.status === "APPROVED").length;
+              const progressPercent = studentTasks.length > 0 ? Math.round((completedCount / studentTasks.length) * 100) : 0;
+              const studentReviews = adminReviewsList.filter((r) => r.studentId === student.id);
+
+              return (
+                <div className="space-y-6 animate-fade-in text-xs">
+                  <div className="flex items-center justify-between">
+                    <button
+                      onClick={() => setSelectedStudentDetailId(null)}
+                      className="flex items-center gap-1.5 text-xs text-slate-400 hover:text-white transition-colors"
+                    >
+                      <ArrowLeft size={14} /> Back to Directory
+                    </button>
+                    <span className="rounded bg-purple-500/10 border border-purple-500/25 px-2.5 py-1 text-[10px] font-extrabold text-purple-400 uppercase">
+                      Admin Intern Inspector
+                    </span>
+                  </div>
+
+                  {/* Profile detail card */}
+                  <div className="grid gap-6 md:grid-cols-3">
+                    <div className="md:col-span-2 rounded-xl border border-white/8 bg-[#080f1e]/60 p-6 space-y-4">
+                      <div>
+                        <p className="text-[10px] font-bold text-purple-400 uppercase tracking-wider">Intern Details</p>
+                        <h3 className="font-display text-2xl font-black text-white mt-1">{student.name}</h3>
+                        <p className="text-xs text-slate-400">@{student.username} · {student.email}</p>
+                      </div>
+
+                      <div className="grid gap-4 sm:grid-cols-3 text-xs border-t border-white/5 pt-4">
+                        <div>
+                          <span className="text-slate-500 font-bold block">Enrolled Track:</span>
+                          <span className="text-slate-200 font-semibold">{track?.title || "Not Enrolled"}</span>
+                        </div>
+                        <div>
+                          <span className="text-slate-500 font-bold block">Current Week / Day:</span>
+                          <span className="text-slate-200 font-semibold">Week {student.currentWeek} · Day {student.currentDay}</span>
+                        </div>
+                        <div>
+                          <span className="text-slate-500 font-bold block">Join Date:</span>
+                          <span className="text-slate-200 font-semibold">{student.joinDate}</span>
+                        </div>
+                      </div>
+
+                      <div className="border-t border-white/5 pt-4">
+                        <span className="text-slate-500 font-bold block text-xs mb-2">Track Completion Progress</span>
+                        <div className="flex items-center gap-3">
+                          <div className="flex-1 h-2 rounded-full bg-white/5 overflow-hidden">
+                            <div
+                              className="h-full bg-gradient-to-r from-purple-500 to-cyan-500 transition-all duration-300"
+                              style={{ width: `${progressPercent}%` }}
+                            />
+                          </div>
+                          <span className="text-xs font-bold text-white shrink-0">{progressPercent}% ({completedCount}/{studentTasks.length} tasks)</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="rounded-xl border border-white/8 bg-[#080f1e]/60 p-6 flex flex-col justify-between">
+                      <div className="space-y-3">
+                        <p className="text-[10px] font-bold text-cyan-400 uppercase tracking-wider">Academic Performance</p>
+                        <div className="flex justify-between items-baseline">
+                          <span className="text-xs text-slate-400">Streak:</span>
+                          <span className="text-base font-extrabold text-orange-400 flex items-center gap-1">
+                            <Flame size={15} /> {student.streak} days
+                          </span>
+                        </div>
+                        <div className="flex justify-between items-baseline">
+                          <span className="text-xs text-slate-400">Total Points:</span>
+                          <span className="text-lg font-black text-cyan-400">{student.points.toLocaleString()} pts</span>
+                        </div>
+                        <div className="flex justify-between items-baseline">
+                          <span className="text-xs text-slate-400">Class Rank:</span>
+                          <span className="text-xs font-bold text-slate-300">{student.rank}</span>
+                        </div>
+                      </div>
+
+                      <div className="rounded-lg bg-white/4 border border-white/5 p-3 text-[11px] text-slate-400 mt-4 leading-normal">
+                        ⚠️ Points can be adjusted by submitting administrative reviews below.
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Submissions & Timeline Logs */}
+                  <div className="grid gap-6 lg:grid-cols-2">
+                    <div className="rounded-xl border border-white/8 bg-[#080f1e]/60 p-6 space-y-4">
+                      <h4 className="font-display text-sm font-bold text-white flex items-center gap-2">
+                        <GraduationCap size={16} className="text-purple-400" />
+                        Intern Task Outline Timeline
+                      </h4>
+                      <div className="space-y-3 max-h-[350px] overflow-y-auto pr-1">
+                        {studentTasks.map((task) => {
+                          const sub = studentSubs.find((s) => s.taskId === task.id);
+                          return (
+                            <div key={task.id} className="p-3 rounded-lg border border-white/5 bg-[#020B18]/40 flex justify-between items-start text-xs">
+                              <div>
+                                <span className="text-[9px] font-bold text-slate-500 uppercase">Week {task.weekNo} · Day {task.dayNo}</span>
+                                <h5 className="font-bold text-slate-200">{task.title}</h5>
+                              </div>
+                              <span className={`text-[9px] font-extrabold px-1.5 py-0.5 rounded ${
+                                sub?.status === "APPROVED" 
+                                  ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                                  : sub?.status === "PENDING"
+                                  ? "bg-blue-500/10 text-blue-400 border border-blue-500/20"
+                                  : sub?.status === "REJECTED"
+                                  ? "bg-red-500/10 text-red-400 border border-red-500/20"
+                                  : "bg-slate-500/10 text-slate-500"
+                              }`}>
+                                {sub ? sub.status : "NO SUBMISSION"}
+                              </span>
                             </div>
-                          </td>
-                          <td className="px-6 py-4">
-                            <span
-                              className="inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1 text-xs font-semibold text-white"
-                              style={{ backgroundColor: `${track?.color}15`, borderColor: `${track?.color}25` }}
-                            >
-                              <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: track?.color }} />
-                              {track?.title}
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    {/* Admin Reviews & Actions */}
+                    <div className="rounded-xl border border-white/8 bg-[#080f1e]/60 p-6 space-y-6">
+                      <div>
+                        <h4 className="font-display text-sm font-bold text-white flex items-center gap-2 mb-2">
+                          <Star size={16} className="text-yellow-400" />
+                          Admin Performance Review & Remarks
+                        </h4>
+                        <p className="text-[10px] text-slate-500">Provide official feedback and award extra bonus points to this student.</p>
+                      </div>
+
+                      <form
+                        onSubmit={(e) => {
+                          e.preventDefault();
+                          handleAddAdminReview(student.id);
+                        }}
+                        className="space-y-3 text-xs"
+                      >
+                        <div>
+                          <label className="block text-slate-400 font-semibold mb-1">Remarks / Audit Feedback</label>
+                          <textarea
+                            required
+                            value={adminReviewText}
+                            onChange={(e) => setAdminReviewText(e.target.value)}
+                            placeholder="Type official remarks for this intern..."
+                            rows={3}
+                            className="w-full rounded-xl border border-white/8 bg-[#020B18] px-4 py-2.5 text-slate-200 outline-none focus:border-purple-400"
+                          />
+                        </div>
+
+                        <div className="relative">
+                          <label className="block text-slate-400 font-semibold mb-1">Award Extra Points Bonus</label>
+                          <button
+                            type="button"
+                            onClick={() => setIsBonusPointsDropdownOpen(!isBonusPointsDropdownOpen)}
+                            className="w-full flex items-center justify-between gap-2 rounded-xl border border-white/8 bg-[#020B18] px-4 py-2.5 text-xs text-slate-200 outline-none hover:border-purple-400 text-left font-semibold"
+                          >
+                            <span>
+                              {adminReviewBonusPoints === 10 && "+10 Points (Minor contribution)"}
+                              {adminReviewBonusPoints === 50 && "+50 Points (Normal active participation)"}
+                              {adminReviewBonusPoints === 100 && "+100 Points (Excellent task execution)"}
+                              {adminReviewBonusPoints === 200 && "+200 Points (Exceptional capstone bonus)"}
                             </span>
-                          </td>
-                          <td className="px-6 py-4 text-slate-400">
-                            Week {student.currentWeek} · Day {student.currentDay}
-                          </td>
-                          <td className="px-6 py-4 font-semibold text-orange-400">
-                            <span className="flex items-center gap-1">
-                              <Flame size={14} />
-                              {student.streak} days
-                            </span>
-                          </td>
-                          <td className="px-6 py-4 text-right font-bold text-cyan-400">
-                            {student.points.toLocaleString()} pts
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
+                            <svg className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${isBonusPointsDropdownOpen ? "rotate-180" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                            </svg>
+                          </button>
+                          {isBonusPointsDropdownOpen && (
+                            <div className="absolute left-0 right-0 mt-2 rounded-xl border border-white/10 bg-[#080f1e]/95 backdrop-blur-xl shadow-2xl z-50 py-1">
+                              {[
+                                { val: 10, label: "+10 Points (Minor contribution)" },
+                                { val: 50, label: "+50 Points (Normal active participation)" },
+                                { val: 100, label: "+100 Points (Excellent task execution)" },
+                                { val: 200, label: "+200 Points (Exceptional capstone bonus)" }
+                              ].map((opt) => (
+                                <button
+                                  key={opt.val}
+                                  type="button"
+                                  onClick={() => {
+                                    setAdminReviewBonusPoints(opt.val);
+                                    setIsBonusPointsDropdownOpen(false);
+                                  }}
+                                  className={`w-full text-left px-4 py-2.5 text-xs transition-colors ${
+                                    adminReviewBonusPoints === opt.val ? "bg-purple-500/10 text-purple-400 font-bold" : "text-slate-400 hover:bg-white/5 hover:text-white"
+                                  }`}
+                                >
+                                  {opt.label}
+                                </button>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+
+                        <button
+                          type="submit"
+                          className="w-full rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 py-3 font-bold text-white hover:scale-[1.01] transition-transform"
+                        >
+                          Submit Official Review & Reward Points
+                        </button>
+                      </form>
+
+                      {/* Review History log */}
+                      <div className="space-y-3 pt-4 border-t border-white/5">
+                        <span className="text-slate-500 font-bold block text-xs">Review Remarks History</span>
+                        <div className="space-y-2 max-h-[150px] overflow-y-auto pr-1">
+                          {studentReviews.map((rev: any) => (
+                            <div key={rev.id} className="p-3 rounded-lg border border-white/5 bg-white/2 text-[11px] space-y-1">
+                              <div className="flex justify-between items-center">
+                                <span className="font-bold text-slate-300">{rev.adminName}</span>
+                                <span className="text-[9px] text-slate-500">{new Date(rev.createdAt).toLocaleDateString()}</span>
+                              </div>
+                              <p className="text-slate-400 italic">&quot;{rev.remarks}&quot;</p>
+                              <span className="text-[10px] text-emerald-400 font-semibold block">Bonus awarded: +{rev.bonusPoints} pts</span>
+                            </div>
+                          ))}
+                          {studentReviews.length === 0 && (
+                            <p className="text-slate-600 text-2xs italic">No admin reviews left for this student yet.</p>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })() : (
+              <div className="space-y-4">
+                <h3 className="font-display text-lg font-bold text-white">Intern Directory</h3>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-sm text-slate-300">
+                    <thead className="bg-white/4 text-xs font-semibold uppercase tracking-wider text-slate-400 border-b border-white/8">
+                      <tr>
+                        <th className="px-6 py-4">Name</th>
+                        <th className="px-6 py-4">Track (Internship)</th>
+                        <th className="px-6 py-4">Progress</th>
+                        <th className="px-6 py-4">Streak</th>
+                        <th className="px-6 py-4 text-right">Points</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-white/8">
+                      {students.map((student) => {
+                        const track = TRACKS.find((t) => t.id === student.enrolledTrackId);
+                        return (
+                          <tr key={student.id} onClick={() => setSelectedStudentDetailId(student.id)} className="hover:bg-white/4 transition-colors cursor-pointer">
+                            <td className="px-6 py-4 font-semibold text-white">
+                              <div>
+                                <p>{student.name}</p>
+                                <p className="text-[10px] text-slate-500 font-medium">@{student.username}</p>
+                              </div>
+                            </td>
+                            <td className="px-6 py-4">
+                              <span
+                                className="inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1 text-xs font-semibold text-white"
+                                style={{ backgroundColor: `${track?.color}15`, borderColor: `${track?.color}25` }}
+                              >
+                                <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: track?.color }} />
+                                {track?.title}
+                              </span>
+                            </td>
+                            <td className="px-6 py-4 text-slate-400">
+                              Week {student.currentWeek} · Day {student.currentDay}
+                            </td>
+                            <td className="px-6 py-4 font-semibold text-orange-400">
+                              <span className="flex items-center gap-1">
+                                <Flame size={14} />
+                                {student.streak} days
+                              </span>
+                            </td>
+                            <td className="px-6 py-4 text-right font-bold text-cyan-400">
+                              {student.points.toLocaleString()} pts
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
               </div>
-            </div>
+            )
           )}
 
           {activeTab === "mentors" && (
-            <div className="space-y-4">
-              <h3 className="font-display text-lg font-bold text-white">Mentor Performance Directory</h3>
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-sm text-slate-300">
-                  <thead className="bg-white/4 text-xs font-semibold uppercase tracking-wider text-slate-400 border-b border-white/8">
-                    <tr>
-                      <th className="px-6 py-4">Mentor Name</th>
-                      <th className="px-6 py-4">Assigned Track</th>
-                      <th className="px-6 py-4 text-center">Tasks Checked</th>
-                      <th className="px-6 py-4 text-center">Tasks Remaining</th>
-                      <th className="px-6 py-4">Latest Remarks</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-white/8">
-                    {mentors.map((mentor) => {
-                      const assignments = MOCK_MENTOR_ASSIGNMENTS.filter((a) => a.mentorId === mentor.id);
-                      const stats = getMentorStats(mentor.id);
+            selectedMentorDetailId ? (() => {
+              const mentor = allUsers.find((u) => u.id === selectedMentorDetailId);
+              if (!mentor) return null;
+              
+              const assignments = MOCK_MENTOR_ASSIGNMENTS.filter((a) => a.mentorId === mentor.id);
+              const assignedTrackIds = assignments.map((a) => a.trackId);
+              const stats = getMentorStats(mentor.id);
 
-                      return (
-                        <tr key={mentor.id} className="hover:bg-white/4 transition-colors">
-                          <td className="px-6 py-4 font-semibold text-white">
+              const enrolledStudents = allUsers.filter((u) => u.role === "STUDENT" && assignedTrackIds.includes(u.enrolledTrackId));
+              
+              const trackSubmissions = submissions.filter((sub) => {
+                const task = tasksList.find((t) => t.id === sub.taskId);
+                return task && assignedTrackIds.includes(task.trackId);
+              });
+              const totalPendingSubs = trackSubmissions.filter((s) => s.status === "PENDING").length;
+              const totalCheckedSubs = trackSubmissions.filter((s) => s.status === "APPROVED" || s.status === "REJECTED").length;
+              const reviewRate = trackSubmissions.length > 0 ? Math.round((totalCheckedSubs / trackSubmissions.length) * 100) : 100;
+
+              const storedTickets = typeof window !== "undefined" ? JSON.parse(localStorage.getItem("connexode_qa_tickets") || "[]") : [];
+              const mentorQuestions = storedTickets.filter((q: any) => assignedTrackIds.includes(q.trackId));
+              const unansweredQuestions = mentorQuestions.filter((q: any) => !q.reply || q.status === "PENDING").length;
+              const answeredQuestions = mentorQuestions.filter((q: any) => q.reply).length;
+              const qaResolutionRate = mentorQuestions.length > 0 ? Math.round((answeredQuestions / mentorQuestions.length) * 100) : 100;
+
+              return (
+                <div className="space-y-6 animate-fade-in text-xs">
+                  <div className="flex items-center justify-between">
+                    <button
+                      onClick={() => setSelectedMentorDetailId(null)}
+                      className="flex items-center gap-1.5 text-xs text-slate-400 hover:text-white transition-colors"
+                    >
+                      <ArrowLeft size={14} /> Back to Directory
+                    </button>
+                    <span className="rounded bg-purple-500/10 border border-purple-500/25 px-2.5 py-1 text-[10px] font-extrabold text-purple-400 uppercase">
+                      Admin Mentor Inspector
+                    </span>
+                  </div>
+
+                  <div className="grid gap-6 md:grid-cols-3">
+                    <div className="md:col-span-2 rounded-xl border border-white/8 bg-[#080f1e]/60 p-6 space-y-4">
+                      <div className="flex items-center gap-3">
+                        {mentor.avatarImage ? (
+                          <img src={mentor.avatarImage} alt={mentor.name} className="h-14 w-14 rounded-full object-cover border-2 border-cyan-400/25" />
+                        ) : (
+                          <div className="h-14 w-14 rounded-full bg-purple-500/20 flex items-center justify-center text-base font-extrabold text-purple-400">
+                            {mentor.avatarInitials || "MC"}
+                          </div>
+                        )}
+                        <div>
+                          <p className="text-[10px] font-bold text-purple-400 uppercase tracking-wider">Advisor Details</p>
+                          <h3 className="font-display text-xl font-black text-white">{mentor.name}</h3>
+                          <p className="text-xs text-slate-400">{mentor.email} · {mentor.rank || "Instructor"}</p>
+                        </div>
+                      </div>
+
+                      <div className="grid gap-4 sm:grid-cols-3 text-xs border-t border-white/5 pt-4">
+                        <div>
+                          <span className="text-slate-500 font-bold block">Assigned Tracks:</span>
+                          <div className="text-slate-200 font-semibold space-y-0.5">
+                            {assignments.map((a, i) => (
+                              <div key={i}>• {a.trackTitle}</div>
+                            ))}
+                            {assignments.length === 0 && <div>None</div>}
+                          </div>
+                        </div>
+                        <div>
+                          <span className="text-slate-500 font-bold block">Daily Review Action Status:</span>
+                          <span className={`inline-flex items-center gap-1.5 rounded px-2 py-0.5 mt-1 text-[10px] font-bold uppercase ${
+                            totalPendingSubs === 0 
+                              ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" 
+                              : "bg-yellow-500/10 text-yellow-500 border border-yellow-500/20"
+                          }`}>
+                            {totalPendingSubs === 0 ? "Up to Date" : `${totalPendingSubs} Pending Tasks`}
+                          </span>
+                        </div>
+                        <div>
+                          <span className="text-slate-500 font-bold block">Daily Helpdesk Resolution:</span>
+                          <span className={`inline-flex items-center gap-1.5 rounded px-2 py-0.5 mt-1 text-[10px] font-bold uppercase ${
+                            unansweredQuestions === 0 
+                              ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" 
+                              : "bg-red-500/10 text-red-400 border border-red-500/20"
+                          }`}>
+                            {unansweredQuestions === 0 ? "All Cleared" : `${unansweredQuestions} Unanswered`}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="rounded-xl border border-white/8 bg-[#080f1e]/60 p-6 space-y-3">
+                      <p className="text-[10px] font-bold text-cyan-400 uppercase tracking-wider">Performance Metrics</p>
+                      <div className="flex justify-between items-baseline text-xs">
+                        <span className="text-slate-400">Total Enrolled Interns:</span>
+                        <span className="font-extrabold text-white text-sm">{enrolledStudents.length} Students</span>
+                      </div>
+                      <div className="flex justify-between items-baseline text-xs">
+                        <span className="text-slate-400">Task Review Activity Rate:</span>
+                        <span className="font-extrabold text-emerald-400 text-sm">{reviewRate}% ({totalCheckedSubs} checked)</span>
+                      </div>
+                      <div className="flex justify-between items-baseline text-xs">
+                        <span className="text-slate-400">Q&A Ticket Response Rate:</span>
+                        <span className="font-extrabold text-cyan-400 text-sm">{qaResolutionRate}% ({answeredQuestions} resolved)</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Mentor Specific Guidelines Editor */}
+                  <div className="rounded-xl border border-white/8 bg-[#080f1e]/60 p-6 space-y-3">
+                    <h4 className="font-display text-sm font-bold text-white flex items-center gap-2">
+                      <BookOpen size={16} className="text-cyan-400" />
+                      Teacher Review Guidelines (Specific to {mentor.name})
+                    </h4>
+                    <p className="text-[10px] text-slate-500">Provide customized review and grading instructions for this mentor.</p>
+                    <textarea
+                      value={typeof window !== "undefined" ? (localStorage.getItem(`connexode_mentor_guidelines_${mentor.id}`) || "") : ""}
+                      onChange={(e) => {
+                        localStorage.setItem(`connexode_mentor_guidelines_${mentor.id}`, e.target.value);
+                        setMentorGuidelines(e.target.value);
+                      }}
+                      placeholder={`Enter custom review guidelines for ${mentor.name}...`}
+                      rows={3}
+                      className="w-full rounded-xl border border-white/8 bg-[#020B18] px-4 py-2.5 text-xs text-slate-200 outline-none focus:border-cyan-400"
+                    />
+                    <div className="text-[10px] text-emerald-400 font-semibold">
+                      ✓ Guidelines saved specifically for {mentor.name}.
+                    </div>
+                  </div>
+
+                  {/* Sub-directories of Mentor view */}
+                  <div className="grid gap-6 lg:grid-cols-2">
+                    <div className="rounded-xl border border-white/8 bg-[#080f1e]/60 p-6 space-y-4">
+                      <h4 className="font-display text-sm font-bold text-white flex items-center gap-2">
+                        <Users size={16} className="text-purple-400" />
+                        Enrolled Interns Under Mentor
+                      </h4>
+                      <div className="space-y-3 max-h-[300px] overflow-y-auto pr-1">
+                        {enrolledStudents.map((s) => (
+                          <div key={s.id} className="p-3 rounded-lg border border-white/5 bg-[#020B18]/40 flex justify-between items-center text-xs">
                             <div>
-                              <p>{mentor.name}</p>
-                              <p className="text-[10px] text-slate-500 font-medium">{mentor.email}</p>
+                              <h5 className="font-bold text-white">{s.name}</h5>
+                              <p className="text-[10px] text-slate-500">Week {s.currentWeek} · Day {s.currentDay}</p>
                             </div>
-                          </td>
-                          <td className="px-6 py-4 text-slate-400">
-                            <div className="flex flex-col gap-1">
-                              {assignments.map((asg, i) => (
-                                <span key={i} className="text-xs text-slate-300 font-medium">
-                                  • {asg.trackTitle}
-                                </span>
-                              ))}
+                            <span className="text-cyan-400 font-bold">{s.points} pts</span>
+                          </div>
+                        ))}
+                        {enrolledStudents.length === 0 && (
+                          <p className="text-slate-600 text-2xs italic text-center py-6">No students currently enrolled under this mentor's tracks.</p>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="rounded-xl border border-white/8 bg-[#080f1e]/60 p-6 space-y-4">
+                      <h4 className="font-display text-sm font-bold text-white flex items-center gap-2">
+                        <MessageSquare size={16} className="text-cyan-400" />
+                        Q&A Ticket Resolution Log
+                      </h4>
+                      <div className="space-y-3 max-h-[300px] overflow-y-auto pr-1">
+                        {mentorQuestions.map((q: any) => (
+                          <div key={q.id} className="p-3 rounded-lg border border-white/5 bg-white/2 text-[11px] space-y-2">
+                            <div className="flex justify-between items-center">
+                              <span className="font-bold text-slate-300">{q.userName}</span>
+                              <span className={`rounded px-1.5 py-0.2 text-[8px] font-bold ${
+                                q.reply ? "bg-emerald-500/10 text-emerald-400" : "bg-yellow-500/10 text-yellow-500"
+                              }`}>{q.reply ? "RESOLVED" : "OPEN"}</span>
                             </div>
-                          </td>
-                          <td className="px-6 py-4 text-center font-bold text-emerald-400">{stats.checked}</td>
-                          <td className="px-6 py-4 text-center font-bold text-yellow-500">
-                            <span className="inline-flex items-center gap-1">
-                              {stats.remaining > 0 ? <Clock size={12} className="animate-spin-slow" /> : null}
-                              {stats.remaining}
-                            </span>
-                          </td>
-                          <td className="px-6 py-4 text-xs italic text-slate-400 max-w-xs truncate" title={stats.lastFeedback}>
-                            &quot;{stats.lastFeedback}&quot;
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
+                            <p className="text-slate-400 italic font-mono bg-black/10 p-2 rounded">&quot;{q.question}&quot;</p>
+                            {q.reply && (
+                              <div className="pl-2 border-l-2 border-cyan-400">
+                                <span className="text-[9px] text-slate-500 block">Mentor Response:</span>
+                                <p className="text-cyan-400">&quot;{q.reply}&quot;</p>
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                        {mentorQuestions.length === 0 && (
+                          <p className="text-slate-600 text-2xs italic text-center py-6">No helpdesk tickets raised under this mentor's tracks.</p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })() : (
+              <div className="space-y-4">
+
+                <h3 className="font-display text-lg font-bold text-white">Mentor Performance Directory</h3>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-sm text-slate-300">
+                    <thead className="bg-white/4 text-xs font-semibold uppercase tracking-wider text-slate-400 border-b border-white/8">
+                      <tr>
+                        <th className="px-6 py-4">Mentor Name</th>
+                        <th className="px-6 py-4">Assigned Track</th>
+                        <th className="px-6 py-4 text-center">Tasks Checked</th>
+                        <th className="px-6 py-4 text-center">Tasks Remaining</th>
+                        <th className="px-6 py-4">Latest Remarks</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-white/8">
+                      {mentors.map((mentor) => {
+                        const assignments = MOCK_MENTOR_ASSIGNMENTS.filter((a) => a.mentorId === mentor.id);
+                        const stats = getMentorStats(mentor.id);
+
+                        return (
+                          <tr key={mentor.id} onClick={() => setSelectedMentorDetailId(mentor.id)} className="hover:bg-white/4 transition-colors cursor-pointer">
+                            <td className="px-6 py-4 font-semibold text-white">
+                              <div>
+                                <p>{mentor.name}</p>
+                                <p className="text-[10px] text-slate-500 font-medium">{mentor.email}</p>
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 text-slate-400">
+                              <div className="flex flex-col gap-1">
+                                {assignments.map((asg, i) => (
+                                  <span key={i} className="text-xs text-slate-300 font-medium">
+                                    • {asg.trackTitle}
+                                  </span>
+                                ))}
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 text-center font-bold text-emerald-400">{stats.checked}</td>
+                            <td className="px-6 py-4 text-center font-bold text-yellow-500">
+                              <span className="inline-flex items-center gap-1">
+                                {stats.remaining > 0 ? <Clock size={12} className="animate-spin-slow" /> : null}
+                                {stats.remaining}
+                              </span>
+                            </td>
+                            <td className="px-6 py-4 text-xs italic text-slate-400 max-w-xs truncate" title={stats.lastFeedback}>
+                              &quot;{stats.lastFeedback}&quot;
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )
+          )}
+
+          {activeTab === "announcements" && (
+            <div className="space-y-6 animate-fade-in text-xs">
+              <div className="flex justify-between items-center mb-2">
+                <div>
+                  <h3 className="font-display text-lg font-bold text-white flex items-center gap-2">
+                    <ShieldAlert size={20} className="text-purple-400" />
+                    Global Announcements Board
+                  </h3>
+                  <p className="text-xs text-slate-400 mt-0.5">Post notifications and announcements visible to all enrolled interns.</p>
+                </div>
+              </div>
+
+              {/* Form to Post Announcement */}
+              <div className="rounded-2xl border border-white/8 bg-[#080f1e]/60 p-6 backdrop-blur-xl space-y-4">
+                <h4 className="font-display text-sm font-bold text-white">Post New Announcement</h4>
+                <form onSubmit={handleAddAnnouncement} className="space-y-4">
+                  <div className="relative z-20">
+                    <label className="block text-2xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">Target Audience</label>
+                    <button
+                      type="button"
+                      onClick={() => setIsTargetAudienceDropdownOpen(!isTargetAudienceDropdownOpen)}
+                      className="w-full flex items-center justify-between gap-2 rounded-xl border border-white/8 bg-[#020B18] px-4 py-2.5 text-xs text-slate-200 outline-none hover:border-purple-500 text-left font-semibold mb-4"
+                    >
+                      <span>
+                        {targetAudience === "ALL" && "All"}
+                        {targetAudience === "MENTOR" && "Mentor"}
+                        {targetAudience === "INTERN" && "Interns"}
+                        {targetAudience === "AMBASSADOR" && "Campus Ambassador"}
+                      </span>
+                      <svg className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${isTargetAudienceDropdownOpen ? "rotate-180" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </button>
+                    {isTargetAudienceDropdownOpen && (
+                      <div className="absolute left-0 right-0 mt-[-8px] rounded-xl border border-white/10 bg-[#080f1e]/95 backdrop-blur-xl shadow-2xl z-50 py-1">
+                        {[
+                          { val: "ALL", label: "All" },
+                          { val: "MENTOR", label: "Mentor" },
+                          { val: "INTERN", label: "Interns" },
+                          { val: "AMBASSADOR", label: "Campus Ambassador" }
+                        ].map((opt) => (
+                          <button
+                            key={opt.val}
+                            type="button"
+                            onClick={() => {
+                              setTargetAudience(opt.val as any);
+                              setIsTargetAudienceDropdownOpen(false);
+                            }}
+                            className={`w-full text-left px-4 py-2.5 text-xs transition-colors ${
+                              targetAudience === opt.val ? "bg-purple-500/10 text-purple-400 font-bold" : "text-slate-400 hover:bg-white/5 hover:text-white"
+                            }`}
+                          >
+                            {opt.label}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                  <div>
+                    <label className="block text-2xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">Announcement Title</label>
+                    <input
+                      type="text"
+                      value={newAnnTitle}
+                      onChange={(e) => setNewAnnTitle(e.target.value)}
+                      placeholder="e.g. System Maintenance or Final Project Submission Guidelines"
+                      className="w-full rounded-xl border border-white/8 bg-[#020B18] px-4 py-2.5 text-xs text-slate-200 outline-none focus:border-purple-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-2xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">Announcement Content</label>
+                    <textarea
+                      value={newAnnContent}
+                      onChange={(e) => setNewAnnContent(e.target.value)}
+                      placeholder="Enter detailed message details here..."
+                      rows={4}
+                      className="w-full rounded-xl border border-white/8 bg-[#020B18] px-4 py-2.5 text-xs text-slate-200 outline-none focus:border-purple-500"
+                    />
+                  </div>
+                  <button
+                    type="submit"
+                    className="rounded-xl bg-purple-600 px-5 py-2.5 text-xs font-bold text-white hover:bg-purple-700 transition-all flex items-center gap-2"
+                  >
+                    <Plus size={14} /> Publish Announcement
+                  </button>
+                </form>
+              </div>
+
+              {/* Active Announcements List */}
+              <div className="space-y-4">
+                <h4 className="font-display text-sm font-bold text-white">Active Announcements ({announcements.filter(a => a.authorRole === "ADMIN").length})</h4>
+                <div className="grid gap-4">
+                  {announcements.filter(a => a.authorRole === "ADMIN").map((ann) => (
+                    <div key={ann.id} className="rounded-xl border border-white/8 bg-[#080f1e]/60 p-5 flex justify-between items-start">
+                      <div className="space-y-1.5 max-w-2xl">
+                        <div className="flex items-center gap-2">
+                          <span className="rounded bg-purple-500/10 border border-purple-500/20 px-2 py-0.5 text-[9px] font-bold text-purple-400 uppercase">
+                            TO: {ann.targetAudience || "ALL"}
+                          </span>
+                          <h5 className="font-bold text-white text-sm">{ann.title}</h5>
+                        </div>
+                        <p className="text-xs text-slate-300 leading-relaxed whitespace-pre-wrap">{ann.content}</p>
+                        <p className="text-[10px] text-slate-500 font-mono">Posted on {new Date(ann.createdAt).toLocaleString()} by {ann.authorName}</p>
+                      </div>
+                      <button
+                        onClick={() => handleDeleteAnnouncement(ann.id)}
+                        className="rounded-lg bg-red-500/10 border border-red-500/20 p-2 text-red-400 hover:bg-red-500/20 transition-all"
+                        title="Delete Announcement"
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
+                  ))}
+                  {announcements.filter(a => a.authorRole === "ADMIN").length === 0 && (
+                    <div className="rounded-xl border border-dashed border-white/8 p-8 text-center text-slate-500 text-xs italic">
+                      No active global announcements. Use the form above to post one.
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           )}
@@ -703,21 +1356,39 @@ export default function AdminDashboard() {
                 </div>
                 
                 <div className="flex items-center gap-3">
-                  <select
-                    value={selectedTrackIdForCurriculum}
-                    onChange={(e) => {
-                      setSelectedTrackIdForCurriculum(e.target.value);
-                      setEditingTask(null);
-                      setIsAddingTask(false);
-                    }}
-                    className="rounded-xl border border-white/8 bg-[#020B18] px-4 py-2.5 text-xs text-slate-200 outline-none focus:border-cyan-400"
-                  >
-                    {tracks.map((track) => (
-                      <option key={track.id} value={track.id}>
-                        {track.title}
-                      </option>
-                    ))}
-                  </select>
+                  <div className="relative">
+                    <button
+                      type="button"
+                      onClick={() => setIsTrackDropdownOpen(!isTrackDropdownOpen)}
+                      className="flex items-center justify-between gap-2 rounded-xl border border-white/8 bg-[#020B18] px-4 py-2.5 text-xs text-slate-200 outline-none hover:border-cyan-400 min-w-[200px] text-left font-semibold"
+                    >
+                      <span>{tracks.find((t) => t.id === selectedTrackIdForCurriculum)?.title || "Select Track"}</span>
+                      <svg className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${isTrackDropdownOpen ? "rotate-180" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </button>
+                    {isTrackDropdownOpen && (
+                      <div className="absolute right-0 mt-2 rounded-xl border border-white/10 bg-[#080f1e]/95 backdrop-blur-xl shadow-2xl z-50 py-1 max-h-60 overflow-y-auto min-w-[220px]">
+                        {tracks.map((track) => (
+                          <button
+                            key={track.id}
+                            type="button"
+                            onClick={() => {
+                              setSelectedTrackIdForCurriculum(track.id);
+                              setEditingTask(null);
+                              setIsAddingTask(false);
+                              setIsTrackDropdownOpen(false);
+                            }}
+                            className={`w-full text-left px-4 py-2.5 text-xs transition-colors ${
+                              selectedTrackIdForCurriculum === track.id ? "bg-purple-500/10 text-purple-400 font-bold" : "text-slate-400 hover:bg-white/5 hover:text-white"
+                            }`}
+                          >
+                            {track.title}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
 
                   <button
                     onClick={() => {
@@ -899,49 +1570,76 @@ export default function AdminDashboard() {
                 </div>
               ) : (
                 /* Outline Day-by-Day Timeline List */
-                <div className="space-y-4 max-h-[600px] overflow-y-auto pr-1">
-                  {tasksList
-                    .filter((t) => t.trackId === selectedTrackIdForCurriculum)
-                    .sort((a, b) => a.weekNo - b.weekNo || a.dayNo - b.dayNo)
-                    .map((task) => (
-                      <div
-                        key={task.id}
-                        className="p-4 rounded-xl border border-white/8 bg-white/4 flex justify-between items-start hover:bg-white/6 transition-all"
-                      >
-                        <div className="space-y-2">
-                          <span className="rounded-full bg-purple-500/10 border border-purple-500/20 px-2 py-0.5 text-[9px] font-bold text-purple-400">
-                            Week {task.weekNo} · Day {task.dayNo}
-                          </span>
-                          <h4 className="text-sm font-bold text-white mt-1.5">{task.title}</h4>
-                          <p className="text-xs text-slate-400 leading-relaxed max-w-xl">{task.taskDetails}</p>
-                          <div className="flex gap-4 text-[10px] text-slate-500">
-                            <span>Points: <span className="text-cyan-400 font-semibold">{task.points} pts</span></span>
-                            <span>Estimate: <span className="text-slate-300 font-semibold">{task.estimatedHours} hrs</span></span>
+                <div className="space-y-4">
+                  {/* Week Tabs */}
+                  <div className="flex flex-wrap gap-2 mb-4 bg-[#020B18]/60 p-2 rounded-2xl border border-white/5">
+                    {[1, 2, 3, 4, 5, 6, 7, 8].map((w) => {
+                      const weekTasks = tasksList.filter(
+                        (t) => t.trackId === selectedTrackIdForCurriculum && t.weekNo === w
+                      );
+                      const isActive = activeWeekForCurriculum === w;
+                      return (
+                        <button
+                          key={w}
+                          type="button"
+                          onClick={() => setActiveWeekForCurriculum(w)}
+                          className={`flex-1 min-w-[80px] text-center py-2 rounded-xl text-xs font-bold transition-all border ${
+                            isActive
+                              ? "bg-purple-500/15 border-purple-500/35 text-purple-300 shadow-[0_0_12px_rgba(168,85,247,0.15)]"
+                              : "bg-white/4 border-transparent text-slate-400 hover:text-white"
+                          }`}
+                        >
+                          Week {w}
+                          <span className="block text-[9px] text-slate-500 font-semibold">{weekTasks.length} Days</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  <div className="space-y-4 max-h-[500px] overflow-y-auto pr-1">
+                    {tasksList
+                      .filter((t) => t.trackId === selectedTrackIdForCurriculum && t.weekNo === activeWeekForCurriculum)
+                      .sort((a, b) => a.dayNo - b.dayNo)
+                      .map((task) => (
+                        <div
+                          key={task.id}
+                          className="p-4 rounded-xl border border-white/8 bg-white/4 flex justify-between items-start hover:bg-white/6 transition-all"
+                        >
+                          <div className="space-y-2">
+                            <span className="rounded-full bg-purple-500/10 border border-purple-500/20 px-2 py-0.5 text-[9px] font-bold text-purple-400">
+                              Week {task.weekNo} · Day {task.dayNo}
+                            </span>
+                            <h4 className="text-sm font-bold text-white mt-1.5">{task.title}</h4>
+                            <p className="text-xs text-slate-400 leading-relaxed max-w-xl">{task.taskDetails}</p>
+                            <div className="flex gap-4 text-[10px] text-slate-500">
+                              <span>Points: <span className="text-cyan-400 font-semibold">{task.points} pts</span></span>
+                              <span>Estimate: <span className="text-slate-300 font-semibold">{task.estimatedHours} hrs</span></span>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-1.5 ml-4">
+                            <button
+                              onClick={() => setEditingTask(task)}
+                              className="p-2 rounded-lg bg-white/5 border border-white/8 text-slate-400 hover:text-cyan-400 hover:bg-cyan-500/10 transition-all"
+                              title="Edit Task"
+                            >
+                              <Edit2 size={13} />
+                            </button>
+                            <button
+                              onClick={() => handleDeleteTask(task.id)}
+                              className="p-2 rounded-lg bg-white/5 border border-white/8 text-slate-400 hover:text-red-400 hover:bg-red-500/10 transition-all"
+                              title="Delete Task"
+                            >
+                              <Trash2 size={13} />
+                            </button>
                           </div>
                         </div>
+                      ))}
 
-                        <div className="flex items-center gap-1.5 ml-4">
-                          <button
-                            onClick={() => setEditingTask(task)}
-                            className="p-2 rounded-lg bg-white/5 border border-white/8 text-slate-400 hover:text-cyan-400 hover:bg-cyan-500/10 transition-all"
-                            title="Edit Task"
-                          >
-                            <Edit2 size={13} />
-                          </button>
-                          <button
-                            onClick={() => handleDeleteTask(task.id)}
-                            className="p-2 rounded-lg bg-white/5 border border-white/8 text-slate-400 hover:text-red-400 hover:bg-red-500/10 transition-all"
-                            title="Delete Task"
-                          >
-                            <Trash2 size={13} />
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-
-                  {tasksList.filter((t) => t.trackId === selectedTrackIdForCurriculum).length === 0 && (
-                    <p className="text-center text-xs text-slate-600 py-12">No tasks defined for this curriculum track.</p>
-                  )}
+                    {tasksList.filter((t) => t.trackId === selectedTrackIdForCurriculum && t.weekNo === activeWeekForCurriculum).length === 0 && (
+                      <p className="text-center text-xs text-slate-600 py-12">No tasks defined for this week.</p>
+                    )}
+                  </div>
                 </div>
               )}
             </div>
@@ -1101,9 +1799,18 @@ export default function AdminDashboard() {
                     {mentorApplications.map((app) => (
                       <tr key={app.id} className="hover:bg-white/4 transition-colors">
                         <td className="px-6 py-4 font-semibold text-white">
-                          <div>
-                            <p>{app.name}</p>
-                            <p className="text-[10px] text-slate-500 font-medium">S/O {app.fatherName}</p>
+                          <div className="flex items-center gap-2.5">
+                            {app.avatarImage ? (
+                              <img src={app.avatarImage} alt="Avatar" className="h-8 w-8 rounded-full object-cover border border-cyan-400/20" />
+                            ) : (
+                              <div className="h-8 w-8 rounded-full bg-cyan-500/20 flex items-center justify-center text-[10px] font-bold text-cyan-400">
+                                {app.name.substring(0, 2).toUpperCase()}
+                              </div>
+                            )}
+                            <div>
+                              <p>{app.name}</p>
+                              <p className="text-[10px] text-slate-500 font-medium">S/O {app.fatherName}</p>
+                            </div>
                           </div>
                         </td>
                         <td className="px-6 py-4 text-xs font-mono">{app.email}</td>

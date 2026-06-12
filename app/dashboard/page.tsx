@@ -20,6 +20,7 @@ export default function DashboardPage() {
   const [profileDetails, setProfileDetails] = useState<any>(null);
   const [questions, setQuestions] = useState<any[]>([]);
   const [newQuestion, setNewQuestion] = useState("");
+  const [announcements, setAnnouncements] = useState<any[]>([]);
 
   const loadQuestions = () => {
     if (typeof window !== "undefined") {
@@ -64,6 +65,18 @@ export default function DashboardPage() {
         }
       }
       loadQuestions();
+
+      // Load announcements
+      if (typeof window !== "undefined") {
+        const storedAnn = localStorage.getItem("connexode_announcements");
+        if (storedAnn) {
+          try {
+            setAnnouncements(JSON.parse(storedAnn));
+          } catch (e) {
+            console.error(e);
+          }
+        }
+      }
     }
   }, [activeUser]);
 
@@ -292,8 +305,75 @@ export default function DashboardPage() {
   }
 
 
+  const isAmbassador = typeof window !== "undefined" && (() => {
+    const storedApps = localStorage.getItem("connexode_ambassador_applications");
+    if (storedApps) {
+      try {
+        const apps = JSON.parse(storedApps);
+        return apps.some((app: any) => app.email === activeUser.email && app.status === "APPROVED");
+      } catch (e) {
+        return false;
+      }
+    }
+    return false;
+  })();
+
+  const relevantAnnouncements = announcements.filter((ann) => {
+    if (ann.authorRole === "MENTOR") {
+      return ann.targetTrackId === activeUser.enrolledTrackId;
+    }
+    const audience = ann.targetAudience || "ALL";
+    if (audience === "ALL") return true;
+    if (audience === "INTERN") return true;
+    if (audience === "AMBASSADOR" && isAmbassador) return true;
+    return false;
+  });
+
   return (
     <div className="mx-auto max-w-5xl space-y-6">
+
+      {/* Announcements notice board */}
+      {relevantAnnouncements.length > 0 && (
+        <div className="rounded-2xl border border-white/8 bg-gradient-to-r from-purple-900/10 via-[#080f1e]/85 to-cyan-900/10 p-5 backdrop-blur-xl space-y-4 animate-fade-in">
+          <div className="flex items-center justify-between border-b border-white/5 pb-2.5">
+            <h3 className="font-display text-xs font-bold text-white flex items-center gap-2">
+              <span className="flex h-1.5 w-1.5 rounded-full bg-cyan-400 animate-ping" />
+              📢 Board Announcements & Updates
+            </h3>
+            <span className="text-[9px] text-slate-500 font-extrabold uppercase tracking-widest bg-white/4 px-2 py-0.5 rounded">
+              {relevantAnnouncements.length} Alert{relevantAnnouncements.length > 1 ? "s" : ""}
+            </span>
+          </div>
+          <div className="space-y-3 max-h-[220px] overflow-y-auto pr-1 custom-scrollbar">
+            {relevantAnnouncements.map((ann) => (
+              <div
+                key={ann.id}
+                className={`p-3.5 rounded-xl border text-[11px] space-y-1.5 transition-all ${
+                  ann.authorRole === "ADMIN"
+                    ? "border-purple-500/15 bg-purple-500/5 hover:bg-purple-500/8"
+                    : "border-cyan-500/15 bg-cyan-500/5 hover:bg-cyan-500/8"
+                }`}
+              >
+                <div className="flex items-center justify-between flex-wrap gap-2">
+                  <div className="flex items-center gap-2">
+                    <span className={`rounded px-1.5 py-0.2 text-[8px] font-bold uppercase tracking-wider ${
+                      ann.authorRole === "ADMIN" ? "bg-purple-500/20 text-purple-400" : "bg-cyan-500/20 text-cyan-400"
+                    }`}>
+                      {ann.authorRole === "ADMIN" ? "Global Alert" : "Mentor Update"}
+                    </span>
+                    <h4 className="font-bold text-white">{ann.title}</h4>
+                  </div>
+                  <span className="text-[9px] text-slate-500 font-mono">{new Date(ann.createdAt).toLocaleString()}</span>
+                </div>
+                <p className="text-slate-300 leading-relaxed whitespace-pre-wrap">{ann.content}</p>
+                <div className="text-[10px] text-slate-500">
+                  Posted by <span className="font-semibold text-slate-300">{ann.authorName}</span>{ann.authorRole === "ADMIN" && <span className="text-purple-400 font-bold ml-1.5">(Admin)</span>}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Payment Approved Banner */}
       <PaymentApprovedBanner userId={activeUser.id} />

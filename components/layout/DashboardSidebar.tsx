@@ -16,10 +16,34 @@ export default function DashboardSidebar() {
   const isBadgesView = searchParams.get("view") === "badges";
   
   const [activeUser, setActiveUser] = useState<any>(null);
+  const [unresolvedCount, setUnresolvedCount] = useState<number>(0);
 
   useEffect(() => {
     setActiveUser(getActiveUser());
   }, []);
+
+  useEffect(() => {
+    if (activeUser) {
+      const loadUnresolved = () => {
+        const stored = localStorage.getItem("connexode_qa_tickets");
+        if (stored) {
+          try {
+            const tickets = JSON.parse(stored);
+            const myTickets = tickets.filter((t: any) => t.userId === activeUser.id);
+            const count = myTickets.filter((t: any) => t.status === "PENDING").length;
+            setUnresolvedCount(count);
+          } catch (e) {}
+        }
+      };
+      loadUnresolved();
+      window.addEventListener("storage", loadUnresolved);
+      const interval = setInterval(loadUnresolved, 2000);
+      return () => {
+        window.removeEventListener("storage", loadUnresolved);
+        clearInterval(interval);
+      };
+    }
+  }, [activeUser]);
 
   const enrolledTrackId = activeUser?.enrolledTrackId || "track_001";
   const track = TRACKS.find((t) => t.id === enrolledTrackId);
@@ -232,18 +256,6 @@ export default function DashboardSidebar() {
         </div>
       </nav>
 
-      {/* Floating Ask Mentor Issue Badge at Bottom Left (matching image layout) */}
-      <div className="px-4 py-3 border-t border-white/8">
-        <a
-          href="/dashboard#helpdesk"
-          className="flex items-center gap-2.5 rounded-xl bg-red-500/10 border border-red-500/20 px-3.5 py-2.5 text-xs font-bold text-red-400 hover:bg-red-500/15 transition-all"
-        >
-          <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-red-500 text-[10px] font-black text-white animate-pulse">
-            N
-          </span>
-          <span>1 Issue / Help Desk</span>
-        </a>
-      </div>
 
       {/* Exit Dashboard */}
       <div className="border-t border-white/8 p-4">

@@ -40,11 +40,12 @@ import {
   MessageSquare,
   Search,
   Calendar,
+  User as UserIcon,
 } from "lucide-react";
 import Link from "next/link";
 
 type SubFilter = "ALL" | "PENDING" | "APPROVED" | "REJECTED";
-type Tab = "submissions" | "students" | "curriculum" | "questions";
+type Tab = "submissions" | "students" | "curriculum" | "questions" | "profile" | "announcements";
 
 export default function MentorDashboard() {
   const [activeMentor, setActiveMentor] = useState<User | null>(null);
@@ -56,10 +57,19 @@ export default function MentorDashboard() {
   
   // Tabs
   const [activeTab, setActiveTab] = useState<Tab>("submissions");
+  const [announcements, setAnnouncements] = useState<any[]>([]);
+  const [newAnnTitle, setNewAnnTitle] = useState("");
+  const [newAnnContent, setNewAnnContent] = useState("");
+  const [targetTrackId, setTargetTrackId] = useState("");
+  const [isEditStudentTrackDropdownOpen, setIsEditStudentTrackDropdownOpen] = useState(false);
+  const [isSubStatusDropdownOpen, setIsSubStatusDropdownOpen] = useState(false);
+  const [isTargetTrackDropdownOpen, setIsTargetTrackDropdownOpen] = useState(false);
 
   // Curriculum Editor States
   const [selectedTrackIdForCurriculum, setSelectedTrackIdForCurriculum] = useState<string>("track_001");
   const [editingTask, setEditingTask] = useState<WeeklyTask | null>(null);
+  const [activeWeekForCurriculum, setActiveWeekForCurriculum] = useState<number>(1);
+  const [isTrackDropdownOpen, setIsTrackDropdownOpen] = useState(false);
   const [isAddingTask, setIsAddingTask] = useState(false);
   const [newTaskTitle, setNewTaskTitle] = useState("");
   const [newTaskDetails, setNewTaskDetails] = useState("");
@@ -78,8 +88,37 @@ export default function MentorDashboard() {
   // Student directory states
   const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null);
   const [searchStudentQuery, setSearchStudentQuery] = useState("");
+  const [selectedStudentFilterId, setSelectedStudentFilterId] = useState<string>("ALL");
+  const [isStudentFilterOpen, setIsStudentFilterOpen] = useState(false);
 
   const [allUsers, setAllUsers] = useState<User[]>(MOCK_USERS);
+
+  // Student Record Editing States
+  const [isEditingStudent, setIsEditingStudent] = useState(false);
+  const [editStudentName, setEditStudentName] = useState("");
+  const [editStudentEmail, setEditStudentEmail] = useState("");
+  const [editStudentTrack, setEditStudentTrack] = useState("");
+  const [editStudentWeek, setEditStudentWeek] = useState(1);
+  const [editStudentDay, setEditStudentDay] = useState(1);
+  const [editStudentPoints, setEditStudentPoints] = useState(0);
+  const [editStudentRank, setEditStudentRank] = useState("");
+  const [editStudentAvatarImage, setEditStudentAvatarImage] = useState("");
+
+  // Student Task Submission Management States
+  const [selectedTaskIdForSubmissionManagement, setSelectedTaskIdForSubmissionManagement] = useState<string | null>(null);
+  const [subStatus, setSubStatus] = useState<SubmissionStatus>("APPROVED");
+  const [subFeedback, setSubFeedback] = useState("");
+  const [subPoints, setSubPoints] = useState(100);
+  const [subGithubUrl, setSubGithubUrl] = useState("");
+  const [subLiveUrl, setSubLiveUrl] = useState("");
+  const [subLinkedinUrl, setSubLinkedinUrl] = useState("");
+
+  // Profile Editor States
+  const [profileName, setProfileName] = useState("");
+  const [profileEmail, setProfileEmail] = useState("");
+  const [profileRank, setProfileRank] = useState("");
+  const [profilePassword, setProfilePassword] = useState("");
+  const [profileAvatarImage, setProfileAvatarImage] = useState("");
 
   useEffect(() => {
     const user = getActiveUser();
@@ -149,6 +188,65 @@ export default function MentorDashboard() {
     loadTickets();
   }, []);
 
+  useEffect(() => {
+    if (activeMentor) {
+      setProfileName(activeMentor.name);
+      setProfileEmail(activeMentor.email);
+      setProfileRank(activeMentor.rank || "Expert Mentor");
+      setProfilePassword(activeMentor.password || "");
+      setProfileAvatarImage(activeMentor.avatarImage || "");
+
+      // Load announcements
+      if (typeof window !== "undefined") {
+        const storedAnn = localStorage.getItem("connexode_announcements");
+        if (storedAnn) {
+          try {
+            setAnnouncements(JSON.parse(storedAnn));
+          } catch (e) {
+            console.error(e);
+          }
+        }
+        const mentorAssignments = MOCK_MENTOR_ASSIGNMENTS.filter((a) => a.mentorId === activeMentor.id);
+        if (mentorAssignments.length > 0) {
+          setTargetTrackId(mentorAssignments[0].trackId);
+        }
+      }
+    }
+  }, [activeMentor]);
+
+  const handleAddAnnouncement = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newAnnTitle.trim() || !newAnnContent.trim() || !targetTrackId) {
+      alert("Please enter a title, content, and select a target track.");
+      return;
+    }
+
+    const newAnn = {
+      id: `ann_${Math.random().toString(36).substring(2, 9)}`,
+      title: newAnnTitle,
+      content: newAnnContent,
+      createdAt: new Date().toISOString(),
+      authorRole: "MENTOR",
+      authorName: activeMentor?.name || "Expert Mentor",
+      targetTrackId: targetTrackId,
+    };
+
+    const updated = [newAnn, ...announcements];
+    setAnnouncements(updated);
+    localStorage.setItem("connexode_announcements", JSON.stringify(updated));
+    setNewAnnTitle("");
+    setNewAnnContent("");
+    alert("📢 Track announcement posted successfully to all students in that track!");
+  };
+
+  const handleDeleteAnnouncement = (id: string) => {
+    if (!confirm("Are you sure you want to delete this announcement?")) return;
+    const updated = announcements.filter((a) => a.id !== id);
+    setAnnouncements(updated);
+    localStorage.setItem("connexode_announcements", JSON.stringify(updated));
+    alert("Announcement deleted successfully!");
+  };
+
   const handleReplySubmit = (e: React.FormEvent, ticketId: string) => {
     e.preventDefault();
     if (!replyText.trim()) return;
@@ -193,6 +291,7 @@ export default function MentorDashboard() {
     ? MOCK_MENTOR_ASSIGNMENTS.filter((a) => a.mentorId === activeMentor.id)
     : [];
   const assignedTrackIds = mentorAssignments.map((a) => a.trackId);
+  const assignedTracks = TRACKS.filter((t) => assignedTrackIds.includes(t.id));
 
   // Filter students enrolled in mentor's tracks
   const assignedStudents = allUsers.filter(
@@ -207,8 +306,9 @@ export default function MentorDashboard() {
 
   // Filtered queue
   const filteredSubmissions = mentorSubmissions.filter((sub) => {
-    if (filter === "ALL") return true;
-    return sub.status === filter;
+    const matchesStatus = filter === "ALL" || sub.status === filter;
+    const matchesStudent = selectedStudentFilterId === "ALL" || sub.userId === selectedStudentFilterId;
+    return matchesStatus && matchesStudent;
   });
 
   // Auto-select first in queue on load/filter change
@@ -326,6 +426,201 @@ export default function MentorDashboard() {
     alert("Task deleted successfully!");
   };
 
+  const startEditingStudent = (student: User) => {
+    setEditStudentName(student.name);
+    setEditStudentEmail(student.email);
+    setEditStudentTrack(student.enrolledTrackId || "");
+    setEditStudentWeek(student.currentWeek || 1);
+    setEditStudentDay(student.currentDay || 1);
+    setEditStudentPoints(student.points || 0);
+    setEditStudentRank(student.rank || "");
+    setEditStudentAvatarImage(student.avatarImage || "");
+    setIsEditingStudent(true);
+  };
+
+  const handleUpdateStudent = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedStudentId) return;
+    const updatedUsers = allUsers.map((u) => {
+      if (u.id === selectedStudentId) {
+        return {
+          ...u,
+          name: editStudentName,
+          email: editStudentEmail,
+          enrolledTrackId: editStudentTrack,
+          currentWeek: Number(editStudentWeek),
+          currentDay: Number(editStudentDay),
+          points: Number(editStudentPoints),
+          rank: editStudentRank,
+          avatarImage: editStudentAvatarImage,
+        };
+      }
+      return u;
+    });
+    setAllUsers(updatedUsers);
+    if (typeof window !== "undefined") {
+      const dynamicUsers = JSON.parse(localStorage.getItem("connexode_dynamic_users") || "[]");
+      const targetUserIndex = dynamicUsers.findIndex((u: any) => u.id === selectedStudentId);
+      const updatedUserObj = updatedUsers.find((u) => u.id === selectedStudentId);
+      if (updatedUserObj) {
+        if (targetUserIndex !== -1) {
+          dynamicUsers[targetUserIndex] = updatedUserObj;
+        } else {
+          dynamicUsers.push(updatedUserObj);
+        }
+        localStorage.setItem("connexode_dynamic_users", JSON.stringify(dynamicUsers));
+      }
+      localStorage.setItem(`connexode_user_track_${selectedStudentId}`, editStudentTrack);
+    }
+    setIsEditingStudent(false);
+    alert("Student record updated successfully!");
+  };
+
+  const handleDeleteStudent = (studentId: string) => {
+    if (!confirm("Are you sure you want to delete this student record? This cannot be undone.")) return;
+    const updatedUsers = allUsers.filter((u) => u.id !== studentId);
+    setAllUsers(updatedUsers);
+    if (typeof window !== "undefined") {
+      const dynamicUsers = JSON.parse(localStorage.getItem("connexode_dynamic_users") || "[]");
+      const filtered = dynamicUsers.filter((u: any) => u.id !== studentId);
+      localStorage.setItem("connexode_dynamic_users", JSON.stringify(filtered));
+      localStorage.removeItem(`connexode_user_track_${studentId}`);
+    }
+    setSelectedStudentId(null);
+    alert("Student record deleted successfully!");
+  };
+
+  const startManagingSubmission = (studentId: string, taskId: string, existingSub: Submission | undefined, taskPoints: number) => {
+    setSelectedTaskIdForSubmissionManagement(taskId);
+    if (existingSub) {
+      setSubStatus(existingSub.status);
+      setSubFeedback(existingSub.feedback || "");
+      setSubPoints(existingSub.points || taskPoints);
+      setSubGithubUrl(existingSub.githubUrl || "");
+      setSubLiveUrl(existingSub.liveUrl || "");
+      setSubLinkedinUrl(existingSub.linkedinUrl || "");
+    } else {
+      setSubStatus("APPROVED");
+      setSubFeedback("Manual grading by mentor.");
+      setSubPoints(taskPoints);
+      setSubGithubUrl("https://github.com/connexode-intern");
+      setSubLiveUrl("");
+      setSubLinkedinUrl("");
+    }
+  };
+
+  const handleSaveStudentSubmission = (studentId: string, taskId: string) => {
+    const existingSub = submissions.find((s) => s.userId === studentId && s.taskId === taskId);
+    let updatedSubs;
+
+    if (existingSub) {
+      updatedSubs = submissions.map((s) => {
+        if (s.id === existingSub.id) {
+          return {
+            ...s,
+            status: subStatus,
+            feedback: subFeedback,
+            points: Number(subPoints),
+            githubUrl: subGithubUrl,
+            liveUrl: subLiveUrl,
+            linkedinUrl: subLinkedinUrl,
+            reviewedAt: new Date().toISOString(),
+          };
+        }
+        return s;
+      });
+    } else {
+      const task = tasksList.find((t) => t.id === taskId);
+      const newSub: Submission = {
+        id: `sub_mentor_created_${Math.random().toString(36).substring(2, 9)}`,
+        userId: studentId,
+        taskId: taskId,
+        taskTitle: task?.title || "Custom Task",
+        status: subStatus,
+        feedback: subFeedback,
+        points: Number(subPoints),
+        githubUrl: subGithubUrl || "https://github.com/connexode-intern",
+        liveUrl: subLiveUrl || "",
+        linkedinUrl: subLinkedinUrl || "",
+        submittedAt: new Date().toISOString(),
+        reviewedAt: new Date().toISOString(),
+      };
+      updatedSubs = [newSub, ...submissions];
+    }
+
+    setSubmissions(updatedSubs);
+
+    if (typeof window !== "undefined") {
+      localStorage.setItem("connexode_custom_submissions", JSON.stringify(
+        updatedSubs.filter((s) => s.id.startsWith("sub_mentor_created_") || !SUBMISSIONS.some((orig) => orig.id === s.id))
+      ));
+    }
+
+    const student = allUsers.find((u) => u.id === studentId);
+    if (student) {
+      const studentAllSubs = updatedSubs.filter((s) => s.userId === studentId && s.status === "APPROVED");
+      const totalPoints = studentAllSubs.reduce((acc, curr) => acc + (curr.points || 0), 0);
+      
+      const updatedUsers = allUsers.map((u) => {
+        if (u.id === studentId) {
+          return { ...u, points: totalPoints };
+        }
+        return u;
+      });
+      setAllUsers(updatedUsers);
+      
+      if (typeof window !== "undefined") {
+        const dynamicUsers = JSON.parse(localStorage.getItem("connexode_dynamic_users") || "[]");
+        const idx = dynamicUsers.findIndex((u: any) => u.id === studentId);
+        if (idx !== -1) {
+          dynamicUsers[idx].points = totalPoints;
+          localStorage.setItem("connexode_dynamic_users", JSON.stringify(dynamicUsers));
+        }
+      }
+    }
+
+    setSelectedTaskIdForSubmissionManagement(null);
+    alert("Submission record saved successfully!");
+  };
+
+  const handleDeleteStudentSubmission = (studentId: string, taskId: string) => {
+    if (!confirm("Are you sure you want to delete this submission?")) return;
+    const updatedSubs = submissions.filter((s) => !(s.userId === studentId && s.taskId === taskId));
+    setSubmissions(updatedSubs);
+
+    if (typeof window !== "undefined") {
+      localStorage.setItem("connexode_custom_submissions", JSON.stringify(
+        updatedSubs.filter((s) => s.id.startsWith("sub_mentor_created_") || !SUBMISSIONS.some((orig) => orig.id === s.id))
+      ));
+    }
+
+    const student = allUsers.find((u) => u.id === studentId);
+    if (student) {
+      const studentAllSubs = updatedSubs.filter((s) => s.userId === studentId && s.status === "APPROVED");
+      const totalPoints = studentAllSubs.reduce((acc, curr) => acc + (curr.points || 0), 0);
+      
+      const updatedUsers = allUsers.map((u) => {
+        if (u.id === studentId) {
+          return { ...u, points: totalPoints };
+        }
+        return u;
+      });
+      setAllUsers(updatedUsers);
+      
+      if (typeof window !== "undefined") {
+        const dynamicUsers = JSON.parse(localStorage.getItem("connexode_dynamic_users") || "[]");
+        const idx = dynamicUsers.findIndex((u: any) => u.id === studentId);
+        if (idx !== -1) {
+          dynamicUsers[idx].points = totalPoints;
+          localStorage.setItem("connexode_dynamic_users", JSON.stringify(dynamicUsers));
+        }
+      }
+    }
+
+    setSelectedTaskIdForSubmissionManagement(null);
+    alert("Submission record deleted successfully!");
+  };
+
   const pendingCount = mentorSubmissions.filter((s) => s.status === "PENDING").length;
 
   if (!activeMentor) {
@@ -385,6 +680,8 @@ export default function MentorDashboard() {
             { id: "students", label: "Intern Records", icon: Users, badge: assignedStudents.length },
             { id: "curriculum", label: "Curriculum Editor", icon: BookOpen, badge: null },
             { id: "questions", label: "Student Questions", icon: MessageSquare, badge: questions.filter((q) => q.status === "PENDING" && assignedTrackIds.includes(q.trackId)).length || null, badgeAlert: true },
+            { id: "announcements", label: "Announcements Board", icon: Send, badge: null },
+            { id: "profile", label: "My Profile", icon: UserIcon, badge: null },
           ] as any[]).map(({ id, label, icon: Icon, badge, badgeAlert }) => (
             <button
               key={id}
@@ -414,9 +711,17 @@ export default function MentorDashboard() {
         {/* Bottom Profile Info + Logout */}
         <div className="px-4 py-4 border-t border-white/5 space-y-2">
           <div className="flex items-center gap-2.5 rounded-xl bg-white/4 border border-white/8 px-3 py-2.5">
-            <div className="h-8 w-8 rounded-full bg-cyan-500/20 flex items-center justify-center text-[11px] font-extrabold text-cyan-400">
-              {activeMentor?.avatarInitials || "MC"}
-            </div>
+            {activeMentor?.avatarImage ? (
+              <img
+                src={activeMentor.avatarImage}
+                alt="Profile"
+                className="h-8 w-8 rounded-full object-cover border border-cyan-400/30"
+              />
+            ) : (
+              <div className="h-8 w-8 rounded-full bg-cyan-500/20 flex items-center justify-center text-[11px] font-extrabold text-cyan-400">
+                {activeMentor?.avatarInitials || "MC"}
+              </div>
+            )}
             <div className="min-w-0">
               <p className="text-xs font-bold text-white truncate">{activeMentor?.name || "Mentor"}</p>
               <p className="text-[10px] text-slate-500 font-semibold">{activeMentor?.rank || "Expert Mentor"}</p>
@@ -446,12 +751,6 @@ export default function MentorDashboard() {
             </h1>
           </div>
           <div className="flex items-center gap-2">
-            <Link
-              href="/admin"
-              className="rounded-xl border border-purple-500/20 bg-purple-500/10 px-3.5 py-2 text-xs font-bold text-purple-400 hover:bg-purple-500/15 transition-all shadow-[0_0_15px_rgba(168,85,247,0.1)]"
-            >
-              Admin Panel →
-            </Link>
           </div>
         </header>
 
@@ -463,11 +762,61 @@ export default function MentorDashboard() {
             <section className="space-y-6">
               {/* Submissions Queue */}
               <div className="rounded-2xl border border-white/8 bg-white/4 p-5 backdrop-blur-xl flex flex-col max-h-[480px]">
-                <div className="mb-4 flex items-center justify-between">
-                  <h2 className="font-display text-base font-bold text-white flex items-center gap-2">
-                    <ClipboardCheck size={16} className="text-cyan-400" />
-                    Review Queue
-                  </h2>
+                <div className="mb-4 flex flex-col gap-2">
+                  <div className="flex items-center justify-between">
+                    <h2 className="font-display text-base font-bold text-white flex items-center gap-2">
+                      <ClipboardCheck size={16} className="text-cyan-400" />
+                      Review Queue
+                    </h2>
+                  </div>
+                  <div className="relative">
+                    <label className="block text-[10px] text-slate-500 font-semibold mb-1">Filter by Intern</label>
+                    <button
+                      type="button"
+                      onClick={() => setIsStudentFilterOpen(!isStudentFilterOpen)}
+                      className="w-full flex items-center justify-between rounded-xl border border-white/8 bg-[#080f1e] px-4 py-2.5 text-xs text-slate-200 outline-none hover:border-cyan-500/35 transition-all text-left"
+                    >
+                      <span>
+                        {selectedStudentFilterId === "ALL"
+                          ? "All Enrolled Interns"
+                          : assignedStudents.find((s) => s.id === selectedStudentFilterId)?.name || "All Enrolled Interns"}
+                      </span>
+                      <svg className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${isStudentFilterOpen ? "rotate-180" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </button>
+                    {isStudentFilterOpen && (
+                      <div className="absolute left-0 right-0 mt-2 rounded-xl border border-white/10 bg-[#080f1e]/95 backdrop-blur-xl shadow-2xl z-50 py-1 max-h-60 overflow-y-auto">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setSelectedStudentFilterId("ALL");
+                            setIsStudentFilterOpen(false);
+                          }}
+                          className={`w-full text-left px-4 py-2.5 text-xs transition-colors ${
+                            selectedStudentFilterId === "ALL" ? "bg-cyan-500/10 text-cyan-400 font-bold" : "text-slate-400 hover:bg-white/5 hover:text-white"
+                          }`}
+                        >
+                          All Enrolled Interns
+                        </button>
+                        {assignedStudents.map((s) => (
+                          <button
+                            key={s.id}
+                            type="button"
+                            onClick={() => {
+                              setSelectedStudentFilterId(s.id);
+                              setIsStudentFilterOpen(false);
+                            }}
+                            className={`w-full text-left px-4 py-2.5 text-xs transition-colors ${
+                              selectedStudentFilterId === s.id ? "bg-cyan-500/10 text-cyan-400 font-bold" : "text-slate-400 hover:bg-white/5 hover:text-white"
+                            }`}
+                          >
+                            {s.name} (@{s.username})
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 {/* Queue Filter Tabs */}
@@ -671,6 +1020,14 @@ export default function MentorDashboard() {
                   </h3>
 
                   <form onSubmit={handleReviewSubmit} className="space-y-4">
+                    {typeof window !== "undefined" && activeMentor && localStorage.getItem(`connexode_mentor_guidelines_${activeMentor.id}`) && (
+                      <div className="bg-purple-500/10 border border-purple-500/20 rounded-xl p-3.5 text-2xs text-purple-300 leading-relaxed mb-4">
+                        <span className="font-bold block uppercase tracking-wider text-purple-400 mb-1">
+                          🛈 Admin Review Guidance:
+                        </span>
+                        {localStorage.getItem(`connexode_mentor_guidelines_${activeMentor.id}`)}
+                      </div>
+                    )}
                     <div>
                       <label className="block text-xs font-semibold text-slate-400 mb-2">Grading Status</label>
                       <div className="flex gap-4">
@@ -816,37 +1173,237 @@ export default function MentorDashboard() {
                   <div className="space-y-6">
                     {/* Header info card */}
                     <div className="rounded-2xl border border-white/8 bg-white/4 p-6">
-                      <div className="flex items-start justify-between gap-4 flex-wrap">
-                        <div>
-                          <span className="text-[10px] font-bold text-cyan-400 uppercase tracking-widest block mb-1">
-                            Student Profile (Mentorship View)
-                          </span>
-                          <h2 className="font-display text-2xl font-extrabold text-white">{student?.name}</h2>
-                          <div className="mt-4 space-y-2 text-xs">
+                      {isEditingStudent ? (
+                        <form onSubmit={handleUpdateStudent} className="space-y-4 text-xs">
+                          <h3 className="text-sm font-bold text-white mb-2">Edit Intern Profile</h3>
+                          <div className="grid gap-4 sm:grid-cols-2">
                             <div>
-                              <span className="text-slate-500 font-bold block">Father's Name:</span>
-                              <span className="text-slate-200 text-sm font-semibold">
-                                {getStudentAppDetails(student?.id)?.fatherName || "Richard Johnson (Mock)"}
-                              </span>
+                              <label className="block text-slate-400 font-semibold mb-1">Full Name</label>
+                              <input
+                                type="text"
+                                required
+                                value={editStudentName}
+                                onChange={(e) => setEditStudentName(e.target.value)}
+                                className="w-full rounded-xl border border-white/8 bg-[#020B18] px-4 py-2 text-slate-200 outline-none focus:border-cyan-400"
+                              />
                             </div>
                             <div>
-                              <span className="text-slate-500 font-bold block">LinkedIn Profile:</span>
-                              {getStudentAppDetails(student?.id)?.projectsUrl ? (
-                                <a
-                                  href={getStudentAppDetails(student?.id).projectsUrl}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="text-cyan-400 font-semibold hover:underline"
-                                >
-                                  {getStudentAppDetails(student?.id).projectsUrl}
-                                </a>
-                              ) : (
-                                <span className="text-slate-500 italic">No LinkedIn/Projects URL provided</span>
-                              )}
+                              <label className="block text-slate-400 font-semibold mb-1">Email Address</label>
+                              <input
+                                type="email"
+                                required
+                                value={editStudentEmail}
+                                onChange={(e) => setEditStudentEmail(e.target.value)}
+                                className="w-full rounded-xl border border-white/8 bg-[#020B18] px-4 py-2 text-slate-200 outline-none focus:border-cyan-400"
+                              />
                             </div>
                           </div>
+
+                          <div className="grid gap-4 sm:grid-cols-3">
+                            <div>
+                            <div className="relative">
+                              <label className="block text-slate-400 font-semibold mb-1">Enrolled Track</label>
+                              <button
+                                type="button"
+                                onClick={() => setIsEditStudentTrackDropdownOpen(!isEditStudentTrackDropdownOpen)}
+                                className="w-full flex items-center justify-between gap-2 rounded-xl border border-white/8 bg-[#020B18] px-4 py-2 text-xs text-slate-200 outline-none hover:border-cyan-400 text-left font-semibold"
+                              >
+                                <span>{TRACKS.find((t) => t.id === editStudentTrack)?.title || "Select Track"}</span>
+                                <svg className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${isEditStudentTrackDropdownOpen ? "rotate-180" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                                </svg>
+                              </button>
+                              {isEditStudentTrackDropdownOpen && (
+                                <div className="absolute left-0 right-0 mt-2 rounded-xl border border-white/10 bg-[#080f1e]/95 backdrop-blur-xl shadow-2xl z-50 py-1 max-h-60 overflow-y-auto">
+                                  {TRACKS.map((t) => (
+                                    <button
+                                      key={t.id}
+                                      type="button"
+                                      onClick={() => {
+                                        setEditStudentTrack(t.id);
+                                        setIsEditStudentTrackDropdownOpen(false);
+                                      }}
+                                      className={`w-full text-left px-4 py-2.5 text-xs transition-colors ${
+                                        editStudentTrack === t.id ? "bg-cyan-500/10 text-cyan-400 font-bold" : "text-slate-400 hover:bg-white/5 hover:text-white"
+                                      }`}
+                                    >
+                                      {t.title}
+                                    </button>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                            </div>
+                            <div>
+                              <label className="block text-slate-400 font-semibold mb-1">Current Week</label>
+                              <input
+                                type="number"
+                                min="1"
+                                max="12"
+                                required
+                                value={editStudentWeek}
+                                onChange={(e) => setEditStudentWeek(Number(e.target.value))}
+                                className="w-full rounded-xl border border-white/8 bg-[#020B18] px-4 py-2 text-slate-200 outline-none focus:border-cyan-400"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-slate-400 font-semibold mb-1">Current Day</label>
+                              <input
+                                type="number"
+                                min="1"
+                                max="7"
+                                required
+                                value={editStudentDay}
+                                onChange={(e) => setEditStudentDay(Number(e.target.value))}
+                                className="w-full rounded-xl border border-white/8 bg-[#020B18] px-4 py-2 text-slate-200 outline-none focus:border-cyan-400"
+                              />
+                            </div>
+                          </div>
+
+                          <div className="grid gap-4 sm:grid-cols-2">
+                            <div>
+                              <label className="block text-slate-400 font-semibold mb-1">Points</label>
+                              <input
+                                type="number"
+                                required
+                                value={editStudentPoints}
+                                onChange={(e) => setEditStudentPoints(Number(e.target.value))}
+                                className="w-full rounded-xl border border-white/8 bg-[#020B18] px-4 py-2 text-slate-200 outline-none focus:border-cyan-400"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-slate-400 font-semibold mb-1">Rank</label>
+                              <input
+                                type="text"
+                                required
+                                value={editStudentRank}
+                                onChange={(e) => setEditStudentRank(e.target.value)}
+                                className="w-full rounded-xl border border-white/8 bg-[#020B18] px-4 py-2 text-slate-200 outline-none focus:border-cyan-400"
+                              />
+                            </div>
+                          </div>
+
+                          <div className="grid gap-4 sm:grid-cols-2">
+                            <div>
+                              <label className="block text-slate-400 font-semibold mb-1">Profile Image URL</label>
+                              <input
+                                type="text"
+                                value={editStudentAvatarImage}
+                                onChange={(e) => setEditStudentAvatarImage(e.target.value)}
+                                placeholder="https://example.com/avatar.png"
+                                className="w-full rounded-xl border border-white/8 bg-[#020B18] px-4 py-2 text-slate-200 outline-none focus:border-cyan-400"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-slate-400 font-semibold mb-1">Upload Profile Image (Max 1MB)</label>
+                              <label className="flex items-center justify-center w-full h-9 rounded-xl border border-dashed border-white/10 bg-[#020B18] hover:bg-white/5 hover:border-cyan-500/35 transition-all cursor-pointer group">
+                                <span className="text-2xs text-slate-400 group-hover:text-slate-300">Click to upload image</span>
+                                <input
+                                  type="file"
+                                  accept="image/*"
+                                  onChange={(e) => {
+                                    const file = e.target.files?.[0];
+                                    if (file) {
+                                      if (file.size > 1024 * 1024) {
+                                        alert("File size exceeds 1MB limit!");
+                                        e.target.value = "";
+                                        return;
+                                      }
+                                      const reader = new FileReader();
+                                      reader.onloadend = () => {
+                                        setEditStudentAvatarImage(reader.result as string);
+                                      };
+                                      reader.readAsDataURL(file);
+                                    }
+                                  }}
+                                  className="hidden"
+                                />
+                              </label>
+                            </div>
+                          </div>
+                          {editStudentAvatarImage && (
+                            <div className="mt-2 flex items-center gap-2 rounded-xl bg-white/4 border border-white/5 p-2 w-max">
+                              <img src={editStudentAvatarImage} alt="Preview" className="h-8 w-8 rounded-full object-cover border border-cyan-400/30" />
+                              <span className="text-[10px] text-slate-300">Image Loaded</span>
+                              <button type="button" onClick={() => setEditStudentAvatarImage("")} className="text-red-400 hover:text-red-300 text-[10px] font-bold ml-2">Remove</button>
+                            </div>
+                          )}
+
+                          <div className="flex gap-2 pt-2">
+                            <button
+                              type="submit"
+                              className="rounded-lg bg-cyan-500 px-4 py-2 text-2xs font-bold text-[#020B18] hover:scale-[1.01] transition-transform"
+                            >
+                              Save Student Changes
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setIsEditingStudent(false)}
+                              className="rounded-lg bg-white/5 border border-white/8 px-4 py-2 text-2xs text-slate-400 hover:text-white"
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        </form>
+                      ) : (
+                        <div className="flex items-start justify-between gap-4 flex-wrap">
+                          <div>
+                            <span className="text-[10px] font-bold text-cyan-400 uppercase tracking-widest block mb-1">
+                              Student Profile (Mentorship View)
+                            </span>
+                            <h2 className="font-display text-2xl font-extrabold text-white">{student?.name}</h2>
+                            <p className="text-xs text-slate-500">@{student?.username} · {student?.email}</p>
+                            <div className="mt-4 space-y-2 text-xs">
+                              <div>
+                                <span className="text-slate-500 font-bold block">Father's Name:</span>
+                                <span className="text-slate-200 text-sm font-semibold">
+                                  {getStudentAppDetails(student?.id)?.fatherName || "Richard Johnson (Mock)"}
+                                </span>
+                              </div>
+                              <div>
+                                <span className="text-slate-500 font-bold block">LinkedIn Profile:</span>
+                                {getStudentAppDetails(student?.id)?.projectsUrl ? (
+                                  <a
+                                    href={getStudentAppDetails(student?.id).projectsUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-cyan-400 font-semibold hover:underline"
+                                  >
+                                    {getStudentAppDetails(student?.id).projectsUrl}
+                                  </a>
+                                ) : (
+                                  <span className="text-slate-500 italic">No LinkedIn/Projects URL provided</span>
+                                )}
+                              </div>
+                              <div className="flex gap-6 mt-2 pt-2 border-t border-white/5">
+                                <div>
+                                  <span className="text-slate-500 font-bold block">Track:</span>
+                                  <span className="text-slate-300 font-semibold">{track?.title}</span>
+                                </div>
+                                <div>
+                                  <span className="text-slate-500 font-bold block">Progress:</span>
+                                  <span className="text-slate-300 font-semibold">Week {student?.currentWeek} · Day {student?.currentDay}</span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={() => student && startEditingStudent(student)}
+                              className="rounded-lg bg-cyan-500/10 border border-cyan-500/20 px-3.5 py-2 text-2xs font-bold text-cyan-400 hover:bg-cyan-500/15 transition-all"
+                            >
+                              Edit Profile
+                            </button>
+                            <button
+                              onClick={() => student && handleDeleteStudent(student.id)}
+                              className="rounded-lg bg-red-500/10 border border-red-500/20 px-3.5 py-2 text-2xs font-bold text-red-400 hover:bg-red-500/15 transition-all"
+                            >
+                              Delete Student
+                            </button>
+                          </div>
                         </div>
-                      </div>
+                      )}
                     </div>
 
                     {/* Timeline list of all tasks */}
@@ -859,7 +1416,8 @@ export default function MentorDashboard() {
                       <div className="space-y-4 max-h-[500px] overflow-y-auto pr-1">
                         {studentTasks.map((task) => {
                           const sub = studentSubs.find((s) => s.taskId === task.id);
-                          
+                          const isManagingThisTask = selectedTaskIdForSubmissionManagement === task.id;
+
                           return (
                             <div key={task.id} className="p-4 rounded-xl border border-white/8 bg-[#020B18]/50 space-y-3">
                               <div className="flex justify-between items-start flex-wrap gap-2">
@@ -869,20 +1427,155 @@ export default function MentorDashboard() {
                                   </span>
                                   <h4 className="text-xs font-bold text-white">{task.title}</h4>
                                 </div>
-                                <span className={`text-[10px] font-extrabold uppercase px-2 py-0.5 rounded ${
-                                  sub?.status === "APPROVED"
-                                    ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
-                                    : sub?.status === "PENDING"
-                                    ? "bg-blue-500/10 text-blue-400 border border-blue-500/20"
-                                    : sub?.status === "REJECTED"
-                                    ? "bg-red-500/10 text-red-400 border border-red-500/20"
-                                    : "bg-slate-500/10 text-slate-500 border border-slate-500/20"
-                                }`}>
-                                  {sub ? sub.status : "NO SUBMISSION"}
-                                </span>
+                                <div className="flex items-center gap-2">
+                                  <span className={`text-[10px] font-extrabold uppercase px-2 py-0.5 rounded ${
+                                    sub?.status === "APPROVED"
+                                      ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                                      : sub?.status === "PENDING"
+                                      ? "bg-blue-500/10 text-blue-400 border border-blue-500/20"
+                                      : sub?.status === "REJECTED"
+                                      ? "bg-red-500/10 text-red-400 border border-red-500/20"
+                                      : "bg-slate-500/10 text-slate-500 border border-slate-500/20"
+                                  }`}>
+                                    {sub ? sub.status : "NO SUBMISSION"}
+                                  </span>
+                                  <button
+                                    onClick={() => student && startManagingSubmission(student.id, task.id, sub, task.points)}
+                                    className="text-[9px] font-bold text-cyan-400 bg-cyan-500/10 border border-cyan-500/20 rounded px-1.5 py-0.5 hover:bg-cyan-500/15"
+                                  >
+                                    Manage
+                                  </button>
+                                </div>
                               </div>
 
-                              {sub ? (
+                              {isManagingThisTask && student && (
+                                <form
+                                  onSubmit={(e) => {
+                                    e.preventDefault();
+                                    handleSaveStudentSubmission(student.id, task.id);
+                                  }}
+                                  className="p-3.5 rounded-lg border border-cyan-500/20 bg-cyan-500/5 space-y-3 text-2xs"
+                                >
+                                  <h5 className="font-bold text-white text-xs">Manage Task Submission</h5>
+                                  
+                                  <div className="grid gap-3 sm:grid-cols-2">
+                                    <div>
+                                    <div className="relative">
+                                      <label className="block text-slate-400 font-semibold mb-1">Status</label>
+                                      <button
+                                        type="button"
+                                        onClick={() => setIsSubStatusDropdownOpen(!isSubStatusDropdownOpen)}
+                                        className="w-full flex items-center justify-between gap-1.5 rounded border border-white/10 bg-[#020B18] px-2 py-1 text-2xs text-slate-200 focus:border-cyan-400 text-left font-semibold"
+                                      >
+                                        <span>{subStatus}</span>
+                                        <svg className={`w-3 h-3 text-slate-400 transition-transform duration-200 ${isSubStatusDropdownOpen ? "rotate-180" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                                        </svg>
+                                      </button>
+                                      {isSubStatusDropdownOpen && (
+                                        <div className="absolute left-0 right-0 mt-1 rounded border border-white/10 bg-[#080f1e]/95 backdrop-blur-xl shadow-2xl z-50 py-1">
+                                          {(["APPROVED", "PENDING", "REJECTED"] as SubmissionStatus[]).map((st) => (
+                                            <button
+                                              key={st}
+                                              type="button"
+                                              onClick={() => {
+                                                setSubStatus(st);
+                                                setIsSubStatusDropdownOpen(false);
+                                              }}
+                                              className={`w-full text-left px-2 py-1 text-2xs transition-colors ${
+                                                subStatus === st ? "bg-cyan-500/10 text-cyan-400 font-bold" : "text-slate-400 hover:bg-white/5 hover:text-white"
+                                              }`}
+                                            >
+                                              {st}
+                                            </button>
+                                          ))}
+                                        </div>
+                                      )}
+                                    </div>
+                                    </div>
+                                    <div>
+                                      <label className="block text-slate-400 font-semibold mb-1">Points Graded</label>
+                                      <input
+                                        type="number"
+                                        required
+                                        value={subPoints}
+                                        onChange={(e) => setSubPoints(Number(e.target.value))}
+                                        className="w-full rounded border border-white/10 bg-[#020B18] px-2 py-1 text-slate-200 focus:border-cyan-400"
+                                      />
+                                    </div>
+                                  </div>
+
+                                  <div>
+                                    <label className="block text-slate-400 font-semibold mb-1">GitHub Repo URL</label>
+                                    <input
+                                      type="text"
+                                      required
+                                      value={subGithubUrl}
+                                      onChange={(e) => setSubGithubUrl(e.target.value)}
+                                      className="w-full rounded border border-white/10 bg-[#020B18] px-2 py-1 text-slate-200 focus:border-cyan-400"
+                                    />
+                                  </div>
+
+                                  <div className="grid gap-3 sm:grid-cols-2">
+                                    <div>
+                                      <label className="block text-slate-400 font-semibold mb-1">Live URL (Optional)</label>
+                                      <input
+                                        type="text"
+                                        value={subLiveUrl}
+                                        onChange={(e) => setSubLiveUrl(e.target.value)}
+                                        className="w-full rounded border border-white/10 bg-[#020B18] px-2 py-1 text-slate-200 focus:border-cyan-400"
+                                      />
+                                    </div>
+                                    <div>
+                                      <label className="block text-slate-400 font-semibold mb-1">LinkedIn Post URL (Optional)</label>
+                                      <input
+                                        type="text"
+                                        value={subLinkedinUrl}
+                                        onChange={(e) => setSubLinkedinUrl(e.target.value)}
+                                        className="w-full rounded border border-white/10 bg-[#020B18] px-2 py-1 text-slate-200 focus:border-cyan-400"
+                                      />
+                                    </div>
+                                  </div>
+
+                                  <div>
+                                    <label className="block text-slate-400 font-semibold mb-1">Remarks / Feedback</label>
+                                    <textarea
+                                      required
+                                      value={subFeedback}
+                                      onChange={(e) => setSubFeedback(e.target.value)}
+                                      rows={2}
+                                      className="w-full rounded border border-white/10 bg-[#020B18] px-2 py-1 text-slate-200 focus:border-cyan-400"
+                                    />
+                                  </div>
+
+                                  <div className="flex gap-2">
+                                    <button
+                                      type="submit"
+                                      className="rounded bg-cyan-500 px-3 py-1 text-2xs font-bold text-[#020B18] hover:scale-[1.01] transition-transform"
+                                    >
+                                      Save Submission
+                                    </button>
+                                    {sub && (
+                                      <button
+                                        type="button"
+                                        onClick={() => handleDeleteStudentSubmission(student.id, task.id)}
+                                        className="rounded bg-red-500/10 border border-red-500/20 px-3 py-1 text-2xs text-red-400 hover:bg-red-500/15 transition-all"
+                                      >
+                                        Delete Submission
+                                      </button>
+                                    )}
+                                    <button
+                                      type="button"
+                                      onClick={() => setSelectedTaskIdForSubmissionManagement(null)}
+                                      className="rounded bg-white/5 border border-white/10 px-3 py-1 text-2xs text-slate-400 hover:text-white"
+                                    >
+                                      Cancel
+                                    </button>
+                                  </div>
+                                </form>
+                              )}
+
+                              {!isManagingThisTask && sub && (
                                 <div className="space-y-2.5 pt-2.5 border-t border-white/5 text-xs">
                                   <div className="flex flex-wrap gap-x-4 gap-y-1.5">
                                     <a
@@ -916,6 +1609,7 @@ export default function MentorDashboard() {
                                         LinkedIn Link
                                       </a>
                                     )}
+                                    <span className="text-slate-500 font-semibold">Points: <span className="text-cyan-400">{sub.points} pts</span></span>
                                   </div>
 
                                   {sub.feedback && (
@@ -925,7 +1619,8 @@ export default function MentorDashboard() {
                                     </div>
                                   )}
                                 </div>
-                              ) : (
+                              )}
+                              {!isManagingThisTask && !sub && (
                                 <p className="text-[11px] text-slate-600 italic">This daily task has not been submitted by the student yet.</p>
                               )}
                             </div>
@@ -954,24 +1649,42 @@ export default function MentorDashboard() {
               </div>
               
               <div className="flex items-center gap-3">
-                <select
-                  value={selectedTrackIdForCurriculum}
-                  onChange={(e) => {
-                    setSelectedTrackIdForCurriculum(e.target.value);
-                    setEditingTask(null);
-                    setIsAddingTask(false);
-                  }}
-                  className="rounded-xl border border-white/8 bg-[#020B18] px-4 py-2.5 text-xs text-slate-200 outline-none focus:border-cyan-400"
-                >
-                  {TRACKS.filter((track) => assignedTrackIds.includes(track.id)).map((track) => (
-                    <option key={track.id} value={track.id}>
-                      {track.title}
-                    </option>
-                  ))}
-                  {assignedTrackIds.length === 0 && (
-                    <option value="">No assigned tracks</option>
+                <div className="relative">
+                  <button
+                    type="button"
+                    onClick={() => setIsTrackDropdownOpen(!isTrackDropdownOpen)}
+                    className="flex items-center justify-between gap-2 rounded-xl border border-white/8 bg-[#020B18] px-4 py-2.5 text-xs text-slate-200 outline-none hover:border-cyan-400 min-w-[200px] text-left font-semibold"
+                  >
+                    <span>{TRACKS.find((t) => t.id === selectedTrackIdForCurriculum)?.title || "Select Track"}</span>
+                    <svg className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${isTrackDropdownOpen ? "rotate-180" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+                  {isTrackDropdownOpen && (
+                    <div className="absolute right-0 mt-2 rounded-xl border border-white/10 bg-[#080f1e]/95 backdrop-blur-xl shadow-2xl z-50 py-1 max-h-60 overflow-y-auto min-w-[220px]">
+                      {TRACKS.filter((track) => assignedTrackIds.includes(track.id)).map((track) => (
+                        <button
+                          key={track.id}
+                          type="button"
+                          onClick={() => {
+                            setSelectedTrackIdForCurriculum(track.id);
+                            setEditingTask(null);
+                            setIsAddingTask(false);
+                            setIsTrackDropdownOpen(false);
+                          }}
+                          className={`w-full text-left px-4 py-2.5 text-xs transition-colors ${
+                            selectedTrackIdForCurriculum === track.id ? "bg-cyan-500/10 text-cyan-400 font-bold" : "text-slate-400 hover:bg-white/5 hover:text-white"
+                          }`}
+                        >
+                          {track.title}
+                        </button>
+                      ))}
+                      {assignedTrackIds.length === 0 && (
+                        <p className="px-4 py-2 text-xs text-slate-500 italic">No assigned tracks</p>
+                      )}
+                    </div>
                   )}
-                </select>
+                </div>
 
                 <button
                   onClick={() => {
@@ -1154,49 +1867,77 @@ export default function MentorDashboard() {
               </div>
             ) : (
               /* Outline day timeline list */
-              <div className="space-y-4 max-h-[600px] overflow-y-auto pr-1">
-                {tasksList
-                  .filter((t) => t.trackId === selectedTrackIdForCurriculum)
-                  .sort((a, b) => a.weekNo - b.weekNo || a.dayNo - b.dayNo)
-                  .map((task) => (
-                    <div
-                      key={task.id}
-                      className="p-4 rounded-xl border border-white/8 bg-white/4 flex justify-between items-start hover:bg-white/6 transition-all"
-                    >
-                      <div className="space-y-2">
-                        <span className="rounded-full bg-purple-500/10 border border-purple-500/20 px-2 py-0.5 text-[9px] font-bold text-purple-400">
-                          Week {task.weekNo} · Day {task.dayNo}
-                        </span>
-                        <h4 className="text-sm font-bold text-white mt-1.5">{task.title}</h4>
-                        <p className="text-xs text-slate-400 leading-relaxed max-w-xl">{task.taskDetails}</p>
-                        <div className="flex gap-4 text-[10px] text-slate-500">
-                          <span>Points: <span className="text-cyan-400 font-semibold">{task.points} pts</span></span>
-                          <span>Estimate: <span className="text-slate-300 font-semibold">{task.estimatedHours} hrs</span></span>
+              /* Outline day timeline list */
+              <div className="space-y-4">
+                {/* Week Tabs */}
+                <div className="flex flex-wrap gap-2 mb-4 bg-[#020B18]/60 p-2 rounded-2xl border border-white/5">
+                  {[1, 2, 3, 4, 5, 6, 7, 8].map((w) => {
+                    const weekTasks = tasksList.filter(
+                      (t) => t.trackId === selectedTrackIdForCurriculum && t.weekNo === w
+                    );
+                    const isActive = activeWeekForCurriculum === w;
+                    return (
+                      <button
+                        key={w}
+                        type="button"
+                        onClick={() => setActiveWeekForCurriculum(w)}
+                        className={`flex-1 min-w-[80px] text-center py-2 rounded-xl text-xs font-bold transition-all border ${
+                          isActive
+                            ? "bg-cyan-500/15 border-cyan-500/35 text-cyan-300 shadow-[0_0_12px_rgba(6,182,212,0.15)]"
+                            : "bg-white/4 border-transparent text-slate-400 hover:text-white"
+                        }`}
+                      >
+                        Week {w}
+                        <span className="block text-[9px] text-slate-500 font-semibold">{weekTasks.length} Days</span>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <div className="space-y-4 max-h-[500px] overflow-y-auto pr-1">
+                  {tasksList
+                    .filter((t) => t.trackId === selectedTrackIdForCurriculum && t.weekNo === activeWeekForCurriculum)
+                    .sort((a, b) => a.dayNo - b.dayNo)
+                    .map((task) => (
+                      <div
+                        key={task.id}
+                        className="p-4 rounded-xl border border-white/8 bg-white/4 flex justify-between items-start hover:bg-white/6 transition-all"
+                      >
+                        <div className="space-y-2">
+                          <span className="rounded-full bg-purple-500/10 border border-purple-500/20 px-2 py-0.5 text-[9px] font-bold text-purple-400">
+                            Week {task.weekNo} · Day {task.dayNo}
+                          </span>
+                          <h4 className="text-sm font-bold text-white mt-1.5">{task.title}</h4>
+                          <p className="text-xs text-slate-400 leading-relaxed max-w-xl">{task.taskDetails}</p>
+                          <div className="flex gap-4 text-[10px] text-slate-500">
+                            <span>Points: <span className="text-cyan-400 font-semibold">{task.points} pts</span></span>
+                            <span>Estimate: <span className="text-slate-300 font-semibold">{task.estimatedHours} hrs</span></span>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-1.5 ml-4">
+                          <button
+                            onClick={() => setEditingTask(task)}
+                            className="p-2 rounded-lg bg-white/5 border border-white/8 text-slate-400 hover:text-cyan-400 hover:bg-cyan-500/10 transition-all"
+                            title="Edit Task"
+                          >
+                            <Edit2 size={13} />
+                          </button>
+                          <button
+                            onClick={() => handleDeleteTask(task.id)}
+                            className="p-2 rounded-lg bg-white/5 border border-white/8 text-slate-400 hover:text-red-400 hover:bg-red-500/10 transition-all"
+                            title="Delete Task"
+                          >
+                            <Trash2 size={13} />
+                          </button>
                         </div>
                       </div>
+                    ))}
 
-                      <div className="flex items-center gap-1.5 ml-4">
-                        <button
-                          onClick={() => setEditingTask(task)}
-                          className="p-2 rounded-lg bg-white/5 border border-white/8 text-slate-400 hover:text-cyan-400 hover:bg-cyan-500/10 transition-all"
-                          title="Edit Task"
-                        >
-                          <Edit2 size={13} />
-                        </button>
-                        <button
-                          onClick={() => handleDeleteTask(task.id)}
-                          className="p-2 rounded-lg bg-white/5 border border-white/8 text-slate-400 hover:text-red-400 hover:bg-red-500/10 transition-all"
-                          title="Delete Task"
-                        >
-                          <Trash2 size={13} />
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-
-                {tasksList.filter((t) => t.trackId === selectedTrackIdForCurriculum).length === 0 && (
-                  <p className="text-center text-xs text-slate-600 py-12">No tasks defined for this track.</p>
-                )}
+                  {tasksList.filter((t) => t.trackId === selectedTrackIdForCurriculum && t.weekNo === activeWeekForCurriculum).length === 0 && (
+                    <p className="text-center text-xs text-slate-600 py-12">No tasks defined for this week.</p>
+                  )}
+                </div>
               </div>
             )}
           </div>
@@ -1282,6 +2023,313 @@ export default function MentorDashboard() {
               )}
             </div>
           </div>
+        )}
+        {activeTab === "announcements" && (
+          <div className="space-y-6 animate-fade-in text-xs">
+            <div className="flex justify-between items-center mb-2">
+              <div>
+                <h3 className="font-display text-lg font-bold text-white flex items-center gap-2">
+                  <Send size={20} className="text-cyan-400" />
+                  Track Announcements Board
+                </h3>
+                <p className="text-xs text-slate-400 mt-0.5">Post updates and notes visible to interns enrolled in your assigned tracks.</p>
+              </div>
+            </div>
+
+            {/* Form to Post Announcement */}
+            <div className="rounded-2xl border border-white/8 bg-white/4 p-6 backdrop-blur-xl space-y-4">
+              <h4 className="font-display text-sm font-bold text-white">Post New Announcement</h4>
+              <form onSubmit={handleAddAnnouncement} className="space-y-4">
+                <div className="relative z-20">
+                  <label className="block text-2xs font-bold uppercase tracking-wider text-slate-400 mb-1.5 font-semibold">Select Target Track</label>
+                  <button
+                    type="button"
+                    onClick={() => setIsTargetTrackDropdownOpen(!isTargetTrackDropdownOpen)}
+                    className="w-full flex items-center justify-between gap-2 rounded-xl border border-white/8 bg-[#020B18] px-4 py-2.5 text-xs text-slate-200 outline-none hover:border-cyan-400 text-left font-semibold"
+                  >
+                    <span>{TRACKS.find((t) => t.id === targetTrackId)?.title || "Select Track"}</span>
+                    <svg className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${isTargetTrackDropdownOpen ? "rotate-180" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+                  {isTargetTrackDropdownOpen && (
+                    <div className="absolute left-0 right-0 mt-2 rounded-xl border border-white/10 bg-[#080f1e]/95 backdrop-blur-xl shadow-2xl z-50 py-1">
+                      {assignedTracks.map((tr) => (
+                        <button
+                          key={tr.id}
+                          type="button"
+                          onClick={() => {
+                            setTargetTrackId(tr.id);
+                            setIsTargetTrackDropdownOpen(false);
+                          }}
+                          className={`w-full text-left px-4 py-2.5 text-xs transition-colors ${
+                            targetTrackId === tr.id ? "bg-cyan-500/10 text-cyan-400 font-bold" : "text-slate-400 hover:bg-white/5 hover:text-white"
+                          }`}
+                        >
+                          {tr.title}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                <div>
+                  <label className="block text-2xs font-bold uppercase tracking-wider text-slate-400 mb-1.5 font-semibold">Announcement Title</label>
+                  <input
+                    type="text"
+                    value={newAnnTitle}
+                    onChange={(e) => setNewAnnTitle(e.target.value)}
+                    placeholder="e.g. Week 2 Live Session Rescheduled or Important Deadline"
+                    className="w-full rounded-xl border border-white/8 bg-[#020B18] px-4 py-2.5 text-xs text-slate-200 outline-none focus:border-cyan-400"
+                  />
+                </div>
+                <div>
+                  <label className="block text-2xs font-bold uppercase tracking-wider text-slate-400 mb-1.5 font-semibold">Announcement Content</label>
+                  <textarea
+                    value={newAnnContent}
+                    onChange={(e) => setNewAnnContent(e.target.value)}
+                    placeholder="Enter detailed message details here..."
+                    rows={4}
+                    className="w-full rounded-xl border border-white/8 bg-[#020B18] px-4 py-2.5 text-xs text-slate-200 outline-none focus:border-cyan-400"
+                  />
+                </div>
+                <button
+                  type="submit"
+                  className="rounded-xl bg-cyan-500 px-5 py-2.5 text-xs font-bold text-[#020B18] hover:bg-cyan-400 transition-all flex items-center gap-2"
+                >
+                  <Plus size={14} /> Publish Track Announcement
+                </button>
+              </form>
+            </div>
+
+            {/* Active Announcements List */}
+            <div className="space-y-4">
+              <h4 className="font-display text-sm font-bold text-white">Active Track Announcements ({announcements.filter(a => a.authorRole === "MENTOR" && a.authorName === activeMentor.name).length})</h4>
+              <div className="grid gap-4">
+                {announcements.filter(a => a.authorRole === "MENTOR" && a.authorName === activeMentor.name).map((ann) => {
+                  const tr = TRACKS.find((t) => t.id === ann.targetTrackId);
+                  return (
+                    <div key={ann.id} className="rounded-xl border border-white/8 bg-white/3 p-5 flex justify-between items-start">
+                      <div className="space-y-1.5 max-w-2xl">
+                        <div className="flex items-center gap-2">
+                          <span className="rounded bg-cyan-500/10 border border-cyan-500/20 px-2 py-0.5 text-[9px] font-bold text-cyan-400 uppercase">
+                            TRACK: {tr?.title || "Assigned Track"}
+                          </span>
+                          <h5 className="font-bold text-white text-sm">{ann.title}</h5>
+                        </div>
+                        <p className="text-xs text-slate-300 leading-relaxed whitespace-pre-wrap">{ann.content}</p>
+                        <p className="text-[10px] text-slate-500 font-mono">Posted on {new Date(ann.createdAt).toLocaleString()} by You</p>
+                      </div>
+                      <button
+                        onClick={() => handleDeleteAnnouncement(ann.id)}
+                        className="rounded-lg bg-red-500/10 border border-red-500/20 p-2 text-red-400 hover:bg-red-500/20 transition-all"
+                        title="Delete Announcement"
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
+                  );
+                })}
+                {announcements.filter(a => a.authorRole === "MENTOR" && a.authorName === activeMentor.name).length === 0 && (
+                  <div className="rounded-xl border border-dashed border-white/8 p-8 text-center text-slate-500 text-xs italic">
+                    No active track announcements posted by you.
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* System Announcements from Admin */}
+            <div className="space-y-4 pt-4 border-t border-white/5">
+              <h4 className="font-display text-sm font-bold text-white flex items-center gap-1.5">
+                <ShieldAlert size={15} className="text-purple-400" />
+                System Announcements from Admin ({announcements.filter(a => a.authorRole === "ADMIN" && (a.targetAudience === "ALL" || a.targetAudience === "MENTOR")).length})
+              </h4>
+              <div className="grid gap-4">
+                {announcements.filter(a => a.authorRole === "ADMIN" && (a.targetAudience === "ALL" || a.targetAudience === "MENTOR")).map((ann) => (
+                  <div key={ann.id} className="rounded-xl border border-white/8 bg-purple-500/5 p-5">
+                    <div className="space-y-1.5">
+                      <div className="flex items-center gap-2">
+                        <span className="rounded bg-purple-500/20 px-2 py-0.5 text-[9px] font-bold text-purple-400 uppercase">
+                          TO: {ann.targetAudience || "ALL"}
+                        </span>
+                        <h5 className="font-bold text-white text-sm">{ann.title}</h5>
+                      </div>
+                      <p className="text-xs text-slate-300 leading-relaxed whitespace-pre-wrap">{ann.content}</p>
+                      <p className="text-[10px] text-slate-500 font-mono">Posted on {new Date(ann.createdAt).toLocaleString()} by Admin ({ann.authorName})</p>
+                    </div>
+                  </div>
+                ))}
+                {announcements.filter(a => a.authorRole === "ADMIN" && (a.targetAudience === "ALL" || a.targetAudience === "MENTOR")).length === 0 && (
+                  <div className="rounded-xl border border-dashed border-white/8 p-6 text-center text-slate-500 text-xs italic">
+                    No active announcements from administrator.
+                  </div>
+                )}
+              </div>
+            </div>
+
+          </div>
+        )}
+        {activeTab === "profile" && (
+          <section className="rounded-2xl border border-white/8 bg-white/4 p-6 sm:p-8 backdrop-blur-xl max-w-xl mx-auto space-y-6 animate-fade-in">
+            <div>
+              <h3 className="font-display text-lg font-bold text-white">Mentor Profile Settings</h3>
+              <p className="text-xs text-slate-500 mt-1">Manage and update your advisor/instructor profile details.</p>
+            </div>
+
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              if (typeof window !== "undefined") {
+                const dynamicUsers = JSON.parse(localStorage.getItem("connexode_dynamic_users") || "[]");
+                
+                const updatedMentor = {
+                  ...activeMentor,
+                  name: profileName,
+                  email: profileEmail,
+                  rank: profileRank,
+                  password: profilePassword,
+                  avatarImage: profileAvatarImage,
+                  avatarInitials: profileName.substring(0, 2).toUpperCase(),
+                };
+
+                const userIndex = dynamicUsers.findIndex((u: any) => u.id === activeMentor.id);
+                if (userIndex !== -1) {
+                  dynamicUsers[userIndex] = updatedMentor;
+                } else {
+                  dynamicUsers.push(updatedMentor);
+                }
+
+                localStorage.setItem("connexode_dynamic_users", JSON.stringify(dynamicUsers));
+                setActiveMentor(updatedMentor);
+                alert("Profile details updated successfully!");
+              }
+            }} className="space-y-4 text-xs">
+              <div>
+                <label className="block text-slate-400 font-semibold mb-1">Full Name</label>
+                <input
+                  type="text"
+                  required
+                  value={profileName}
+                  onChange={(e) => setProfileName(e.target.value)}
+                  className="w-full rounded-xl border border-white/8 bg-[#020B18] px-4 py-3 text-slate-200 outline-none focus:border-cyan-400"
+                />
+              </div>
+
+              <div>
+                <label className="block text-slate-400 font-semibold mb-1">Email Address</label>
+                <input
+                  type="email"
+                  required
+                  value={profileEmail}
+                  onChange={(e) => setProfileEmail(e.target.value)}
+                  className="w-full rounded-xl border border-white/8 bg-[#020B18] px-4 py-3 text-slate-200 outline-none focus:border-cyan-400"
+                />
+              </div>
+
+              <div>
+                <label className="block text-slate-400 font-semibold mb-1">Rank / Specialization</label>
+                <input
+                  type="text"
+                  required
+                  value={profileRank}
+                  onChange={(e) => setProfileRank(e.target.value)}
+                  className="w-full rounded-xl border border-white/8 bg-[#020B18] px-4 py-3 text-slate-200 outline-none focus:border-cyan-400"
+                />
+              </div>
+
+              <div>
+                <label className="block text-slate-400 font-semibold mb-1">Account Password</label>
+                <input
+                  type="password"
+                  required
+                  value={profilePassword}
+                  onChange={(e) => setProfilePassword(e.target.value)}
+                  className="w-full rounded-xl border border-white/8 bg-[#020B18] px-4 py-3 text-slate-200 outline-none focus:border-cyan-400"
+                />
+              </div>
+
+              <div>
+                <label className="block text-slate-400 font-semibold mb-1">Profile Image URL</label>
+                <input
+                  type="text"
+                  value={profileAvatarImage}
+                  onChange={(e) => setProfileAvatarImage(e.target.value)}
+                  placeholder="https://example.com/avatar.png"
+                  className="w-full rounded-xl border border-white/8 bg-[#020B18] px-4 py-3 text-slate-200 outline-none focus:border-cyan-400"
+                />
+              </div>
+
+              <div>
+                <label className="block text-slate-400 font-semibold mb-1.5">Upload Profile Image (Max 1MB)</label>
+                <label className="flex flex-col items-center justify-center w-full h-28 rounded-xl border-2 border-dashed border-white/10 bg-[#020B18]/50 hover:bg-[#020B18]/80 hover:border-cyan-500/35 transition-all cursor-pointer group">
+                  <div className="flex flex-col items-center justify-center pt-3 pb-3">
+                    <svg className="w-6 h-6 text-slate-500 group-hover:text-cyan-400 transition-colors mb-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                    </svg>
+                    <p className="text-2xs text-slate-400 group-hover:text-slate-300"><span className="font-semibold">Click to upload</span> or drag and drop</p>
+                    <p className="text-[10px] text-slate-600 mt-0.5">PNG, JPG or GIF (max. 1MB)</p>
+                  </div>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        if (file.size > 1024 * 1024) {
+                          alert("File size exceeds 1MB limit!");
+                          e.target.value = "";
+                          return;
+                        }
+                        const reader = new FileReader();
+                        reader.onloadend = () => {
+                          setProfileAvatarImage(reader.result as string);
+                        };
+                        reader.readAsDataURL(file);
+                      }
+                    }}
+                    className="hidden"
+                  />
+                </label>
+                {profileAvatarImage && (
+                  <div className="mt-3 flex items-center gap-3 rounded-xl bg-white/4 border border-white/5 p-3">
+                    <img src={profileAvatarImage} alt="Preview" className="h-10 w-10 rounded-full object-cover border border-cyan-400/30" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[10px] font-bold text-slate-300 truncate">Selected Avatar</p>
+                      <button
+                        type="button"
+                        onClick={() => setProfileAvatarImage("")}
+                        className="text-red-400 hover:text-red-300 font-semibold text-[10px] mt-0.5"
+                      >
+                        Remove Image
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="pt-4 flex gap-4">
+                <button
+                  type="submit"
+                  className="flex-1 rounded-xl bg-gradient-to-r from-cyan-500 to-teal-500 py-3.5 text-xs font-bold text-[#020B18] hover:scale-[1.01] transition-transform"
+                >
+                  Save Profile Changes
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (confirm("Are you sure you want to delete your mentor profile? This cannot be undone.")) {
+                      const dynamicUsers = JSON.parse(localStorage.getItem("connexode_dynamic_users") || "[]");
+                      const filtered = dynamicUsers.filter((u: any) => u.id !== activeMentor.id);
+                      localStorage.setItem("connexode_dynamic_users", JSON.stringify(filtered));
+                      localStorage.removeItem("connexode_active_user");
+                      window.location.href = "/register";
+                    }
+                  }}
+                  className="rounded-xl border border-red-500/20 bg-red-500/10 px-6 py-3.5 text-xs font-bold text-red-400 hover:bg-red-500/15 transition-all"
+                >
+                  Delete Account
+                </button>
+              </div>
+            </form>
+          </section>
         )}
       </main>
     </div>
