@@ -3,6 +3,8 @@ import Navbar from "@/components/layout/Navbar";
 import HeroSection from "@/components/landing/HeroSection";
 import TracksSection from "@/components/landing/TracksSection";
 import HowItWorksSection from "@/components/landing/HowItWorksSection";
+import CompanyDetailsSection from "@/components/landing/CompanyDetailsSection";
+import AmbassadorBenefitsSection from "@/components/landing/AmbassadorBenefitsSection";
 import TrustSection from "@/components/landing/TrustSection";
 import CTASection from "@/components/landing/CTASection";
 import Footer from "@/components/landing/Footer";
@@ -21,6 +23,8 @@ export default function HomePage() {
       <HeroSection />
       {/* <TracksSection /> */}
       {/* <HowItWorksSection /> */}
+      <CompanyDetailsSection />
+      <AmbassadorBenefitsSection />
       <TrustSection />
       <CTASection />
       <Footer />
