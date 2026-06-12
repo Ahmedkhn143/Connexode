@@ -1,125 +1,121 @@
 import { PrismaClient, Role, SubmissionStatus } from "@prisma/client";
 import { TRACKS, MOCK_USERS, WEEKLY_TASKS, BADGES, SUBMISSIONS } from "../lib/mock-data";
 
-const prisma = new PrismaClient();
+const prisma = new PrismaClient({
+  datasources: {
+    db: {
+      url: process.env.DIRECT_URL,
+    },
+  },
+});
 
 async function main() {
   console.log("Seeding database...");
 
-  // Seed Tracks
-  for (const track of TRACKS) {
-    await prisma.track.upsert({
-      where: { id: track.id },
-      update: {},
-      create: {
-        id: track.id,
-        title: track.title,
-        slug: track.slug,
-        description: track.description,
-        icon: track.icon,
-        color: track.color,
-        durationWeeks: track.durationWeeks,
-        isPublished: true,
-      },
-    });
-  }
+  // Delete all existing data to prevent primary key collisions on seeding
+  await prisma.submission.deleteMany();
+  await prisma.userBadge.deleteMany();
+  await prisma.badge.deleteMany();
+  await prisma.weeklyTask.deleteMany();
+  await prisma.enrollment.deleteMany();
+  await prisma.user.deleteMany();
+  await prisma.track.deleteMany();
+
+  // Create Tracks
+  await prisma.track.createMany({
+    data: TRACKS.map((t) => ({
+      id: t.id,
+      title: t.title,
+      slug: t.slug,
+      description: t.description,
+      icon: t.icon,
+      color: t.color,
+      durationWeeks: t.durationWeeks,
+      isPublished: true,
+    })),
+  });
   console.log("Tracks seeded.");
 
-  // Seed Users & Enrollments
-  for (const user of MOCK_USERS) {
-    await prisma.user.upsert({
-      where: { id: user.id },
-      update: {},
-      create: {
-        id: user.id,
-        name: user.name,
-        username: user.username,
-        email: user.email,
-        role: user.role as Role,
-        points: user.points,
-        createdAt: new Date(user.joinDate),
-      },
-    });
+  // Create Users
+  await prisma.user.createMany({
+    data: MOCK_USERS.map((u) => ({
+      id: u.id,
+      name: u.name,
+      username: u.username,
+      email: u.email,
+      role: u.role as Role,
+      points: u.points,
+      createdAt: new Date(u.joinDate),
+    })),
+  });
 
-    await prisma.enrollment.upsert({
-      where: { userId_trackId: { userId: user.id, trackId: user.enrolledTrackId } },
-      update: {},
-      create: {
-        userId: user.id,
-        trackId: user.enrolledTrackId,
-        status: "ACTIVE",
-      },
+  // Create Enrollments
+  const enrollmentsData = MOCK_USERS.filter((u) => u.enrolledTrackId).map((u) => ({
+    userId: u.id,
+    trackId: u.enrolledTrackId,
+    status: "ACTIVE" as const,
+  }));
+  if (enrollmentsData.length > 0) {
+    await prisma.enrollment.createMany({
+      data: enrollmentsData,
     });
   }
   console.log("Users and enrollments seeded.");
 
-  // Seed Weekly Tasks
-  for (const task of WEEKLY_TASKS) {
-    await prisma.weeklyTask.upsert({
-      where: { id: task.id },
-      update: {},
-      create: {
-        id: task.id,
-        trackId: task.trackId,
-        weekNo: task.weekNo,
-        dayNo: task.dayNo,
-        title: task.title,
-        taskDetails: task.taskDetails,
-        instructions: task.instructions,
-        estimatedHours: task.estimatedHours,
-        points: task.points,
-      },
-    });
-  }
+  // Create Weekly Tasks
+  await prisma.weeklyTask.createMany({
+    data: WEEKLY_TASKS.map((t) => ({
+      id: t.id,
+      trackId: t.trackId,
+      weekNo: t.weekNo,
+      dayNo: t.dayNo,
+      title: t.title,
+      taskDetails: t.taskDetails,
+      instructions: t.instructions,
+      estimatedHours: t.estimatedHours,
+      points: t.points,
+    })),
+  });
   console.log("Weekly tasks seeded.");
 
-  // Seed Badges
-  for (const badge of BADGES) {
-    await prisma.badge.upsert({
-      where: { id: badge.id },
-      update: {},
-      create: {
-        id: badge.id,
-        name: badge.name,
-        description: badge.description,
-        icon: badge.icon,
-        color: badge.color,
-      },
-    });
+  // Create Badges
+  await prisma.badge.createMany({
+    data: BADGES.map((b) => ({
+      id: b.id,
+      name: b.name,
+      description: b.description,
+      icon: b.icon,
+      color: b.color,
+    })),
+  });
 
-    // If earned by Alex Johnson (usr_001)
-    if (badge.earned) {
-      await prisma.userBadge.upsert({
-        where: { userId_badgeId: { userId: "usr_001", badgeId: badge.id } },
-        update: {},
-        create: {
-          userId: "usr_001",
-          badgeId: badge.id,
-          earnedAt: badge.earnedDate ? new Date(badge.earnedDate) : new Date(),
-        },
-      });
-    }
+  // Create User Badges
+  const userBadgesData = BADGES.filter((b) => b.earned).map((b) => ({
+    userId: "usr_001",
+    badgeId: b.id,
+    earnedAt: b.earnedDate ? new Date(b.earnedDate) : new Date(),
+  }));
+  if (userBadgesData.length > 0) {
+    await prisma.userBadge.createMany({
+      data: userBadgesData,
+    });
   }
   console.log("Badges seeded.");
 
-  // Seed Submissions
-  for (const sub of SUBMISSIONS) {
-    await prisma.submission.upsert({
-      where: { id: sub.id },
-      update: {},
-      create: {
-        id: sub.id,
-        userId: sub.userId,
-        taskId: sub.taskId,
-        githubUrl: sub.githubUrl,
-        liveUrl: sub.liveUrl,
-        status: sub.status as SubmissionStatus,
-        feedback: sub.feedback,
-        submittedAt: new Date(sub.submittedAt),
-        reviewedAt: sub.reviewedAt ? new Date(sub.reviewedAt) : null,
-      },
-    });
-  }
+  // Create Submissions
+  await prisma.submission.createMany({
+    data: SUBMISSIONS.map((sub) => ({
+      id: sub.id,
+      userId: sub.userId,
+      taskId: sub.taskId,
+      githubUrl: sub.githubUrl,
+      liveUrl: sub.liveUrl,
+      status: sub.status as SubmissionStatus,
+      feedback: sub.feedback,
+      submittedAt: new Date(sub.submittedAt),
+      reviewedAt: sub.reviewedAt ? new Date(sub.reviewedAt) : null,
+    })),
+  });
   console.log("Submissions seeded.");
   console.log("Seeding complete!");
 }

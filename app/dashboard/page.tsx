@@ -24,6 +24,7 @@ export default function DashboardPage() {
   const loadQuestions = () => {
     if (typeof window !== "undefined") {
       const activeUserObj = getActiveUser();
+      if (!activeUserObj) return;
       const stored = localStorage.getItem("connexode_qa_tickets");
       if (stored) {
         try {
@@ -38,8 +39,12 @@ export default function DashboardPage() {
 
   useEffect(() => {
     const user = getActiveUser();
+    if (!user) {
+      window.location.href = "/register";
+      return;
+    }
     setActiveUser(user);
-    if (user && user.enrolledTrackId) {
+    if (user.enrolledTrackId) {
       setPaymentStatusState(getPaymentStatus(user.enrolledTrackId, user.id));
     }
   }, []);

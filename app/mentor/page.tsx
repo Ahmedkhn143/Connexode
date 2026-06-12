@@ -82,7 +82,12 @@ export default function MentorDashboard() {
   const [allUsers, setAllUsers] = useState<User[]>(MOCK_USERS);
 
   useEffect(() => {
-    setActiveMentor(getActiveUser());
+    const user = getActiveUser();
+    if (!user || user.role !== "MENTOR") {
+      window.location.href = "/register";
+      return;
+    }
+    setActiveMentor(user);
     setTasksList(WEEKLY_TASKS);
     
     // Load local storage custom submissions

@@ -12,6 +12,7 @@ import {
   editTask,
   deleteTask,
   setPaymentStatus,
+  getActiveUser,
   type Track,
   type WeeklyTask,
   type User,
@@ -51,7 +52,12 @@ export default function AdminDashboard() {
   const [activeAdmin, setActiveAdmin] = useState<User | null>(null);
 
   useEffect(() => {
-    setActiveAdmin(MOCK_USERS.find((u) => u.role === "ADMIN") || null);
+    const user = getActiveUser();
+    if (!user || user.role !== "ADMIN") {
+      window.location.href = "/register";
+      return;
+    }
+    setActiveAdmin(user);
     setTasksList(WEEKLY_TASKS);
     setLogsList(MOCK_TASK_EDIT_LOGS);
 

@@ -12,7 +12,12 @@ export default function DashboardLayout({
   const [activeUser, setActiveUser] = useState<User | null>(null);
 
   useEffect(() => {
-    setActiveUser(getActiveUser());
+    const user = getActiveUser();
+    if (!user) {
+      window.location.href = "/register";
+    } else {
+      setActiveUser(user);
+    }
   }, []);
 
   if (!activeUser) {

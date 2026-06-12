@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import { CheckCircle2, Loader2, ArrowLeft, ShieldCheck, Wallet, ArrowRight, Upload, AlertCircle, Clock, FileText, Building2, Smartphone, User as UserIcon } from "lucide-react";
-import { TRACKS, setPaymentStatus, enrollUserInTrack, getActiveUser } from "@/lib/mock-data";
+import { TRACKS, setPaymentStatus, enrollUserInTrack, getActiveUser, type User } from "@/lib/mock-data";
 import { cn } from "@/lib/utils";
 
 const PAK_UNIVERSITIES = [
@@ -36,6 +36,17 @@ export default function CheckoutPage() {
 
   const track = TRACKS.find((t) => t.id === trackId);
   
+  const [activeUser, setActiveUser] = useState<User | null>(null);
+
+  useEffect(() => {
+    const user = getActiveUser();
+    if (!user) {
+      window.location.href = "/register";
+    } else {
+      setActiveUser(user);
+    }
+  }, []);
+  
   // Form Fields
   const [fullName, setFullName] = useState("Alex Johnson");
   const [fatherName, setFatherName] = useState("Richard Johnson");
@@ -64,6 +75,14 @@ export default function CheckoutPage() {
   const [state, setState] = useState<"idle" | "pending_approval">("idle");
 
   const price = 500; // Rs. 500 (one-time fee for 2 months)
+
+  if (!activeUser) {
+    return (
+      <div className="min-h-screen bg-[#020B18] text-slate-100 flex items-center justify-center">
+        <div className="h-6 w-6 animate-spin rounded-full border-2 border-cyan-400 border-t-transparent" />
+      </div>
+    );
+  }
 
   if (!track) {
     return (
@@ -165,12 +184,11 @@ export default function CheckoutPage() {
 
     // Submit
     try {
-      const activeUserObj = getActiveUser();
       const pending = JSON.parse(localStorage.getItem("connexode_manual_payments") || "[]");
       const filtered = pending.filter((p: any) => p.trackId !== trackId);
       filtered.push({
         id: `tx_${Math.random().toString(36).substring(2, 9)}`,
-        userId: activeUserObj.id,
+        userId: activeUser.id,
         trackId,
         trackTitle: track.title,
         userName: fullName,
@@ -195,7 +213,7 @@ export default function CheckoutPage() {
         submittedAt: new Date().toISOString(),
       });
       localStorage.setItem("connexode_manual_payments", JSON.stringify(filtered));
-      setPaymentStatus(trackId, "PAID", activeUserObj.id);
+      setPaymentStatus(trackId, "PAID", activeUser.id);
       enrollUserInTrack(trackId);
       setState("pending_approval");
     } catch (err) {

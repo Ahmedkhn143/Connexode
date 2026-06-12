@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import CustomCursor from "@/components/ui/CustomCursor";
-import RoleSwitcher from "@/components/layout/RoleSwitcher";
 
 export const metadata: Metadata = {
   title: "Connexode — Virtual Internship & Learning Platform",
@@ -35,7 +34,6 @@ export default function RootLayout({
       </head>
       <body className="min-h-full antialiased" suppressHydrationWarning>
         <CustomCursor />
-        <RoleSwitcher />
         {children}
       </body>
     </html>

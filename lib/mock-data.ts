@@ -164,7 +164,7 @@ export const MOCK_CERTIFICATES: Certificate[] = [
 export const ACTIVE_USER_ID = "usr_001";
 export const MOCK_USER = MOCK_USERS.find((user) => user.id === ACTIVE_USER_ID)!;
 
-export const getActiveUser = (): User => {
+export const getActiveUser = (): User | null => {
   if (typeof window !== "undefined") {
     const saved = localStorage.getItem("connexode_active_user");
     if (saved) {
@@ -197,14 +197,7 @@ export const getActiveUser = (): User => {
       }
     }
   }
-  const defaultUser = MOCK_USERS.find((u) => u.id === ACTIVE_USER_ID)!;
-  if (typeof window !== "undefined") {
-    const trackSaved = localStorage.getItem(`connexode_user_track_${defaultUser.id}`);
-    if (trackSaved) {
-      return { ...defaultUser, enrolledTrackId: trackSaved };
-    }
-  }
-  return defaultUser;
+  return null;
 };
 
 export const getTrackMentor = (trackId: string): User | null => {
@@ -242,7 +235,9 @@ export const setActiveUser = (id: string) => {
 export const enrollUserInTrack = (trackId: string) => {
   if (typeof window !== "undefined") {
     const activeUser = getActiveUser();
-    localStorage.setItem(`connexode_user_track_${activeUser.id}`, trackId);
+    if (activeUser) {
+      localStorage.setItem(`connexode_user_track_${activeUser.id}`, trackId);
+    }
   }
 };
 
