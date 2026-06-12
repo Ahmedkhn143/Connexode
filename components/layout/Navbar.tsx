@@ -16,6 +16,9 @@ export default function Navbar() {
 
     // Load active user
     if (typeof window !== "undefined") {
+      if (window.location.pathname === "/") {
+        localStorage.removeItem("connexode_active_user");
+      }
       const activeUserId = localStorage.getItem("connexode_active_user");
       if (activeUserId) {
         // Check dynamic users first
