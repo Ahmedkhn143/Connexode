@@ -6,12 +6,12 @@ import { motion } from "framer-motion";
 import { ArrowRight, Sparkles, Terminal } from "lucide-react";
 
 const TYPEWRITER_WORDS = [
-  "Full Stack Web Dev",
-  "AI Engineering",
-  "n8n Automation",
-  "DevOps & Cloud",
-  "Data Analytics",
-  "Cybersecurity",
+  "Developer Leadership",
+  "Campus Tech Events",
+  "Peer Mentorship",
+  "Open Source Growth",
+  "Technical Advocacy",
+  "Community Building",
 ];
 
 const TERMINAL_LINES = [

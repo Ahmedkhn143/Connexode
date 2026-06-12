@@ -3,17 +3,17 @@ import "./globals.css";
 import CustomCursor from "@/components/ui/CustomCursor";
 
 export const metadata: Metadata = {
-  title: "Connexode — Virtual Internship & Learning Platform",
+  title: "Connexode — Tech Campus Ambassador & Developer Network",
   description:
-    "Build real skills through structured daily tasks, GitHub project submissions, and industry-verified certificates. Choose from 6 tech tracks: Full Stack, AI, DevOps, and more.",
+    "Empowering student tech leaders to run developer communities, organize workshops, and build real-world peer networks on campuses.",
   keywords: [
-    "virtual internship", "tech learning", "full stack development",
-    "AI engineering", "student projects", "coding bootcamp", "online internship",
+    "campus ambassador", "tech leadership", "developer community",
+    "student network", "peer learning", "coding community", "developer advocate",
   ],
   openGraph: {
-    title: "Connexode — Build Real Skills. Get Real Experience.",
+    title: "Connexode — Empowering Campuses, Fostering Innovation",
     description:
-      "A premium task-based internship platform. Study, build, submit, and get certified — no videos, just real work.",
+      "A premium tech network for campus ambassadors and developer communities. Lead workshops, build connections, and get certified.",
     type: "website",
   },
 };

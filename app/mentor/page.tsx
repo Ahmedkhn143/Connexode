@@ -121,18 +121,16 @@ export default function MentorDashboard() {
   const [profileAvatarImage, setProfileAvatarImage] = useState("");
 
   useEffect(() => {
-    const user = getActiveUser();
-    if (!user || user.role !== "MENTOR") {
-      window.location.href = "/register";
-      return;
+    // Redirect to home since mentorship is currently inactive
+    if (typeof window !== "undefined") {
+      window.location.href = "/";
     }
-    setActiveMentor(user);
-    setTasksList(WEEKLY_TASKS);
+    return;
     
     // Load local storage custom submissions
     if (typeof window !== "undefined") {
       const localSubs = localStorage.getItem("connexode_custom_submissions");
-      const parsed = localSubs ? JSON.parse(localSubs) : [];
+      const parsed = localSubs ? JSON.parse(localSubs || "[]") : [];
       // Combine seed submissions with local storage ones, ensuring no duplicate IDs
       const combined = [...parsed, ...SUBMISSIONS].reduce((acc: Submission[], item: Submission) => {
         if (!acc.some((s) => s.id === item.id)) {
@@ -146,7 +144,7 @@ export default function MentorDashboard() {
       const dynamicUsersRaw = localStorage.getItem("connexode_dynamic_users");
       if (dynamicUsersRaw) {
         try {
-          const dynamicUsers = JSON.parse(dynamicUsersRaw);
+          const dynamicUsers = JSON.parse(dynamicUsersRaw || "[]");
           const combinedUsers = [...dynamicUsers, ...MOCK_USERS].reduce((acc: User[], u: User) => {
             if (!acc.some((x) => x.id === u.id)) {
               const trackSaved = localStorage.getItem(`connexode_user_track_${u.id}`);

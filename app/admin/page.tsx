@@ -24,7 +24,7 @@ import Link from "next/link";
 type Tab = "students" | "mentors" | "tracks" | "audits" | "curriculum" | "payments" | "mentor_applications" | "ambassador_applications" | "announcements";
 
 export default function AdminDashboard() {
-  const [activeTab, setActiveTab] = useState<Tab>("students");
+  const [activeTab, setActiveTab] = useState<Tab>("ambassador_applications");
   const [tracks, setTracks] = useState<Track[]>(TRACKS);
   const [tasksList, setTasksList] = useState<WeeklyTask[]>([]);
   const [logsList, setLogsList] = useState(MOCK_TASK_EDIT_LOGS);
@@ -33,6 +33,7 @@ export default function AdminDashboard() {
   const [selectedApplication, setSelectedApplication] = useState<any | null>(null);
   const [mentorApplications, setMentorApplications] = useState<any[]>([]);
   const [ambassadorApplications, setAmbassadorApplications] = useState<any[]>([]);
+  const [outreachSubmissions, setOutreachSubmissions] = useState<any[]>([]);
 
   // Detailed Modal/View States
   const [selectedStudentDetailId, setSelectedStudentDetailId] = useState<string | null>(null);
@@ -183,6 +184,16 @@ export default function AdminDashboard() {
       if (storedAmb) {
         try {
           setAmbassadorApplications(JSON.parse(storedAmb));
+        } catch (e) {
+          console.error(e);
+        }
+      }
+
+      // Load outreach logs
+      const storedOutreach = localStorage.getItem("connexode_outreach_submissions");
+      if (storedOutreach) {
+        try {
+          setOutreachSubmissions(JSON.parse(storedOutreach));
         } catch (e) {
           console.error(e);
         }
@@ -377,6 +388,47 @@ export default function AdminDashboard() {
     alert(`❌ Campus Ambassador Application for ${app.fullName} REJECTED.`);
   };
 
+  const handleApproveOutreach = (subId: string) => {
+    const subs = [...outreachSubmissions];
+    const subIndex = subs.findIndex((s) => s.id === subId);
+    if (subIndex === -1) return;
+
+    const sub = subs[subIndex];
+    sub.status = "APPROVED";
+
+    let rewardPoints = 100;
+    if (sub.taskLabel.includes("Task B")) rewardPoints = 300;
+    else if (sub.taskLabel.includes("Task C")) rewardPoints = 200;
+    else if (sub.taskLabel.includes("Task D")) rewardPoints = 150;
+
+    sub.pointsEarned = rewardPoints;
+
+    setOutreachSubmissions(subs);
+    localStorage.setItem("connexode_outreach_submissions", JSON.stringify(subs));
+
+    // Update dynamic user points
+    const dynamicUsers = JSON.parse(localStorage.getItem("connexode_dynamic_users") || "[]");
+    const uIndex = dynamicUsers.findIndex((u: any) => u.email.toLowerCase() === sub.email.toLowerCase());
+    if (uIndex !== -1) {
+      dynamicUsers[uIndex].points = (dynamicUsers[uIndex].points || 0) + rewardPoints;
+      localStorage.setItem("connexode_dynamic_users", JSON.stringify(dynamicUsers));
+    }
+
+    alert(`✅ Verified outreach log for ${sub.fullName}! Ambassador rewarded with +${rewardPoints} PTS.`);
+  };
+
+  const handleRejectOutreach = (subId: string) => {
+    const subs = [...outreachSubmissions];
+    const subIndex = subs.findIndex((s) => s.id === subId);
+    if (subIndex === -1) return;
+
+    subs[subIndex].status = "REJECTED";
+    setOutreachSubmissions(subs);
+    localStorage.setItem("connexode_outreach_submissions", JSON.stringify(subs));
+
+    alert(`❌ Rejected outreach activity log for ${subs[subIndex].fullName}.`);
+  };
+
   const handleRejectPayment = (txId: string, trackId: string) => {
     const payment = payments.find((p) => p.id === txId);
     const userId = payment ? payment.userId : undefined;
@@ -533,6 +585,7 @@ export default function AdminDashboard() {
         {/* Nav Items */}
         <nav className="flex-1 px-3 py-3 space-y-1 overflow-y-auto">
           {([
+            /*
             { id: "students", label: "Enrolled Interns", icon: Users, badge: totalStudents },
             { id: "mentors", label: "Mentor Performance", icon: GraduationCap, badge: mentors.length },
             { id: "tracks", label: "Curriculum Tracks", icon: GitBranch, badge: totalTracks },
@@ -540,6 +593,7 @@ export default function AdminDashboard() {
             { id: "audits", label: "Audit Feed", icon: History, badge: null },
             { id: "payments", label: "Approvals Queue", icon: Clock, badge: payments.filter((p) => p.status === "PENDING").length || null, badgeAlert: true },
             { id: "mentor_applications", label: "Mentor Applications", icon: GraduationCap, badge: mentorApplications.filter((a) => a.status === "PENDING").length || null, badgeAlert: true },
+            */
             { id: "ambassador_applications", label: "Ambassador Apps", icon: Star, badge: ambassadorApplications.filter((a) => a.status === "PENDING").length || null, badgeAlert: true },
             { id: "announcements", label: "Announcements Board", icon: ShieldAlert, badge: null },
           ] as any[]).map(({ id, label, icon: Icon, badge, badgeAlert }) => (
@@ -1900,11 +1954,20 @@ export default function AdminDashboard() {
                   <tbody className="divide-y divide-white/8">
                     {ambassadorApplications.map((app) => (
                       <tr key={app.id} className="hover:bg-white/4 transition-colors">
-                        <td className="px-6 py-4 font-semibold text-white">
-                          <div>
-                            <p>{app.fullName}</p>
-                            <p className="text-[10px] text-slate-500 font-mono mt-0.5">{app.email}</p>
-                            <p className="text-[10px] text-slate-500 font-mono">{app.phone}</p>
+                        <td className="px-6 py-4 font-semibold text-white animate-fade-in">
+                          <div className="flex items-center gap-3">
+                            {app.avatarImage ? (
+                              <img src={app.avatarImage} alt={app.fullName} className="h-10 w-10 rounded-full object-cover border border-white/10 shrink-0" />
+                            ) : (
+                              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-cyan-500 to-teal-500 text-xs font-extrabold text-[#020B18] shrink-0">
+                                {app.fullName?.substring(0, 2).toUpperCase()}
+                              </div>
+                            )}
+                            <div>
+                              <p>{app.fullName}</p>
+                              <p className="text-[10px] text-slate-500 font-mono mt-0.5">{app.email}</p>
+                              <p className="text-[10px] text-slate-500 font-mono">{app.phone}</p>
+                            </div>
                           </div>
                         </td>
                         <td className="px-6 py-4">
@@ -1977,6 +2040,87 @@ export default function AdminDashboard() {
                     )}
                   </tbody>
                 </table>
+              </div>
+
+              {/* Outreach Activity Verification Logs */}
+              <div className="mt-8 pt-8 border-t border-white/5 space-y-4">
+                <h3 className="font-display text-lg font-bold text-white flex items-center gap-2">
+                  <CheckCircle2 className="text-cyan-400" size={20} />
+                  Ambassador Outreach Logs Verification Queue
+                </h3>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-sm text-slate-300">
+                    <thead className="bg-white/4 text-xs font-semibold uppercase tracking-wider text-slate-400 border-b border-white/8">
+                      <tr>
+                        <th className="px-6 py-4">Ambassador</th>
+                        <th className="px-6 py-4">Task Type</th>
+                        <th className="px-6 py-4">Activity Title</th>
+                        <th className="px-6 py-4">Proof Link</th>
+                        <th className="px-6 py-4 text-center">Peers Reached</th>
+                        <th className="px-6 py-4">Status</th>
+                        <th className="px-6 py-4 text-right">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-white/8">
+                      {outreachSubmissions.map((sub) => (
+                        <tr key={sub.id} className="hover:bg-white/4 transition-colors">
+                          <td className="px-6 py-4 font-semibold text-white">
+                            <div>
+                              <p>{sub.fullName}</p>
+                              <p className="text-[10px] text-slate-500 font-mono">{sub.email}</p>
+                            </div>
+                          </td>
+                          <td className="py-4 px-6 text-xs text-slate-400 max-w-[150px] truncate">{sub.taskLabel}</td>
+                          <td className="py-4 px-6 font-bold text-white">{sub.title}</td>
+                          <td className="py-4 px-6">
+                            <a href={sub.proofUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-cyan-400 hover:underline">
+                              View Proof
+                            </a>
+                          </td>
+                          <td className="py-4 px-6 text-center font-mono">{sub.peersReached}</td>
+                          <td className="py-4 px-6">
+                            <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold ${
+                              sub.status === "APPROVED"
+                                ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                                : sub.status === "REJECTED"
+                                ? "bg-red-500/10 text-red-400 border border-red-500/20"
+                                : "bg-yellow-500/10 text-yellow-500 border border-yellow-500/20"
+                            }`}>
+                              {sub.status}
+                            </span>
+                          </td>
+                          <td className="py-4 px-6 text-right">
+                            <div className="flex justify-end gap-2">
+                              {sub.status === "PENDING" && (
+                                <>
+                                  <button
+                                    onClick={() => handleApproveOutreach(sub.id)}
+                                    className="rounded-lg bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 text-xs font-bold text-emerald-400 hover:bg-emerald-500/20 transition-all"
+                                  >
+                                    Verify
+                                  </button>
+                                  <button
+                                    onClick={() => handleRejectOutreach(sub.id)}
+                                    className="rounded-lg bg-red-500/10 border border-red-500/20 px-2.5 py-1 text-xs font-bold text-red-400 hover:bg-red-500/20 transition-all"
+                                  >
+                                    Reject
+                                  </button>
+                                </>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                      {outreachSubmissions.length === 0 && (
+                        <tr>
+                          <td colSpan={7} className="text-center text-xs text-slate-500 py-12">
+                            No outreach submission logs waiting for review.
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             </div>
           )}

@@ -34,9 +34,10 @@ export default function WelcomeBanner() {
     sessionStorage.removeItem("connexode_just_registered");
   };
 
-  const handleScrollToTracks = () => {
-    const el = document.getElementById("tracks");
-    if (el) el.scrollIntoView({ behavior: "smooth" });
+  const handleRedirectToAmbassador = () => {
+    if (typeof window !== "undefined") {
+      window.location.href = "/ambassador";
+    }
     handleDismiss();
   };
 
@@ -59,14 +60,14 @@ export default function WelcomeBanner() {
             🎉 Welcome to Connexode{userName ? `, ${userName.split(" ")[0]}` : ""}!
           </p>
           <p className="text-xs text-slate-400 leading-relaxed">
-            Your account is ready. Scroll down to browse internship tracks and apply to one that matches your goals.
+            Your account is ready. Get started by joining the premium Campus Ambassador Program to build your network and lead.
           </p>
           <button
-            onClick={handleScrollToTracks}
+            onClick={handleRedirectToAmbassador}
             className="mt-3 flex items-center gap-1.5 rounded-xl bg-emerald-500/15 border border-emerald-500/25 px-4 py-2 text-xs font-bold text-emerald-400 hover:bg-emerald-500/25 transition-all"
           >
             <ArrowDown size={12} />
-            Browse Internship Tracks
+            Apply to Ambassador Program
           </button>
         </div>
 

@@ -44,9 +44,9 @@ export default function DashboardLayout({
         <div className="flex items-center justify-between border-b border-white/8 bg-[#020B18]/80 px-8 py-4 backdrop-blur-xl sticky top-0 z-10">
           <div>
             <h1 className="font-display text-sm font-semibold text-slate-300">
-              Full Stack Web Dev — Week 1
+              Campus Ambassador Workspace
             </h1>
-            <p className="text-xs text-slate-600">Track your daily progress below</p>
+            <p className="text-xs text-slate-600">Manage your university campaigns</p>
           </div>
           <div className="flex items-center gap-3">
             {activeUser.avatarImage ? (

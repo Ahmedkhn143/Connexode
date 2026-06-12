@@ -151,9 +151,9 @@ export default function RegisterForm({ initialSignUp = false }: { initialSignUp?
         // Flag for WelcomeBanner on landing page
         sessionStorage.setItem("connexode_just_registered", "1");
 
-        setSuccess("Account created! Redirecting to Ambassador application...");
+        setSuccess("Account created! Redirecting to Homepage...");
         setTimeout(() => {
-          router.push("/ambassador");
+          window.location.href = "/";
         }, 800);
       } catch (err) {
         console.error(err);
@@ -228,8 +228,8 @@ export default function RegisterForm({ initialSignUp = false }: { initialSignUp?
           setSuccess("Welcome back! Redirecting to your Dashboard...");
           setTimeout(() => { router.push("/dashboard"); }, 900);
         } else {
-          setSuccess("Logged in! Redirecting to Ambassador Program...");
-          setTimeout(() => { router.push("/ambassador"); }, 900);
+          setSuccess("Logged in! Redirecting to Dashboard...");
+          setTimeout(() => { router.push("/dashboard"); }, 900);
         }
         return;
       }

@@ -375,7 +375,7 @@ export default function CheckoutPage() {
                       className="w-full rounded-xl border border-white/10 bg-[#030c1c] px-4 py-3 text-xs text-slate-300 outline-none"
                     >
                       {PAK_UNIVERSITIES.map((uni) => (
-                        <option key={uni} value={uni}>{uni}</option>
+                        <option key={uni} value={uni} className="bg-[#0A1628] text-slate-200">{uni}</option>
                       ))}
                     </select>
 
@@ -401,7 +401,7 @@ export default function CheckoutPage() {
                       className="w-full rounded-xl border border-white/10 bg-[#030c1c] px-4 py-3 text-xs text-slate-300 outline-none"
                     >
                       {EXPERIENCE_LEVELS.map((exp) => (
-                        <option key={exp} value={exp}>{exp}</option>
+                        <option key={exp} value={exp} className="bg-[#0A1628] text-slate-200">{exp}</option>
                       ))}
                     </select>
                   </div>
@@ -561,10 +561,10 @@ export default function CheckoutPage() {
                       onChange={(e) => setPaymentMethod(e.target.value)}
                       className="w-full rounded-xl border border-white/10 bg-[#030c1c] px-4 py-3 text-xs text-slate-300 outline-none"
                     >
-                      <option value="EasyPaisa">EasyPaisa</option>
-                      <option value="SadaPay">SadaPay</option>
-                      <option value="Meezan Bank">Meezan Bank</option>
-                      <option value="JazzCash">JazzCash</option>
+                      <option value="EasyPaisa" className="bg-[#0A1628] text-slate-200">EasyPaisa</option>
+                      <option value="SadaPay" className="bg-[#0A1628] text-slate-200">SadaPay</option>
+                      <option value="Meezan Bank" className="bg-[#0A1628] text-slate-200">Meezan Bank</option>
+                      <option value="JazzCash" className="bg-[#0A1628] text-slate-200">JazzCash</option>
                     </select>
                   </div>
                   <div>

@@ -28,7 +28,7 @@ export default function AmbassadorBenefitsSection() {
     {
       icon: Award,
       title: "Free Premium Access",
-      desc: "Get 100% scholarship access to all future premium virtual internship tracks and courses.",
+      desc: "Get 100% scholarship access to all future premium coding programs and developer courses.",
     }
   ];
 

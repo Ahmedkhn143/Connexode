@@ -5,7 +5,7 @@ import RegisterForm from "@/components/auth/RegisterForm";
 
 export const metadata: Metadata = {
   title: "Create Your Account — Connexode",
-  description: "Register for your virtual internship track, track your progress, build your developer profile, and earn industry-verified certificates.",
+  description: "Join the Connexode Developer Network. Apply to our Campus Ambassador program, access exclusive events, and build your leadership profile.",
 };
 
 export default async function RegisterPage({
@@ -42,10 +42,10 @@ export default async function RegisterPage({
         <div className="space-y-8 my-auto relative z-10 max-w-sm">
           <div className="space-y-3">
             <h1 className="font-display text-4xl font-extrabold tracking-tight text-white leading-tight">
-              Start Your Virtual Internship Journey
+              Join the Connexode Tech Network
             </h1>
             <p className="text-sm text-slate-400 leading-relaxed">
-              Build production-ready applications, share proof of work on LinkedIn, and get direct review mentorship.
+              Connect with fellow developers, build leadership skills as a Campus Ambassador, and showcase verified credentials.
             </p>
           </div>
 

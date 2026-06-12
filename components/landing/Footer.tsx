@@ -43,7 +43,7 @@ export default function Footer() {
               </span>
             </Link>
             <p className="mb-6 text-sm leading-relaxed text-slate-500">
-              The premium virtual internship platform where skills are built through action, not passive watching.
+              The premium developer network and leadership platform where skills are built through action and community.
             </p>
             <div className="flex items-center gap-3">
               {SOCIAL_LINKS.map(({ icon: Icon, href, label }) => (

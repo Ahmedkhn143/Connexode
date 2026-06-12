@@ -160,6 +160,7 @@ export default function DashboardSidebar() {
             <Award size={16} />
             My Badges
           </Link>
+          {/* Commented out internship links
           <Link
             href="/dashboard?view=roadmap"
             className={cn(
@@ -186,7 +187,6 @@ export default function DashboardSidebar() {
             My Mentor
           </Link>
           
-          {/* Ask Mentor Help Link */}
           <Link
             href="/dashboard#helpdesk"
             className="flex items-center gap-3 rounded-xl px-4 py-2.5 text-sm font-medium text-slate-400 hover:bg-white/5 hover:text-slate-200 transition-all duration-200"
@@ -194,9 +194,10 @@ export default function DashboardSidebar() {
             <MessageSquare size={16} className="text-cyan-400" />
             Ask Mentor (Help)
           </Link>
+          */}
         </div>
 
-        {/* Week Accordion */}
+        {/* Commented out Course Plan Accordion
         <div className="mb-2 px-4 pt-2">
           <p className="text-xs font-semibold uppercase tracking-widest text-slate-600">
             <BookOpen size={10} className="mr-1.5 inline" />
@@ -254,6 +255,7 @@ export default function DashboardSidebar() {
             );
           })}
         </div>
+        */}
       </nav>
 
 

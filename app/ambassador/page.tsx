@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Navbar from "@/components/layout/Navbar";
 import {
@@ -23,15 +23,77 @@ const CITIES = [
 ];
 
 const PERKS = [
-  { icon: Gift, label: "Free Course Access", desc: "Get full access to any Connexode internship track for free." },
+  { icon: Gift, label: "Free Course Access", desc: "Get full access to all future premium Connexode tracks and courses for free." },
   { icon: Trophy, label: "Stipend & Bonuses", desc: "Earn monthly stipend based on your referral & event performance." },
   { icon: Star, label: "Certificate of Excellence", desc: "Official Ambassador certificate for your LinkedIn & resume." },
   { icon: Users, label: "Exclusive Community", desc: "Join a private ambassador Slack with mentors and industry leads." },
 ];
 
 export default function AmbassadorApplyPage() {
+  const [redirecting, setRedirecting] = useState(true);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const activeUserId = localStorage.getItem("connexode_active_user");
+      if (!activeUserId) {
+        window.location.href = "/register";
+        return;
+      }
+
+      // Check user's details
+      let userEmail = "";
+      let userName = "";
+      const dynamicRaw = localStorage.getItem("connexode_dynamic_users");
+      if (dynamicRaw) {
+        try {
+          const dynamicUsers = JSON.parse(dynamicRaw);
+          const found = dynamicUsers.find((u: any) => u.id === activeUserId);
+          if (found) {
+            userEmail = found.email;
+            userName = found.name;
+          }
+        } catch (e) {}
+      }
+
+      // Check ambassador status
+      const storedApps = localStorage.getItem("connexode_ambassador_applications");
+      let appStatus = "NONE";
+      if (storedApps && userEmail) {
+        try {
+          const apps = JSON.parse(storedApps);
+          const matched = apps.find((a: any) => a.email.toLowerCase() === userEmail.toLowerCase());
+          if (matched) {
+            appStatus = matched.status;
+          }
+        } catch (e) {}
+      }
+
+      if (appStatus === "APPROVED") {
+        window.location.href = "/dashboard";
+      } else if (appStatus === "PENDING") {
+        setSubmitted(true);
+        setRedirecting(false);
+      } else {
+        setForm((f) => ({
+          ...f,
+          fullName: userName || f.fullName,
+          email: userEmail || f.email,
+        }));
+        setRedirecting(false);
+      }
+    }
+  }, []);
+
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  if (redirecting) {
+    return (
+      <div className="flex h-screen items-center justify-center bg-[#020B18] text-slate-400">
+        <div className="h-6 w-6 animate-spin rounded-full border-2 border-cyan-400 border-t-transparent" />
+      </div>
+    );
+  }
 
   const [form, setForm] = useState({
     fullName: "",
@@ -39,6 +101,7 @@ export default function AmbassadorApplyPage() {
     phone: "",
     city: "",
     university: "",
+    customUniversity: "",
     degree: "",
     semester: "",
     linkedin: "",
@@ -48,6 +111,7 @@ export default function AmbassadorApplyPage() {
     pastExperience: "",
     reachEstimate: "",
     availability: "",
+    avatarImage: "",
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -61,13 +125,17 @@ export default function AmbassadorApplyPage() {
     if (!form.email.trim() || !/\S+@\S+\.\S+/.test(form.email)) errs.email = "Valid email is required.";
     if (!form.phone.trim() || !/^0[0-9]{10}$/.test(form.phone.replace(/-/g, ""))) errs.phone = "Valid Pakistani mobile (03xxxxxxxxx).";
     if (!form.city) errs.city = "Please select your city.";
-    if (!form.university) errs.university = "Please select your university.";
+    if (!form.university) {
+      errs.university = "Please select your university.";
+    } else if (form.university === "Other" && !form.customUniversity.trim()) {
+      errs.customUniversity = "Please enter your university name.";
+    }
     if (!form.degree.trim()) errs.degree = "Degree / Program is required.";
-    if (!form.linkedin.trim()) errs.linkedin = "LinkedIn profile URL is required.";
     if (!form.whyAmbassador.trim() || form.whyAmbassador.length < 80)
       errs.whyAmbassador = "Please write at least 80 characters explaining your motivation.";
     if (!form.reachEstimate.trim()) errs.reachEstimate = "Please estimate your student reach.";
     if (!form.availability) errs.availability = "Please select your availability.";
+    if (!form.avatarImage) errs.avatarImage = "Profile photo is required.";
     return errs;
   };
 
@@ -81,7 +149,11 @@ export default function AmbassadorApplyPage() {
     // Save to localStorage as pending application
     try {
       const existing = JSON.parse(localStorage.getItem("connexode_ambassador_applications") || "[]");
-      existing.push({ ...form, id: `amb_${Date.now()}`, status: "PENDING", submittedAt: new Date().toISOString() });
+      const savedForm = {
+        ...form,
+        university: form.university === "Other" ? form.customUniversity.trim() : form.university,
+      };
+      existing.push({ ...savedForm, id: `amb_${Date.now()}`, status: "PENDING", submittedAt: new Date().toISOString() });
       localStorage.setItem("connexode_ambassador_applications", JSON.stringify(existing));
     } catch (e) {}
 
@@ -91,7 +163,7 @@ export default function AmbassadorApplyPage() {
   };
 
   const inputCls = (key: string) =>
-    `w-full rounded-xl border ${errors[key] ? "border-red-500/50 bg-red-500/5" : "border-white/10 bg-white/4"} px-4 py-3 text-xs text-slate-200 placeholder-slate-600 outline-none focus:border-cyan-400/50 transition-colors`;
+    `w-full rounded-xl border ${errors[key] ? "border-red-500/50 bg-red-500/5" : "border-white/10 bg-[#0A1628]"} px-4 py-3 text-xs text-slate-200 placeholder-slate-600 outline-none focus:border-cyan-400/50 transition-colors`;
 
   if (submitted) {
     return (
@@ -148,10 +220,10 @@ export default function AmbassadorApplyPage() {
                 Back to Homepage
               </Link>
               <Link
-                href="/#tracks"
+                href="/"
                 className="flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/5 py-3 text-xs font-semibold text-slate-300 hover:bg-white/8 transition-all"
               >
-                Browse Internship Tracks
+                Back to Network Home
               </Link>
             </div>
           </div>
@@ -231,6 +303,44 @@ export default function AmbassadorApplyPage() {
                 Personal Information
               </h3>
               <div className="grid gap-4 sm:grid-cols-2">
+                <div className="sm:col-span-2">
+                  <label className="mb-1.5 block text-[10px] font-semibold uppercase tracking-wider text-slate-500">Profile Photo *</label>
+                  <label className="flex flex-col items-center justify-center w-full h-24 rounded-xl border-2 border-dashed border-white/10 bg-[#0A1628] hover:bg-white/5 hover:border-cyan-500/35 transition-all cursor-pointer group">
+                    <div className="flex flex-col items-center justify-center pt-2 pb-2">
+                      <p className="text-[10px] text-slate-400 group-hover:text-slate-300"><span className="font-semibold">Click to upload profile photo</span></p>
+                      <p className="text-[8px] text-slate-600">PNG, JPG up to 1MB</p>
+                    </div>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          if (file.size > 1024 * 1024) {
+                            alert("File size exceeds 1MB limit!");
+                            e.target.value = "";
+                            return;
+                          }
+                          const reader = new FileReader();
+                          reader.onloadend = () => {
+                            setForm((f) => ({ ...f, avatarImage: reader.result as string }));
+                          };
+                          reader.readAsDataURL(file);
+                        }
+                      }}
+                      className="hidden"
+                    />
+                  </label>
+                  {form.avatarImage && (
+                    <div className="mt-2 flex items-center gap-2 rounded-xl bg-white/4 border border-white/5 p-2">
+                      <img src={form.avatarImage} alt="Preview" className="h-8 w-8 rounded-full object-cover border border-cyan-400/30" />
+                      <span className="text-[10px] text-slate-300 truncate flex-1">Image Loaded</span>
+                      <button type="button" onClick={() => setForm((f) => ({ ...f, avatarImage: "" }))} className="text-red-400 hover:text-red-300 text-[10px] font-bold">Remove</button>
+                    </div>
+                  )}
+                  {errors.avatarImage && <p className="mt-1 text-[10px] text-red-400">{errors.avatarImage}</p>}
+                </div>
+
                 <div>
                   <label className="mb-1.5 block text-[10px] font-semibold uppercase tracking-wider text-slate-500">Full Name *</label>
                   <input type="text" value={form.fullName} onChange={set("fullName")} placeholder="Muhammad Ali Khan" className={inputCls("fullName")} />
@@ -255,8 +365,8 @@ export default function AmbassadorApplyPage() {
                 <div>
                   <label className="mb-1.5 block text-[10px] font-semibold uppercase tracking-wider text-slate-500">City *</label>
                   <select value={form.city} onChange={set("city")} className={inputCls("city")}>
-                    <option value="">Select your city</option>
-                    {CITIES.map((c) => <option key={c} value={c}>{c}</option>)}
+                    <option value="" className="bg-[#0A1628] text-slate-200">Select your city</option>
+                    {CITIES.map((c) => <option key={c} value={c} className="bg-[#0A1628] text-slate-200">{c}</option>)}
                   </select>
                   {errors.city && <p className="mt-1 text-[10px] text-red-400">{errors.city}</p>}
                 </div>
@@ -276,11 +386,25 @@ export default function AmbassadorApplyPage() {
                 <div className="sm:col-span-2">
                   <label className="mb-1.5 block text-[10px] font-semibold uppercase tracking-wider text-slate-500">University / College *</label>
                   <select value={form.university} onChange={set("university")} className={inputCls("university")}>
-                    <option value="">Select your institution</option>
-                    {UNIVERSITIES.map((u) => <option key={u} value={u}>{u}</option>)}
+                    <option value="" className="bg-[#0A1628] text-slate-200">Select your institution</option>
+                    {UNIVERSITIES.map((u) => <option key={u} value={u} className="bg-[#0A1628] text-slate-200">{u}</option>)}
                   </select>
                   {errors.university && <p className="mt-1 text-[10px] text-red-400">{errors.university}</p>}
                 </div>
+
+                {form.university === "Other" && (
+                  <div className="sm:col-span-2">
+                    <label className="mb-1.5 block text-[10px] font-semibold uppercase tracking-wider text-slate-500">Custom University Name *</label>
+                    <input
+                      type="text"
+                      value={form.customUniversity}
+                      onChange={set("customUniversity")}
+                      placeholder="Write your university name here"
+                      className={inputCls("customUniversity")}
+                    />
+                    {errors.customUniversity && <p className="mt-1 text-[10px] text-red-400">{errors.customUniversity}</p>}
+                  </div>
+                )}
                 <div>
                   <label className="mb-1.5 block text-[10px] font-semibold uppercase tracking-wider text-slate-500">Degree / Program *</label>
                   <input type="text" value={form.degree} onChange={set("degree")} placeholder="e.g. BS Computer Science" className={inputCls("degree")} />
@@ -327,12 +451,12 @@ export default function AmbassadorApplyPage() {
                     <Users size={10} className="text-emerald-400" /> Estimated Student Reach *
                   </label>
                   <select value={form.reachEstimate} onChange={set("reachEstimate")} className={inputCls("reachEstimate")}>
-                    <option value="">Select your reach</option>
-                    <option value="0-100">0 – 100 students</option>
-                    <option value="100-500">100 – 500 students</option>
-                    <option value="500-1000">500 – 1,000 students</option>
-                    <option value="1000-5000">1,000 – 5,000 students</option>
-                    <option value="5000+">5,000+ students</option>
+                    <option value="" className="bg-[#0A1628] text-slate-200">Select your reach</option>
+                    <option value="0-100" className="bg-[#0A1628] text-slate-200">0 – 100 students</option>
+                    <option value="100-500" className="bg-[#0A1628] text-slate-200">100 – 500 students</option>
+                    <option value="500-1000" className="bg-[#0A1628] text-slate-200">500 – 1,000 students</option>
+                    <option value="1000-5000" className="bg-[#0A1628] text-slate-200">1,000 – 5,000 students</option>
+                    <option value="5000+" className="bg-[#0A1628] text-slate-200">5,000+ students</option>
                   </select>
                   {errors.reachEstimate && <p className="mt-1 text-[10px] text-red-400">{errors.reachEstimate}</p>}
                 </div>
@@ -378,11 +502,11 @@ export default function AmbassadorApplyPage() {
                 <div>
                   <label className="mb-1.5 block text-[10px] font-semibold uppercase tracking-wider text-slate-500">Weekly Availability *</label>
                   <select value={form.availability} onChange={set("availability")} className={inputCls("availability")}>
-                    <option value="">Select hours per week</option>
-                    <option value="2-4">2–4 hours / week</option>
-                    <option value="4-8">4–8 hours / week</option>
-                    <option value="8-12">8–12 hours / week</option>
-                    <option value="12+">12+ hours / week (full-time dedication)</option>
+                    <option value="" className="bg-[#0A1628] text-slate-200">Select hours per week</option>
+                    <option value="2-4" className="bg-[#0A1628] text-slate-200">2–4 hours / week</option>
+                    <option value="4-8" className="bg-[#0A1628] text-slate-200">4–8 hours / week</option>
+                    <option value="8-12" className="bg-[#0A1628] text-slate-200">8–12 hours / week</option>
+                    <option value="12+" className="bg-[#0A1628] text-slate-200">12+ hours / week (full-time dedication)</option>
                   </select>
                   {errors.availability && <p className="mt-1 text-[10px] text-red-400">{errors.availability}</p>}
                 </div>
