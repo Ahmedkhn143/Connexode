@@ -151,9 +151,9 @@ export default function RegisterForm({ initialSignUp = false }: { initialSignUp?
         // Flag for WelcomeBanner on landing page
         sessionStorage.setItem("connexode_just_registered", "1");
 
-        setSuccess("Account created! Choose your internship track below.");
+        setSuccess("Account created! Redirecting to Ambassador application...");
         setTimeout(() => {
-          router.push("/#tracks");
+          router.push("/ambassador");
         }, 800);
       } catch (err) {
         console.error(err);
@@ -228,8 +228,8 @@ export default function RegisterForm({ initialSignUp = false }: { initialSignUp?
           setSuccess("Welcome back! Redirecting to your Dashboard...");
           setTimeout(() => { router.push("/dashboard"); }, 900);
         } else {
-          setSuccess("Logged in! Choose your internship track.");
-          setTimeout(() => { router.push("/#tracks"); }, 900);
+          setSuccess("Logged in! Redirecting to Ambassador Program...");
+          setTimeout(() => { router.push("/ambassador"); }, 900);
         }
         return;
       }
@@ -598,8 +598,8 @@ export default function RegisterForm({ initialSignUp = false }: { initialSignUp?
           </button>
         </form>
 
-        {/* Mentor Application Trigger */}
-        <div className="text-center pt-2 border-t border-white/5">
+        {/* Mentor Application Trigger Commented Out */}
+        {/* <div className="text-center pt-2 border-t border-white/5">
           {!isMentorApply ? (
             <button
               type="button"
@@ -627,7 +627,7 @@ export default function RegisterForm({ initialSignUp = false }: { initialSignUp?
               ← Back to Student Sign In / Sign Up
             </button>
           )}
-        </div>
+        </div> */}
       </div>
     </div>
   );

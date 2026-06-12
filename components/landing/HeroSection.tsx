@@ -15,12 +15,12 @@ const TYPEWRITER_WORDS = [
 ];
 
 const TERMINAL_LINES = [
-  { prefix: "$", text: " connexode enroll --track full-stack", color: "text-slate-400" },
-  { prefix: "✓", text: " Enrolled in Full Stack Web Dev", color: "text-emerald-400" },
-  { prefix: "→", text: " Week 1, Day 1: Build a Next.js Navbar", color: "text-cyan-400" },
-  { prefix: "$", text: " connexode submit --github <url>", color: "text-slate-400" },
-  { prefix: "✓", text: " Task submitted for review", color: "text-emerald-400" },
-  { prefix: "🏆", text: " Badge Unlocked: First Commit!", color: "text-yellow-400" },
+  { prefix: "$", text: " connexode join --ambassador", color: "text-slate-400" },
+  { prefix: "✓", text: " Application Registered Successfully", color: "text-emerald-400" },
+  { prefix: "→", text: " Welcome to Connexode Tech Leaders", color: "text-cyan-400" },
+  { prefix: "$", text: " connexode run --campus-community", color: "text-slate-400" },
+  { prefix: "✓", text: " Network initiated on 12 campuses", color: "text-emerald-400" },
+  { prefix: "🏆", text: " Badge Unlocked: Campus Leader!", color: "text-yellow-400" },
 ];
 
 function useTypewriter(words: string[], speed = 80, pause = 2000) {
@@ -99,7 +99,7 @@ export default function HeroSection() {
             className="mb-6 inline-flex items-center gap-2 rounded-full border border-cyan-400/20 bg-cyan-400/8 px-4 py-2 text-sm font-medium text-cyan-400"
           >
             <Sparkles size={14} />
-            The #1 Virtual Internship Platform — 2026
+            The #1 Tech Campus Ambassador Program — 2026
           </motion.div>
 
           {/* Headline */}
@@ -111,9 +111,9 @@ export default function HeroSection() {
           >
             Build Real Skills.{" "}
             <span className="bg-gradient-to-r from-cyan-400 to-teal-400 bg-clip-text text-transparent">
-              Get Real Experience.
+              Lead Your Campus.
             </span>{" "}
-            Land Your Job.
+            Empower Peers.
           </motion.h1>
 
           {/* Sub-headline with typewriter */}
@@ -128,7 +128,7 @@ export default function HeroSection() {
               {displayedTrack}
               <span className="animate-blink border-r-2 border-cyan-400">&nbsp;</span>
             </span>{" "}
-            through structured daily tasks, real project submissions, and industry-verified certificates.
+            through leadership, campus tech events, community mentoring, and verified reference credentials.
           </motion.p>
 
           {/* CTAs */}
@@ -171,7 +171,7 @@ export default function HeroSection() {
               ))}
             </div>
             <span>
-              <span className="font-semibold text-slate-300">12,400+</span> students enrolled
+              <span className="font-semibold text-slate-300">12,400+</span> community members
             </span>
           </motion.div>
         </div>
