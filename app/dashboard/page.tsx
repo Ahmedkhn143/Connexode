@@ -39,6 +39,7 @@ export default function DashboardPage() {
   const [fullName, setFullName] = useState("");
   const [phone, setPhone] = useState("");
   const [city, setCity] = useState("");
+  const [customCity, setCustomCity] = useState("");
   const [university, setUniversity] = useState("");
   const [degree, setDegree] = useState("");
   const [semester, setSemester] = useState("");
@@ -291,7 +292,11 @@ export default function DashboardPage() {
     const errs: Record<string, string> = {};
     if (!fullName.trim()) errs.fullName = "Full name is required.";
     if (!phone.trim() || !/^0[0-9]{10}$/.test(phone.replace(/-/g, ""))) errs.phone = "Valid Pakistani mobile (03xxxxxxxxx).";
-    if (!city) errs.city = "Please select your city.";
+    if (!city) {
+      errs.city = "Please select your city.";
+    } else if (city === "Other" && !customCity.trim()) {
+      errs.customCity = "Please enter your city name.";
+    }
     if (!university) {
       errs.university = "Please select your university.";
     } else if (university === "Other" && !customUniversity.trim()) {
@@ -324,7 +329,7 @@ export default function DashboardPage() {
         fullName: fullName.trim(),
         email: activeUser.email,
         phone: phone.trim(),
-        city,
+        city: city === "Other" ? customCity.trim() : city,
         university: university === "Other" ? customUniversity.trim() : university,
         degree: degree.trim(),
         semester: semester.trim(),
@@ -422,6 +427,13 @@ export default function DashboardPage() {
                       className="hidden"
                     />
                   </label>
+                  <input
+                    type="text"
+                    value={avatarImage || ""}
+                    onChange={(e) => setAvatarImage(e.target.value)}
+                    placeholder="Or paste a profile photo URL..."
+                    className="mt-2 w-full rounded-xl border border-white/10 bg-[#0A1628] px-4 py-2.5 text-xs text-slate-200 placeholder-slate-600 outline-none focus:border-cyan-400/50 text-center"
+                  />
                   {avatarImage && (
                     <div className="mt-2 flex items-center gap-2 rounded-xl bg-white/4 border border-white/5 p-2">
                       <img src={avatarImage} alt="Preview" className="h-8 w-8 rounded-full object-cover border border-cyan-400/30" />
@@ -452,6 +464,20 @@ export default function DashboardPage() {
                   </select>
                   {formErrors.city && <p className="mt-1 text-[10px] text-red-400">{formErrors.city}</p>}
                 </div>
+
+                {city === "Other" && (
+                  <div>
+                    <label className="mb-1.5 block text-[10px] font-semibold uppercase tracking-wider text-slate-400">Custom City Name *</label>
+                    <input
+                      type="text"
+                      value={customCity}
+                      onChange={(e) => setCustomCity(e.target.value)}
+                      placeholder="Write your city name here"
+                      className={inputClsForm("customCity")}
+                    />
+                    {formErrors.customCity && <p className="mt-1 text-[10px] text-red-400">{formErrors.customCity}</p>}
+                  </div>
+                )}
                 <div>
                   <label className="mb-1.5 block text-[10px] font-semibold uppercase tracking-wider text-slate-400">University *</label>
                   <select value={university} onChange={(e) => setUniversity(e.target.value)} className={inputClsForm("university")}>
