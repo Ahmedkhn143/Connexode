@@ -7,7 +7,7 @@ import TaskList from "@/components/dashboard/TaskList";
 import TrackRoadmap from "@/components/dashboard/TrackRoadmap";
 import PaymentApprovedBanner from "@/components/dashboard/PaymentApprovedBanner";
 import { getActiveUser, getPaymentStatus, getTrackMentor, TRACKS, SUBMISSIONS, WEEKLY_TASKS, type User } from "@/lib/mock-data";
-import { BadgeCheck, GitBranch, ArrowRight, MessageSquare, Send, User as UserIcon, Zap, Clock, CheckCircle2, ExternalLink } from "lucide-react";
+import { BadgeCheck, GitBranch, ArrowRight, MessageSquare, Send, User as UserIcon, Zap, Clock, CheckCircle2, ExternalLink, Copy, FileText, Download, Trophy, Award, MapPin } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 
@@ -53,6 +53,13 @@ export default function DashboardPage() {
   const [customUniversity, setCustomUniversity] = useState("");
   const [avatarImage, setAvatarImage] = useState("");
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+
+  // ── Assigned Task States ──
+  const [studentAssignedTasks, setStudentAssignedTasks] = useState<any[]>([]);
+  const [selectedStudentTask, setSelectedStudentTask] = useState<any | null>(null);
+  const [studentProofUrl, setStudentProofUrl] = useState("");
+  const [studentSubDesc, setStudentSubDesc] = useState("");
+  const [studentMsgText, setStudentMsgText] = useState("");
 
   const loadQuestions = () => {
     if (typeof window !== "undefined") {
@@ -154,12 +161,40 @@ export default function DashboardPage() {
   const [description, setDescription] = useState("");
   const [peersReached, setPeersReached] = useState(10);
 
+  // Referral generator states
+  const [referralCode, setReferralCode] = useState("");
+  const [isCopied, setIsCopied] = useState(false);
+  const [mediaAssets, setMediaAssets] = useState<any[]>([]);
+
   const loadAmbassadorData = (userEmail: string) => {
     if (typeof window === "undefined") return "NONE";
     let status = "NONE";
 
     // Load applications
-    const storedApps = localStorage.getItem("connexode_ambassador_applications");
+    let storedApps = localStorage.getItem("connexode_ambassador_applications");
+    if (!storedApps && userEmail.toLowerCase() === "alex@example.com") {
+      const defaultApps = [
+        {
+          id: "amb_default",
+          fullName: "Alex Johnson",
+          email: "alex@example.com",
+          phone: "03001234567",
+          city: "Karachi",
+          university: "FAST NUCES",
+          degree: "BS Computer Science",
+          semester: "6th Semester",
+          linkedin: "https://linkedin.com/in/alex-johnson",
+          reachEstimate: "100-500",
+          availability: "4-8",
+          avatarImage: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&h=150&q=80",
+          status: "APPROVED",
+          submittedAt: new Date().toISOString()
+        }
+      ];
+      localStorage.setItem("connexode_ambassador_applications", JSON.stringify(defaultApps));
+      storedApps = JSON.stringify(defaultApps);
+    }
+
     if (storedApps) {
       try {
         const apps = JSON.parse(storedApps);
@@ -187,19 +222,56 @@ export default function DashboardPage() {
     return status;
   };
 
+  const loadStudentAssignedTasks = (userId: string, email: string) => {
+    if (typeof window !== "undefined") {
+      const storedAssigned = localStorage.getItem("connexode_assigned_tasks");
+      if (storedAssigned) {
+        try {
+          const allTasks = JSON.parse(storedAssigned);
+          const myTasks = allTasks.filter(
+            (t: any) => t.studentId === userId || t.studentEmail?.toLowerCase() === email?.toLowerCase()
+          );
+          setStudentAssignedTasks(myTasks);
+          return myTasks;
+        } catch (e) {
+          console.error(e);
+        }
+      }
+    }
+    return [];
+  };
+
+  const refreshStudentAssignedTasks = () => {
+    if (activeUser) {
+      const myTasks = loadStudentAssignedTasks(activeUser.id, activeUser.email);
+      if (selectedStudentTask) {
+        const updated = myTasks.find((t: any) => t.id === selectedStudentTask.id);
+        if (updated) {
+          setSelectedStudentTask(updated);
+        }
+      }
+    }
+  };
+
   useEffect(() => {
     if (activeUser) {
       if (activeUser.role === "STUDENT") {
         const status = loadAmbassadorData(activeUser.email);
+        loadStudentAssignedTasks(activeUser.id, activeUser.email);
         if (status !== "APPROVED") {
           window.location.href = "/";
           return;
         }
       } else {
         loadAmbassadorData(activeUser.email);
+        loadStudentAssignedTasks(activeUser.id, activeUser.email);
       }
 
-      // Load announcements
+      // Set default referral code based on username or email username
+      const code = activeUser.username || activeUser.email.split("@")[0].toLowerCase().replace(/[^a-z0-9]/g, "-");
+      setReferralCode(code);
+
+      // Load announcements & media assets
       if (typeof window !== "undefined") {
         const storedAnn = localStorage.getItem("connexode_announcements");
         if (storedAnn) {
@@ -208,6 +280,22 @@ export default function DashboardPage() {
           } catch (e) {
             console.error(e);
           }
+        }
+
+        let storedAssets = localStorage.getItem("connexode_media_assets");
+        if (!storedAssets) {
+          const defaultAssets = [
+            { id: "asset_001", name: "Connexode Logo & Brand Book", desc: "Official logos, brand colors, and guidelines", format: "ZIP", size: "4.8 MB", url: "https://connexode.pk/assets/brand-book.zip", type: "FILE" },
+            { id: "asset_002", name: "Campus Seminar Slide Deck", desc: "Ready-to-use presentation deck for workshops", format: "PPTX", size: "12.4 MB", url: "https://connexode.pk/assets/seminar-slides.pptx", type: "FILE" },
+            { id: "asset_003", name: "Promo Banners & Story Templates", desc: "Flyers and layouts for WhatsApp & Instagram", format: "ZIP", size: "8.2 MB", url: "https://connexode.pk/assets/promo-banners.zip", type: "FILE" },
+          ];
+          localStorage.setItem("connexode_media_assets", JSON.stringify(defaultAssets));
+          storedAssets = JSON.stringify(defaultAssets);
+        }
+        try {
+          setMediaAssets(JSON.parse(storedAssets));
+        } catch (e) {
+          console.error(e);
         }
       }
     }
@@ -276,6 +364,51 @@ export default function DashboardPage() {
       setDescription("");
       setPeersReached(10);
       loadAmbassadorData(activeUser.email);
+    }
+  };
+
+  const handleSubmitStudentProof = (e: React.FormEvent, taskId: string) => {
+    e.preventDefault();
+    if (!studentProofUrl.trim() || !studentSubDesc.trim()) {
+      alert("Please provide both a proof URL and a description.");
+      return;
+    }
+    if (typeof window !== "undefined") {
+      const storedAssigned = localStorage.getItem("connexode_assigned_tasks");
+      const allTasks = storedAssigned ? JSON.parse(storedAssigned) : [];
+      const tIndex = allTasks.findIndex((t: any) => t.id === taskId);
+      if (tIndex !== -1) {
+        allTasks[tIndex].status = "SUBMITTED";
+        allTasks[tIndex].proofUrl = studentProofUrl.trim();
+        allTasks[tIndex].submissionDesc = studentSubDesc.trim();
+        allTasks[tIndex].submittedAt = new Date().toISOString();
+        localStorage.setItem("connexode_assigned_tasks", JSON.stringify(allTasks));
+        setStudentProofUrl("");
+        setStudentSubDesc("");
+        alert("🚀 Proof submitted successfully for verification!");
+        refreshStudentAssignedTasks();
+      }
+    }
+  };
+
+  const handleSendStudentMsg = (e: React.FormEvent, taskId: string) => {
+    e.preventDefault();
+    if (!studentMsgText.trim()) return;
+    if (typeof window !== "undefined") {
+      const storedAssigned = localStorage.getItem("connexode_assigned_tasks");
+      const allTasks = storedAssigned ? JSON.parse(storedAssigned) : [];
+      const tIndex = allTasks.findIndex((t: any) => t.id === taskId);
+      if (tIndex !== -1) {
+        if (!allTasks[tIndex].questions) allTasks[tIndex].questions = [];
+        allTasks[tIndex].questions.push({
+          sender: "STUDENT",
+          text: studentMsgText.trim(),
+          timestamp: new Date().toISOString()
+        });
+        localStorage.setItem("connexode_assigned_tasks", JSON.stringify(allTasks));
+        setStudentMsgText("");
+        refreshStudentAssignedTasks();
+      }
     }
   };
 
@@ -687,26 +820,172 @@ export default function DashboardPage() {
         </div>
       )}
 
-      {/* Ambassador Welcome header */}
-      <div className="relative overflow-hidden rounded-2xl border border-cyan-400/25 bg-gradient-to-br from-[#06172f] to-[#020B18] p-6 shadow-xl">
-        <div className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full blur-3xl bg-cyan-500/15" />
-        <div className="relative flex flex-wrap items-center justify-between gap-4">
-          <div>
-            <p className="mb-1 text-sm text-slate-500">Connexode Campus Ambassador dashboard</p>
-            <h2 className="font-display text-2xl font-extrabold text-white">
-              {activeUser.name}
-            </h2>
-            <p className="mt-1 flex items-center gap-2 text-sm text-cyan-400 font-bold">
-              <span className="inline-block h-2.5 w-2.5 rounded-full bg-cyan-400 animate-pulse" />
-              Active Ambassador Lead · {ambassadorDetails?.university || "FAST NUCES"}
-            </p>
+      {/* Ambassador Welcome Header & Referral Link Generator */}
+      <div className="grid gap-6 md:grid-cols-3">
+        {/* Profile Card & Custom Ref Link */}
+        <div className="relative overflow-hidden rounded-2xl border border-yellow-500/25 bg-gradient-to-br from-[#0D1B2A] to-[#020B18] p-6 shadow-xl md:col-span-2 space-y-4">
+          <div className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full blur-3xl bg-yellow-500/15" />
+          <div className="relative flex flex-wrap items-center justify-between gap-4">
+            <div>
+              <p className="mb-1 text-[10px] uppercase font-bold tracking-widest text-yellow-500/70">Campus Ambassador Lead</p>
+              <h2 className="font-display text-2xl font-black text-white">
+                {activeUser.name}
+              </h2>
+              <p className="mt-1 flex items-center gap-2 text-xs text-slate-400">
+                <span className="inline-block h-2.5 w-2.5 rounded-full bg-emerald-400 animate-pulse" />
+                Active Ambassador · {ambassadorDetails?.university || "FAST NUCES"}
+              </p>
+            </div>
+            <div className="flex flex-col items-end gap-1.5 text-right">
+              <span className="rounded-full bg-yellow-500/10 border border-yellow-500/20 px-3 py-1 text-[9px] font-black uppercase tracking-wider text-yellow-400 flex items-center gap-1 shadow-sm">
+                <Trophy size={11} className="text-yellow-400 animate-bounce" />
+                Campus Tech Lead
+              </span>
+            </div>
           </div>
-          <div className="flex flex-col items-end gap-2 text-right">
-            <span className="rounded-xl border border-yellow-500/20 bg-yellow-500/10 px-4 py-2 text-xs font-bold text-yellow-400">
-              🏆 Level: Campus Tech Lead
+
+          <div className="border-t border-white/5 pt-4 space-y-3">
+            <h4 className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 flex items-center gap-1">
+              <Copy size={11} className="text-yellow-500" />
+              Your Custom Referral Code & Link
+            </h4>
+            <div className="flex flex-wrap items-center gap-2">
+              <input
+                type="text"
+                value={`https://connexode.pk/ref?code=${referralCode}`}
+                readOnly
+                className="flex-1 min-w-[200px] rounded-xl border border-white/10 bg-[#030a16] px-3 py-2.5 text-xs text-slate-300 font-mono select-all outline-none"
+              />
+              <button
+                onClick={() => {
+                  if (typeof navigator !== "undefined") {
+                    navigator.clipboard.writeText(`https://connexode.pk/ref?code=${referralCode}`);
+                    setIsCopied(true);
+                    setTimeout(() => setIsCopied(false), 2000);
+                  }
+                }}
+                className="rounded-xl bg-yellow-500 hover:bg-yellow-400 px-4 py-2.5 text-xs font-black text-[#020B18] transition-all flex items-center gap-1 cursor-pointer"
+              >
+                {isCopied ? "Copied! ✓" : "Copy Link"}
+              </button>
+            </div>
+            <p className="text-[9px] text-slate-500">Every student signing up using this link adds referrals to your stats and unlocks point bonuses!</p>
+          </div>
+        </div>
+
+        {/* Realtime Referral Analytics */}
+        <div className="rounded-2xl border border-white/8 bg-white/4 p-6 backdrop-blur-xl flex flex-col justify-between">
+          <div>
+            <h3 className="text-xs uppercase font-extrabold tracking-wider text-slate-400 flex items-center gap-1.5 mb-3">
+              <MapPin size={12} className="text-yellow-500" />
+              Referral Analytics
+            </h3>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between border-b border-white/5 pb-2">
+                <span className="text-xs text-slate-500">Link Clicks</span>
+                <span className="text-sm font-bold text-white font-mono">148</span>
+              </div>
+              <div className="flex items-center justify-between border-b border-white/5 pb-2">
+                <span className="text-xs text-slate-500">Signups / Registrations</span>
+                <span className="text-sm font-bold text-white font-mono">32</span>
+              </div>
+              <div className="flex items-center justify-between pb-1">
+                <span className="text-xs text-slate-500">Paid Enrolls</span>
+                <span className="text-sm font-bold text-emerald-400 font-mono">8</span>
+              </div>
+            </div>
+          </div>
+          <div className="border-t border-white/5 pt-3">
+            <span className="text-[9px] text-yellow-500 font-semibold flex items-center gap-1 leading-relaxed">
+              🔥 1 Active signup = +50 points!
             </span>
           </div>
         </div>
+      </div>
+
+      {/* Gamified Milestone Perks Gauge */}
+      <div className="rounded-2xl border border-white/8 bg-gradient-to-r from-yellow-500/5 via-[#040e1c] to-yellow-500/5 p-6 backdrop-blur-xl space-y-4">
+        {(() => {
+          // Calculate Tier
+          let currentTier = "Bronze";
+          let nextTier = "Silver";
+          let pointsNeeded = 500;
+          let currentMilestone = 150;
+          let nextMilestone = 500;
+          let tierPerks = "Official Digital Badge & Verified Campus Ambassador Certificate.";
+
+          if (totalPoints >= 1000) {
+            currentTier = "Gold";
+            nextTier = "Platinum";
+            pointsNeeded = 2000;
+            currentMilestone = 1000;
+            nextMilestone = 2000;
+            tierPerks = "Rs. 5,000 monthly cash stipend + Premium LinkedIn Recommendation Letter.";
+          } else if (totalPoints >= 500) {
+            currentTier = "Silver";
+            nextTier = "Gold";
+            pointsNeeded = 1000;
+            currentMilestone = 500;
+            nextMilestone = 1000;
+            tierPerks = "Official Connexode Ambassador Hoodie, swag stickers, & notebook pack.";
+          } else if (totalPoints >= 150) {
+            currentTier = "Bronze";
+            nextTier = "Silver";
+            pointsNeeded = 500;
+            currentMilestone = 150;
+            nextMilestone = 500;
+            tierPerks = "Official Digital Badge & Verified Campus Ambassador Certificate.";
+          } else {
+            currentTier = "Onboarding";
+            nextTier = "Bronze";
+            pointsNeeded = 150;
+            currentMilestone = 0;
+            nextMilestone = 150;
+            tierPerks = "Complete 1 initial outreach task to unlock Bronze level!";
+          }
+
+          const progressPercent = Math.min(
+            100,
+            Math.max(5, ((totalPoints - currentMilestone) / (nextMilestone - currentMilestone)) * 100)
+          );
+
+          return (
+            <>
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <h3 className="font-display text-sm font-extrabold text-white flex items-center gap-2">
+                    <Award size={16} className="text-yellow-500 animate-spin" style={{ animationDuration: "12s" }} />
+                    Milestone Perks & Rewards Progress
+                  </h3>
+                  <p className="text-[10px] text-slate-500 mt-0.5">Earn points to unlock cash incentives, custom swags, and recommendation letters.</p>
+                </div>
+                <div className="text-right">
+                  <span className="text-[10px] text-slate-500 block">Current Reward Tier</span>
+                  <span className="text-sm font-black text-yellow-400 font-display uppercase tracking-widest">{currentTier} Lead</span>
+                </div>
+              </div>
+
+              {/* Progress Gauge */}
+              <div className="space-y-2 pt-2">
+                <div className="flex items-center justify-between text-[10px] font-mono text-slate-500">
+                  <span>{currentMilestone} PTS ({currentTier})</span>
+                  <span className="font-semibold text-slate-300">{totalPoints} / {nextMilestone} PTS</span>
+                  <span>{nextMilestone} PTS ({nextTier})</span>
+                </div>
+                <div className="relative h-3 w-full rounded-full bg-white/5 overflow-hidden border border-white/5">
+                  <div
+                    className="h-full rounded-full bg-gradient-to-r from-yellow-500 via-amber-400 to-yellow-400 shadow-[0_0_10px_rgba(234,179,8,0.3)] transition-all duration-1000"
+                    style={{ width: `${progressPercent}%` }}
+                  />
+                </div>
+                <div className="flex items-start gap-2 rounded-xl bg-yellow-500/5 border border-yellow-500/10 p-3 mt-3 text-xs leading-relaxed text-slate-400">
+                  <span className="text-yellow-400 font-extrabold text-[10px] uppercase tracking-wider block shrink-0 mt-0.5">Unlocked Perks:</span>
+                  <p className="flex-1 text-[11px]">{tierPerks}</p>
+                </div>
+              </div>
+            </>
+          );
+        })()}
       </div>
 
       {/* Ambassador Stats Rows */}
@@ -714,7 +993,7 @@ export default function DashboardPage() {
         {[
           { label: "Total Ambassador Points", value: `${totalPoints} PTS`, desc: "Verify outreach activities" },
           { label: "Approved Events hosted", value: approvedEvents, desc: "Bootcamps or info sessions" },
-          { label: "Onboarded Peer Referrals", value: ambassadorDetails?.reachEstimate || "100-500", desc: "Estimated student reach" },
+          { label: "Onboarded Peer Referrals", value: "32 Signups", desc: "Estimated student reach" },
           { label: "Pending verifications", value: outreachSubmissions.filter((s) => s.status === "PENDING").length, desc: "Awaiting Admin audit" },
         ].map((stat, i) => (
           <div key={i} className="rounded-2xl border border-white/8 bg-white/4 p-5 backdrop-blur-xl">
@@ -889,6 +1168,78 @@ export default function DashboardPage() {
         </div>
       </div>
 
+      {/* Leaderboard & Media Kit */}
+      <div className="grid gap-6 md:grid-cols-2">
+        {/* Media Kit Download Center */}
+        <div className="rounded-2xl border border-white/8 bg-white/4 p-6 backdrop-blur-xl space-y-4">
+          <h3 className="font-display text-sm font-extrabold text-white flex items-center gap-2">
+            <Download size={16} className="text-yellow-500" />
+            Branding Assets & Media Kit Center
+          </h3>
+          <p className="text-[11px] text-slate-500">Download official promotion kits, slide decks for workshops, and WhatsApp banners.</p>
+          <div className="space-y-3">
+            {mediaAssets.map((item) => (
+              <div key={item.id} className="flex items-center justify-between p-3 rounded-xl border border-white/5 bg-black/20 text-xs gap-4">
+                <div className="min-w-0">
+                  <h4 className="font-bold text-white truncate">{item.name}</h4>
+                  <p className="text-[10px] text-slate-500 mt-0.5 truncate">{item.desc} · <span className="font-mono text-yellow-500 font-bold">{item.format}</span></p>
+                </div>
+                <a
+                  href={item.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="shrink-0 rounded-lg bg-white/5 border border-white/10 px-3 py-1.5 text-[10px] font-bold text-slate-300 hover:bg-yellow-500 hover:text-[#020B18] transition-all flex items-center gap-1 cursor-pointer"
+                >
+                  <Download size={10} />
+                  {item.size}
+                </a>
+              </div>
+            ))}
+            {mediaAssets.length === 0 && (
+              <p className="text-center text-slate-500 italic text-[11px] py-4">No active assets in the media kit currently.</p>
+            )}
+          </div>
+        </div>
+
+        {/* Live Scoreboard / Regional Leaderboard */}
+        <div className="rounded-2xl border border-white/8 bg-white/4 p-6 backdrop-blur-xl space-y-4">
+          <h3 className="font-display text-sm font-extrabold text-white flex items-center gap-2">
+            <Trophy size={16} className="text-yellow-500" />
+            National Leaderboard (June 2026)
+          </h3>
+          <p className="text-[11px] text-slate-500">Compare your standing with top-performing ambassadors across other regions.</p>
+          <div className="space-y-2.5">
+            {[
+              { rank: 1, name: "Muhammad Ali", uni: "FAST NUST", pts: 1250, level: "Gold" },
+              { rank: 2, name: activeUser.name, uni: ambassadorDetails?.university || "FAST NUCES", pts: totalPoints, level: totalPoints >= 1000 ? "Gold" : totalPoints >= 500 ? "Silver" : "Bronze", isCurrent: true },
+              { rank: 3, name: "Ayesha Fatima", uni: "LUMS", pts: 850, level: "Silver" },
+              { rank: 4, name: "Zainab Khan", uni: "IBA Karachi", pts: 620, level: "Silver" },
+              { rank: 5, name: "Bilal Ahmed", uni: "NED University", pts: 450, level: "Bronze" },
+            ].map((amb, i) => (
+              <div
+                key={i}
+                className={`flex items-center justify-between p-2.5 rounded-xl border transition-all ${
+                  amb.isCurrent
+                    ? "border-yellow-500/30 bg-yellow-500/10 shadow-[0_0_15px_rgba(234,179,8,0.15)]"
+                    : "border-white/5 bg-black/20"
+                } text-xs`}
+              >
+                <div className="flex items-center gap-3">
+                  <span className={`w-5 text-center font-mono font-black ${
+                    amb.rank === 1 ? "text-yellow-400" : amb.rank === 2 ? "text-slate-300" : "text-slate-500"
+                  }`}>{amb.rank}</span>
+                  <div>
+                    <h4 className={`font-bold ${amb.isCurrent ? "text-yellow-400" : "text-white"}`}>{amb.name}</h4>
+                    <p className="text-[9px] text-slate-500 mt-0.5">{amb.uni} · <span className="text-yellow-500/70 font-semibold">{amb.level}</span></p>
+                  </div>
+                </div>
+                <span className="font-mono font-black text-white">{amb.pts} PTS</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
       {/* Support / Coordinator chat */}
       <div className="rounded-2xl border border-white/8 bg-white/4 p-6 backdrop-blur-xl">
         <h3 className="font-display text-lg font-bold text-white flex items-center gap-2">
@@ -915,6 +1266,212 @@ export default function DashboardPage() {
           </button>
         </form>
       </div>
+
+      {/* Assigned Custom Tasks Section */}
+      <div className="rounded-2xl border border-yellow-500/20 bg-gradient-to-br from-[#0D1B2A]/50 to-[#020B18]/50 p-6 backdrop-blur-xl space-y-4">
+        <div className="flex items-center justify-between border-b border-white/5 pb-3">
+          <div>
+            <h2 className="font-display text-lg font-bold text-white flex items-center gap-2">
+              <Award size={18} className="text-yellow-400" />
+              Directly Assigned Outreach Tasks
+            </h2>
+            <p className="text-xs text-slate-500 mt-0.5">Tasks custom assigned to you by the Admin. Submit proof and chat directly with coordinator.</p>
+          </div>
+          <span className="rounded-full bg-yellow-500/10 border border-yellow-500/20 px-3 py-1 text-[10px] font-black uppercase tracking-wider text-yellow-400">
+            {studentAssignedTasks.length} Assigned Task{studentAssignedTasks.length !== 1 ? "s" : ""}
+          </span>
+        </div>
+
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-xs border-collapse">
+            <thead>
+              <tr className="border-b border-white/5 text-slate-500">
+                <th className="pb-3 pr-4">Task Title</th>
+                <th className="pb-3 pr-4">Assigned Date</th>
+                <th className="pb-3 pr-4">Points</th>
+                <th className="pb-3 pr-4">Status</th>
+                <th className="pb-3 text-right">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {studentAssignedTasks.map((t) => (
+                <tr key={t.id} className="border-b border-white/5 text-slate-300 hover:bg-white/2 transition-colors">
+                  <td className="py-3 pr-4 font-bold text-white max-w-[200px] truncate">{t.taskTitle}</td>
+                  <td className="py-3 pr-4 font-mono">{new Date(t.assignedAt).toLocaleDateString()}</td>
+                  <td className="py-3 pr-4 font-bold text-yellow-400">+{t.points} PTS</td>
+                  <td className="py-3 pr-4">
+                    <span className={`rounded-full px-2.5 py-0.5 text-[9px] font-extrabold uppercase ${
+                      t.status === "APPROVED"
+                        ? "bg-emerald-500/10 text-emerald-400"
+                        : t.status === "REJECTED"
+                        ? "bg-red-500/10 text-red-400"
+                        : t.status === "SUBMITTED"
+                        ? "bg-blue-500/10 text-blue-400 animate-pulse"
+                        : "bg-yellow-500/10 text-yellow-500"
+                    }`}>
+                      {t.status}
+                    </span>
+                  </td>
+                  <td className="py-3 text-right">
+                    <button
+                      onClick={() => setSelectedStudentTask(t)}
+                      className="rounded-lg bg-white/5 border border-white/10 px-3 py-1.5 text-[10px] font-bold text-slate-300 hover:bg-yellow-500 hover:text-[#020B18] transition-all cursor-pointer"
+                    >
+                      {t.status === "ASSIGNED" || t.status === "REJECTED" ? "Submit Proof & Chat" : "View Details & Chat"}
+                    </button>
+                  </td>
+                </tr>
+              ))}
+              {studentAssignedTasks.length === 0 && (
+                <tr>
+                  <td colSpan={5} className="text-center text-slate-500 py-6 italic">No custom tasks assigned to you by the Coordinator yet.</td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Student Assigned Task Modal */}
+      {selectedStudentTask && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm overflow-y-auto">
+          <div className="relative max-w-2xl w-full bg-[#030914] border border-white/10 rounded-2xl overflow-hidden shadow-2xl flex flex-col my-8">
+            {/* Header */}
+            <div className="flex items-center justify-between px-6 py-4 border-b border-white/5 bg-slate-950">
+              <div className="flex items-center gap-2">
+                <Award className="text-yellow-400" size={16} />
+                <div>
+                  <h3 className="text-sm font-bold text-white">{selectedStudentTask.taskTitle}</h3>
+                  <p className="text-[9px] text-slate-500 font-mono">Assigned on: {new Date(selectedStudentTask.assignedAt).toLocaleString()}</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setSelectedStudentTask(null)}
+                className="rounded-lg bg-white/5 px-3 py-1.5 text-xs text-slate-400 hover:text-white hover:bg-white/10 transition-all cursor-pointer"
+              >
+                Close
+              </button>
+            </div>
+
+            {/* Content Body */}
+            <div className="p-6 space-y-6 text-xs text-slate-300 overflow-y-auto max-h-[70vh]">
+              {/* Task Description */}
+              <div>
+                <h4 className="font-bold text-yellow-500 uppercase tracking-wider text-[10px] mb-2">Task Details & Instructions</h4>
+                <div className="rounded-xl border border-white/8 bg-white/3 p-4">
+                  <p className="leading-relaxed whitespace-pre-wrap">{selectedStudentTask.taskDesc}</p>
+                  <p className="mt-3 text-[10px] font-bold text-yellow-400 uppercase tracking-widest font-mono">Points: +{selectedStudentTask.points} PTS</p>
+                </div>
+              </div>
+
+              {/* Submission Form / Submission Details */}
+              <div>
+                <h4 className="font-bold text-yellow-500 uppercase tracking-wider text-[10px] mb-2">
+                  {selectedStudentTask.status === "ASSIGNED" || selectedStudentTask.status === "REJECTED" ? "Submit Submission Proof" : "Your Submission Details"}
+                </h4>
+                {selectedStudentTask.status === "ASSIGNED" || selectedStudentTask.status === "REJECTED" ? (
+                  <form onSubmit={(e) => handleSubmitStudentProof(e, selectedStudentTask.id)} className="space-y-4 rounded-xl border border-white/8 bg-white/3 p-4">
+                    {selectedStudentTask.status === "REJECTED" && (
+                      <div className="p-2.5 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 font-semibold mb-2">
+                        ⚠️ Your previous submission was rejected. Please review feedback in Q&A chat and re-submit proof below.
+                      </div>
+                    )}
+                    <div>
+                      <label className="mb-1 block text-[9px] font-semibold uppercase tracking-wider text-slate-400">Public Proof URL *</label>
+                      <input
+                        type="url"
+                        required
+                        value={studentProofUrl}
+                        onChange={(e) => setStudentProofUrl(e.target.value)}
+                        placeholder="https://linkedin.com/posts/username-post-link..."
+                        className="w-full rounded-xl border border-white/10 bg-[#030c1c] px-4 py-2.5 text-xs text-slate-200 outline-none focus:border-yellow-400/40"
+                      />
+                    </div>
+                    <div>
+                      <label className="mb-1 block text-[9px] font-semibold uppercase tracking-wider text-slate-400">Submission Description / Notes *</label>
+                      <textarea
+                        required
+                        rows={3}
+                        value={studentSubDesc}
+                        onChange={(e) => setStudentSubDesc(e.target.value)}
+                        placeholder="Describe how you completed the task, how many peers you reached, etc..."
+                        className="w-full rounded-xl border border-white/10 bg-[#030c1c] px-4 py-2.5 text-xs text-slate-200 outline-none focus:border-yellow-400/40"
+                      />
+                    </div>
+                    <button
+                      type="submit"
+                      className="w-full flex items-center justify-center gap-1.5 rounded-xl bg-yellow-500 py-3 text-xs font-bold text-[#020B18] hover:scale-[1.01] transition-transform cursor-pointer"
+                    >
+                      Submit Task Proof
+                    </button>
+                  </form>
+                ) : (
+                  <div className="rounded-xl border border-white/8 bg-blue-500/5 p-4 space-y-3">
+                    <div>
+                      <span className="text-slate-500 font-bold block">Submission Proof URL:</span>
+                      <a href={selectedStudentTask.proofUrl} target="_blank" rel="noopener noreferrer" className="text-cyan-400 hover:underline break-all block mt-0.5">
+                        {selectedStudentTask.proofUrl}
+                      </a>
+                    </div>
+                    <div>
+                      <span className="text-slate-500 font-bold block">Submission Description:</span>
+                      <p className="text-slate-200 mt-1 whitespace-pre-wrap">{selectedStudentTask.submissionDesc}</p>
+                    </div>
+                    <p className="text-[10px] text-slate-500 font-mono">Submitted at: {new Date(selectedStudentTask.submittedAt).toLocaleString()}</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Chat Thread */}
+              <div>
+                <h4 className="font-bold text-yellow-500 uppercase tracking-wider text-[10px] mb-2">Q&A Chat Thread with Coordinator</h4>
+                <div className="rounded-xl border border-white/8 bg-black/40 p-4 space-y-3 max-h-48 overflow-y-auto flex flex-col">
+                  {selectedStudentTask.questions && selectedStudentTask.questions.length > 0 ? (
+                    selectedStudentTask.questions.map((q: any, i: number) => (
+                      <div
+                        key={i}
+                        className={`flex flex-col max-w-[85%] rounded-xl p-3 ${
+                          q.sender === "STUDENT"
+                            ? "bg-yellow-500/10 border border-yellow-500/20 text-yellow-200 self-end ml-auto"
+                            : "bg-white/5 border border-white/8 text-slate-200 self-start mr-auto"
+                        }`}
+                      >
+                        <span className="text-[8px] font-bold uppercase tracking-wider text-slate-500 mb-1">
+                          {q.sender === "STUDENT" ? "You" : "Coordinator (Admin)"}
+                        </span>
+                        <p className="leading-relaxed">{q.text}</p>
+                        <span className="text-[7px] text-slate-600 font-mono text-right mt-1">
+                          {new Date(q.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        </span>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-center text-slate-600 italic py-4">No chat history. Send a query below if you have any questions about this task.</p>
+                  )}
+                </div>
+
+                {/* Send message form */}
+                <form onSubmit={(e) => handleSendStudentMsg(e, selectedStudentTask.id)} className="mt-3 flex gap-2">
+                  <input
+                    type="text"
+                    value={studentMsgText}
+                    onChange={(e) => setStudentMsgText(e.target.value)}
+                    placeholder="Ask coordinator a question about this task..."
+                    className="flex-1 rounded-xl border border-white/8 bg-[#020B18] px-4 py-2.5 text-xs text-slate-200 outline-none focus:border-yellow-400/30"
+                  />
+                  <button
+                    type="submit"
+                    className="rounded-xl bg-yellow-500 px-4 py-2.5 text-xs font-bold text-[#020B18] hover:scale-[1.02] transition-transform cursor-pointer"
+                  >
+                    Send
+                  </button>
+                </form>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

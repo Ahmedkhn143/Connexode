@@ -167,6 +167,14 @@ export const MOCK_USER = MOCK_USERS.find((user) => user.id === ACTIVE_USER_ID)!;
 export const getActiveUser = (): User | null => {
   if (typeof window !== "undefined") {
     const saved = localStorage.getItem("connexode_active_user");
+    const sessionActive = sessionStorage.getItem("connexode_active_user");
+    
+    // If in localStorage but not in sessionStorage, the session has expired (tab closed)
+    if (saved && !sessionActive) {
+      localStorage.removeItem("connexode_active_user");
+      return null;
+    }
+
     if (saved) {
       // Find in dynamic users first
       const dynamicUsersRaw = localStorage.getItem("connexode_dynamic_users");
@@ -209,10 +217,10 @@ export const getTrackMentor = (trackId: string): User | null => {
 export const getPaymentStatus = (trackId: string, userId?: string): "PENDING" | "PENDING_VERIFICATION" | "PAID" => {
   if (typeof window !== "undefined") {
     const uid = userId || localStorage.getItem("connexode_active_user") || "default";
-    const saved = localStorage.getItem(`connexode_payment_status_${uid}_${trackId}`) || localStorage.getItem(`connexode_payment_status_${trackId}`);
-    if (saved === "PAID" || saved === "PENDING_VERIFICATION" || saved === "PENDING") {
-      return saved as any;
-    }
+    const status = localStorage.getItem(`connexode_payment_status_${uid}_${trackId}`);
+    if (status) return status as any;
+    const oldStatus = localStorage.getItem(`connexode_payment_status_${trackId}`);
+    if (oldStatus) return oldStatus as any;
   }
   return "PENDING";
 };
@@ -228,6 +236,7 @@ export const setPaymentStatus = (trackId: string, status: "PENDING" | "PENDING_V
 export const setActiveUser = (id: string) => {
   if (typeof window !== "undefined") {
     localStorage.setItem("connexode_active_user", id);
+    sessionStorage.setItem("connexode_active_user", id);
     window.location.reload();
   }
 };
@@ -2992,6 +3001,15 @@ export const BADGES: Badge[] = [
   { id: "badge_006", name: "Database Wizard", description: "Connected Prisma to PostgreSQL", icon: "Database", color: "#FF6B35", earned: false },
   { id: "badge_007", name: "Deployment King", description: "Deployed 5 projects to production", icon: "Rocket", color: "#6366F1", earned: false },
   { id: "badge_008", name: "Streak Master", description: "Maintained a 14-day submission streak", icon: "Flame", color: "#EF4444", earned: false },
+];
+
+export const AMBASSADOR_BADGES: Badge[] = [
+  { id: "amb_badge_001", name: "Outreach Pioneer", description: "Shared Connexode mission on LinkedIn", icon: "GitCommit", color: "#F59E0B", earned: false },
+  { id: "amb_badge_002", name: "Society Leader", description: "Hosted an info seminar with 15+ students on campus", icon: "Swords", color: "#A855F7", earned: false },
+  { id: "amb_badge_003", name: "Community Builder", description: "Formed a local dev group with 20+ members", icon: "Layers", color: "#00BFA5", earned: false },
+  { id: "amb_badge_004", name: "Growth Catalyst", description: "Onboarded 5 classmates to the platform", icon: "Zap", color: "#EC4899", earned: false },
+  { id: "amb_badge_005", name: "Active Ambassador", description: "Earned a total of 500+ outreach points", icon: "Flame", color: "#FF6B35", earned: false },
+  { id: "amb_badge_006", name: "Elite Lead", description: "Earned a total of 1000+ outreach points", icon: "Rocket", color: "#6366F1", earned: false },
 ];
 
 // ── Submissions ───────────────────────────────────────────────

@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { BadgeCheck, Calendar, Flame, Edit2, X, Globe } from "lucide-react";
 import { type User, type Track } from "@/lib/mock-data";
+import { cleanImageUrl } from "@/lib/utils";
 
 interface ProfileHeaderProps {
   user: User;
@@ -30,6 +31,7 @@ export default function ProfileHeader({ user, track }: ProfileHeaderProps) {
   const [activeUser, setActiveUser] = useState<any>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [isAmbassador, setIsAmbassador] = useState(false);
 
   // Form States
   const [name, setName] = useState(user.name);
@@ -41,6 +43,23 @@ export default function ProfileHeader({ user, track }: ProfileHeaderProps) {
   useEffect(() => {
     setMounted(true);
     if (typeof window !== "undefined") {
+      // Check if ambassador
+      const emailToCheck = user.email || "";
+      if (emailToCheck) {
+        const storedApps = localStorage.getItem("connexode_ambassador_applications");
+        if (storedApps) {
+          try {
+            const apps = JSON.parse(storedApps);
+            const userApp = apps.find((a: any) => a.email.toLowerCase() === emailToCheck.toLowerCase());
+            if (userApp && userApp.status === "APPROVED") {
+              setIsAmbassador(true);
+            }
+          } catch (e) {
+            console.error(e);
+          }
+        }
+      }
+
       const activeId = localStorage.getItem("connexode_active_user");
       if (activeId && activeId === user.id) {
         // Load latest saved state if available in dynamic users
@@ -78,7 +97,7 @@ export default function ProfileHeader({ user, track }: ProfileHeaderProps) {
       bio: bio.trim(),
       githubUrl: githubUrl.trim(),
       linkedinUrl: linkedinUrl.trim(),
-      avatarImage: avatarImage.trim(),
+      avatarImage: cleanImageUrl(avatarImage),
       avatarInitials: name.trim().substring(0, 2).toUpperCase(),
     };
 
@@ -142,10 +161,17 @@ export default function ProfileHeader({ user, track }: ProfileHeaderProps) {
         <div className="flex-1 min-w-0">
           <div className="mb-2 flex flex-wrap items-center gap-3">
             <h1 className="font-display text-3xl font-extrabold text-white">{displayUser.name}</h1>
-            <div className="flex items-center gap-1.5 rounded-full border border-cyan-400/25 bg-cyan-400/10 px-3 py-1 text-xs font-semibold text-cyan-400">
-              <BadgeCheck size={12} />
-              Verified Intern
-            </div>
+            {isAmbassador ? (
+              <div className="flex items-center gap-1.5 rounded-full border border-yellow-500/25 bg-yellow-500/10 px-3 py-1 text-xs font-semibold text-yellow-400">
+                <BadgeCheck size={12} />
+                Campus Ambassador
+              </div>
+            ) : (
+              <div className="flex items-center gap-1.5 rounded-full border border-cyan-400/25 bg-cyan-400/10 px-3 py-1 text-xs font-semibold text-cyan-400">
+                <BadgeCheck size={12} />
+                Verified Intern
+              </div>
+            )}
             {activeUser && (
               <button
                 onClick={() => setIsEditing(true)}
@@ -167,9 +193,9 @@ export default function ProfileHeader({ user, track }: ProfileHeaderProps) {
             <span className="flex items-center gap-1.5">
               <div
                 className="h-2 w-2 rounded-full"
-                style={{ backgroundColor: track.color }}
+                style={{ backgroundColor: isAmbassador ? "#EAB308" : track.color }}
               />
-              {track.title}
+              {isAmbassador ? "Campus Ambassador Program" : track.title}
             </span>
             <span className="flex items-center gap-1.5">
               <Calendar size={13} />
@@ -267,7 +293,7 @@ export default function ProfileHeader({ user, track }: ProfileHeaderProps) {
                 <input
                   type="text"
                   value={avatarImage}
-                  onChange={(e) => setAvatarImage(e.target.value)}
+                  onChange={(e) => setAvatarImage(cleanImageUrl(e.target.value))}
                   placeholder="Or paste a profile image URL..."
                   className="w-full rounded-xl border border-white/10 bg-white/5 py-2.5 px-3 text-xs text-slate-200 outline-none focus:border-cyan-400/40"
                 />
@@ -306,14 +332,26 @@ export default function ProfileHeader({ user, track }: ProfileHeaderProps) {
                 />
               </div>
 
-              {/* Locked Internship Field */}
-              <div>
-                <label className="mb-1.5 block text-2xs font-semibold uppercase tracking-wider text-slate-400">Enrolled Internship Track (Read-Only)</label>
-                <div className="w-full rounded-xl border border-white/5 bg-white/3 py-2.5 px-3 text-xs text-slate-500 font-semibold select-none flex items-center justify-between">
-                  <span>{track.title}</span>
-                  <span className="text-[9px] font-black uppercase text-red-400/60 tracking-wider">Locked</span>
+              {/* Dynamic Program / Track Display */}
+              {isAmbassador ? (
+                <div className="space-y-3">
+                  <div>
+                    <label className="mb-1.5 block text-2xs font-semibold uppercase tracking-wider text-slate-400">Active Program (Read-Only)</label>
+                    <div className="w-full rounded-xl border border-yellow-500/25 bg-yellow-500/10 py-2.5 px-3 text-xs text-yellow-400 font-semibold select-none flex items-center justify-between">
+                      <span>Campus Ambassador Program</span>
+                      <span className="text-[9px] font-black uppercase text-yellow-400 tracking-wider">Active</span>
+                    </div>
+                  </div>
                 </div>
-              </div>
+              ) : (
+                <div>
+                  <label className="mb-1.5 block text-2xs font-semibold uppercase tracking-wider text-slate-400">Enrolled Internship Track (Read-Only)</label>
+                  <div className="w-full rounded-xl border border-white/5 bg-white/3 py-2.5 px-3 text-xs text-slate-500 font-semibold select-none flex items-center justify-between">
+                    <span>{track.title}</span>
+                    <span className="text-[9px] font-black uppercase text-red-400/60 tracking-wider">Locked</span>
+                  </div>
+                </div>
+              )}
 
               <div className="pt-2">
                 <button

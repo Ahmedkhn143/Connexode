@@ -263,6 +263,10 @@ export default function DashboardSidebar() {
       <div className="border-t border-white/8 p-4">
         <Link
           href="/"
+          onClick={() => {
+            localStorage.removeItem("connexode_active_user");
+            sessionStorage.removeItem("connexode_active_user");
+          }}
           className="flex items-center gap-3 rounded-xl px-4 py-2.5 text-sm font-medium text-slate-500 transition-all hover:bg-white/5 hover:text-slate-300"
         >
           <LogOut size={15} />

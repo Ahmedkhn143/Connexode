@@ -8,7 +8,8 @@ import {
   Briefcase, Phone, Mail,
   Link2, AtSign, Video, Sparkles, Clock, Shield, BookOpen,
 } from "lucide-react";
-
+import { MOCK_USERS } from "@/lib/mock-data";
+import { cleanImageUrl } from "@/lib/utils";
 const UNIVERSITIES = [
   "FAST NUCES", "NUST", "COMSATS University", "UET Lahore", "UET Peshawar",
   "LUMS", "IBA Karachi", "NED University", "GIKI", "Air University",
@@ -116,20 +117,52 @@ export default function AmbassadorApplyPage() {
       // Check user's details
       let userEmail = "";
       let userName = "";
+      let userAvatar = "";
+
+      let foundUser = null;
       const dynamicRaw = localStorage.getItem("connexode_dynamic_users");
       if (dynamicRaw) {
         try {
           const dynamicUsers = JSON.parse(dynamicRaw);
-          const found = dynamicUsers.find((u: any) => u.id === activeUserId);
-          if (found) {
-            userEmail = found.email;
-            userName = found.name;
-          }
+          foundUser = dynamicUsers.find((u: any) => u.id === activeUserId);
         } catch (e) {}
       }
 
+      if (!foundUser) {
+        foundUser = MOCK_USERS.find((u) => u.id === activeUserId);
+      }
+
+      if (foundUser) {
+        userEmail = foundUser.email;
+        userName = foundUser.name;
+        userAvatar = foundUser.avatarImage || "";
+      }
+
       // Check ambassador status
-      const storedApps = localStorage.getItem("connexode_ambassador_applications");
+      let storedApps = localStorage.getItem("connexode_ambassador_applications");
+      if (!storedApps && userEmail.toLowerCase() === "alex@example.com") {
+        const defaultApps = [
+          {
+            id: "amb_default",
+            fullName: "Alex Johnson",
+            email: "alex@example.com",
+            phone: "03001234567",
+            city: "Karachi",
+            university: "FAST NUCES",
+            degree: "BS Computer Science",
+            semester: "6th Semester",
+            linkedin: "https://linkedin.com/in/alex-johnson",
+            reachEstimate: "100-500",
+            availability: "4-8",
+            avatarImage: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&h=150&q=80",
+            status: "APPROVED",
+            submittedAt: new Date().toISOString()
+          }
+        ];
+        localStorage.setItem("connexode_ambassador_applications", JSON.stringify(defaultApps));
+        storedApps = JSON.stringify(defaultApps);
+      }
+
       let appStatus = "NONE";
       if (storedApps && userEmail) {
         try {
@@ -151,6 +184,7 @@ export default function AmbassadorApplyPage() {
           ...f,
           fullName: userName || f.fullName,
           email: userEmail || f.email,
+          avatarImage: userAvatar || f.avatarImage,
         }));
         setRedirecting(false);
       }
@@ -402,7 +436,9 @@ export default function AmbassadorApplyPage() {
               
               <div className="grid gap-5 sm:grid-cols-2">
                 <div className="sm:col-span-2">
-                  <label className="mb-2 block text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Profile Photo *</label>
+                  <label className="mb-2 block text-[10px] font-extrabold uppercase tracking-wider text-slate-400">
+                    Profile Photo * {form.avatarImage && <span className="text-emerald-400 font-bold ml-1.5">(Pre-loaded from Account)</span>}
+                  </label>
                   
                   <div className="grid gap-4 sm:grid-cols-[1fr_2.5fr] items-center">
                     {/* Visual 3D slot for photo */}
@@ -470,7 +506,7 @@ export default function AmbassadorApplyPage() {
                         <input
                           type="text"
                           value={form.avatarImage || ""}
-                          onChange={(e) => setForm((f) => ({ ...f, avatarImage: e.target.value }))}
+                          onChange={(e) => setForm((f) => ({ ...f, avatarImage: cleanImageUrl(e.target.value) }))}
                           placeholder="Or paste profile image URL..."
                           className="w-full rounded-xl border border-white/8 bg-[#030914] pl-9 pr-4 py-2.5 text-[10px] text-slate-300 placeholder-slate-600 outline-none shadow-[inset_0_2px_4px_rgba(0,0,0,0.6)] focus:border-cyan-400/80 focus:shadow-[inset_0_2px_4px_rgba(0,0,0,0.8),_0_0_15px_rgba(34,211,238,0.2)] transition-all duration-300"
                         />

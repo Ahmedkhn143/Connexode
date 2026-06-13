@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Lock, Mail, Loader2, AlertCircle, CheckCircle, ArrowRight, ShieldAlert, Eye, EyeOff } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn, cleanImageUrl } from "@/lib/utils";
 import { MOCK_USERS } from "@/lib/mock-data";
 
 export default function RegisterForm({ initialSignUp = false }: { initialSignUp?: boolean }) {
@@ -14,6 +14,9 @@ export default function RegisterForm({ initialSignUp = false }: { initialSignUp?
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+
+  const [showWhatsAppModal, setShowWhatsAppModal] = useState(false);
+  const [refAmbassadorName, setRefAmbassadorName] = useState("");
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -144,17 +147,64 @@ export default function RegisterForm({ initialSignUp = false }: { initialSignUp?
           avatarImage,
         };
 
+        // Check for referral code and award +50 points to the ambassador
+        let referralCode = "";
+        let matchedAmbassador: any = null;
+        if (typeof window !== "undefined") {
+          const params = new URLSearchParams(window.location.search);
+          referralCode = params.get("code") || "";
+          
+          if (referralCode) {
+            const storedApps = localStorage.getItem("connexode_ambassador_applications");
+            if (storedApps) {
+              try {
+                const apps = JSON.parse(storedApps);
+                matchedAmbassador = apps.find(
+                  (a: any) => 
+                    a.status === "APPROVED" && 
+                    (a.fullName.toLowerCase().replace(/\s+/g, "-") === referralCode.toLowerCase() || 
+                     a.email.split("@")[0].toLowerCase() === referralCode.toLowerCase() ||
+                     a.id === referralCode)
+                );
+                
+                if (matchedAmbassador) {
+                  setRefAmbassadorName(matchedAmbassador.fullName);
+                  
+                  // Award +50 points to ambassador
+                  const storedUsers = localStorage.getItem("connexode_dynamic_users");
+                  if (storedUsers) {
+                    const users = JSON.parse(storedUsers);
+                    const idx = users.findIndex((u: any) => u.email.toLowerCase() === matchedAmbassador.email.toLowerCase());
+                    if (idx !== -1) {
+                      users[idx].points = (users[idx].points || 0) + 50;
+                      localStorage.setItem("connexode_dynamic_users", JSON.stringify(users));
+                    }
+                  }
+                }
+              } catch (e) {
+                console.error(e);
+              }
+            }
+          }
+        }
+
         dynamicUsers.push(newUser);
         localStorage.setItem("connexode_dynamic_users", JSON.stringify(dynamicUsers));
         localStorage.setItem("connexode_active_user", newUser.id);
+        sessionStorage.setItem("connexode_active_user", newUser.id);
 
         // Flag for WelcomeBanner on landing page
         sessionStorage.setItem("connexode_just_registered", "1");
 
-        setSuccess("Account created! Redirecting to Homepage...");
-        setTimeout(() => {
-          window.location.href = "/";
-        }, 800);
+        if (referralCode && matchedAmbassador) {
+          setLoading(false);
+          setShowWhatsAppModal(true);
+        } else {
+          setSuccess("Account created! Redirecting to Dashboard...");
+          setTimeout(() => {
+            window.location.href = "/dashboard";
+          }, 800);
+        }
       } catch (err) {
         console.error(err);
         setLoading(false);
@@ -191,6 +241,7 @@ export default function RegisterForm({ initialSignUp = false }: { initialSignUp?
         }
 
         localStorage.setItem("connexode_active_user", staticUser.id);
+        sessionStorage.setItem("connexode_active_user", staticUser.id);
         const role = staticUser.role;
 
         if (role === "ADMIN") {
@@ -221,6 +272,7 @@ export default function RegisterForm({ initialSignUp = false }: { initialSignUp?
 
       if (dynamicUser) {
         localStorage.setItem("connexode_active_user", dynamicUser.id);
+        sessionStorage.setItem("connexode_active_user", dynamicUser.id);
         const enrolledTrackId = dynamicUser.enrolledTrackId ||
           localStorage.getItem(`connexode_user_track_${dynamicUser.id}`);
 
@@ -405,7 +457,7 @@ export default function RegisterForm({ initialSignUp = false }: { initialSignUp?
                 <input
                   type="url"
                   value={avatarImage}
-                  onChange={(e) => setAvatarImage(e.target.value)}
+                  onChange={(e) => setAvatarImage(cleanImageUrl(e.target.value))}
                   placeholder="https://example.com/avatar.png"
                   className="w-full rounded-xl border border-white/10 bg-white/5 py-3 px-4 text-xs text-slate-200 outline-none focus:border-cyan-400/40 transition-colors"
                 />
@@ -474,7 +526,7 @@ export default function RegisterForm({ initialSignUp = false }: { initialSignUp?
                 <input
                   type="url"
                   value={avatarImage}
-                  onChange={(e) => setAvatarImage(e.target.value)}
+                  onChange={(e) => setAvatarImage(cleanImageUrl(e.target.value))}
                   placeholder="https://example.com/avatar.png"
                   className="w-full rounded-xl border border-white/10 bg-white/5 py-3 px-4 text-xs text-slate-200 outline-none focus:border-cyan-400/40 transition-colors"
                 />

@@ -17,7 +17,12 @@ export default function Navbar() {
     // Load active user
     if (typeof window !== "undefined") {
       const activeUserId = localStorage.getItem("connexode_active_user");
-      if (activeUserId) {
+      const sessionActive = sessionStorage.getItem("connexode_active_user");
+      
+      if (activeUserId && !sessionActive) {
+        localStorage.removeItem("connexode_active_user");
+        setActiveUser(null);
+      } else if (activeUserId) {
         // Check dynamic users first
         const dynamicRaw = localStorage.getItem("connexode_dynamic_users");
         if (dynamicRaw) {
@@ -40,6 +45,7 @@ export default function Navbar() {
   const handleLogout = () => {
     if (typeof window !== "undefined") {
       localStorage.removeItem("connexode_active_user");
+      sessionStorage.removeItem("connexode_active_user");
       setActiveUser(null);
       window.location.href = "/";
     }

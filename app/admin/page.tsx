@@ -51,6 +51,15 @@ export default function AdminDashboard() {
   const [isBonusPointsDropdownOpen, setIsBonusPointsDropdownOpen] = useState(false);
   const [isTargetAudienceDropdownOpen, setIsTargetAudienceDropdownOpen] = useState(false);
 
+  // Assigned Tasks & Q&A States
+  const [assignedTasks, setAssignedTasks] = useState<any[]>([]);
+  const [selectedAssignedTask, setSelectedAssignedTask] = useState<any | null>(null);
+  const [assignStudentId, setAssignStudentId] = useState("");
+  const [assignTaskTitle, setAssignTaskTitle] = useState("");
+  const [assignTaskDesc, setAssignTaskDesc] = useState("");
+  const [assignTaskPoints, setAssignTaskPoints] = useState(150);
+  const [adminReplyText, setAdminReplyText] = useState("");
+
   const handleAddAnnouncement = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newAnnTitle.trim() || !newAnnContent.trim()) return;
@@ -184,6 +193,16 @@ export default function AdminDashboard() {
       if (storedAmb) {
         try {
           setAmbassadorApplications(JSON.parse(storedAmb));
+        } catch (e) {
+          console.error(e);
+        }
+      }
+
+      // Load assigned tasks
+      const storedAssigned = localStorage.getItem("connexode_assigned_tasks");
+      if (storedAssigned) {
+        try {
+          setAssignedTasks(JSON.parse(storedAssigned));
         } catch (e) {
           console.error(e);
         }
@@ -427,6 +446,102 @@ export default function AdminDashboard() {
     localStorage.setItem("connexode_outreach_submissions", JSON.stringify(subs));
 
     alert(`❌ Rejected outreach activity log for ${subs[subIndex].fullName}.`);
+  };
+
+  const handleAssignTask = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!assignStudentId || !assignTaskTitle.trim() || !assignTaskDesc.trim()) {
+      alert("Please fill in all assignment fields.");
+      return;
+    }
+
+    const matchedUser = allUsers.find((u) => u.id === assignStudentId);
+    const newAssignedTask = {
+      id: `at_${Date.now()}`,
+      studentId: assignStudentId,
+      studentName: matchedUser?.name || "Unknown Ambassador",
+      studentEmail: matchedUser?.email || "",
+      taskTitle: assignTaskTitle.trim(),
+      taskDesc: assignTaskDesc.trim(),
+      points: Number(assignTaskPoints),
+      status: "ASSIGNED",
+      assignedAt: new Date().toISOString(),
+      questions: []
+    };
+
+    const updated = [newAssignedTask, ...assignedTasks];
+    setAssignedTasks(updated);
+    localStorage.setItem("connexode_assigned_tasks", JSON.stringify(updated));
+
+    // Reset fields
+    setAssignTaskTitle("");
+    setAssignTaskDesc("");
+    setAssignTaskPoints(150);
+    alert("🎉 Custom outreach task assigned successfully!");
+  };
+
+  const handleVerifyAssignedTask = (taskId: string) => {
+    const tasks = [...assignedTasks];
+    const tIndex = tasks.findIndex((t) => t.id === taskId);
+    if (tIndex === -1) return;
+
+    const task = tasks[tIndex];
+    task.status = "APPROVED";
+    setAssignedTasks(tasks);
+    localStorage.setItem("connexode_assigned_tasks", JSON.stringify(tasks));
+
+    // Award points to dynamic user
+    const dynamicUsers = JSON.parse(localStorage.getItem("connexode_dynamic_users") || "[]");
+    const uIndex = dynamicUsers.findIndex((u: any) => u.email.toLowerCase() === task.studentEmail.toLowerCase() || u.id === task.studentId);
+    if (uIndex !== -1) {
+      dynamicUsers[uIndex].points = (dynamicUsers[uIndex].points || 0) + task.points;
+      localStorage.setItem("connexode_dynamic_users", JSON.stringify(dynamicUsers));
+      // Update global users list
+      setAllUsers((prev) =>
+        prev.map((u) => (u.id === dynamicUsers[uIndex].id ? { ...u, points: dynamicUsers[uIndex].points } : u))
+      );
+    } else {
+      // Static user fallback
+      setAllUsers((prev) =>
+        prev.map((u) => (u.id === task.studentId || u.email.toLowerCase() === task.studentEmail.toLowerCase() ? { ...u, points: (u.points || 0) + task.points } : u))
+      );
+    }
+
+    alert(`✅ Task "${task.taskTitle}" verified! ${task.points} Points awarded to ${task.studentName}.`);
+  };
+
+  const handleRejectAssignedTask = (taskId: string) => {
+    const tasks = [...assignedTasks];
+    const tIndex = tasks.findIndex((t) => t.id === taskId);
+    if (tIndex === -1) return;
+
+    const task = tasks[tIndex];
+    task.status = "REJECTED";
+    setAssignedTasks(tasks);
+    localStorage.setItem("connexode_assigned_tasks", JSON.stringify(tasks));
+    alert(`❌ Task "${task.taskTitle}" rejected.`);
+  };
+
+  const handleSendAdminReply = (e: React.FormEvent, taskId: string) => {
+    e.preventDefault();
+    if (!adminReplyText.trim()) return;
+
+    const tasks = [...assignedTasks];
+    const tIndex = tasks.findIndex((t) => t.id === taskId);
+    if (tIndex === -1) return;
+
+    const task = tasks[tIndex];
+    if (!task.questions) task.questions = [];
+    const newMsg = {
+      sender: "ADMIN",
+      text: adminReplyText.trim(),
+      timestamp: new Date().toISOString()
+    };
+    task.questions.push(newMsg);
+    setAssignedTasks(tasks);
+    localStorage.setItem("connexode_assigned_tasks", JSON.stringify(tasks));
+    setSelectedAssignedTask({ ...task });
+    setAdminReplyText("");
   };
 
   const handleRejectPayment = (txId: string, trackId: string) => {
@@ -2122,6 +2237,141 @@ export default function AdminDashboard() {
                   </table>
                 </div>
               </div>
+
+              {/* Assign Custom Task Section */}
+              <div className="mt-8 pt-8 border-t border-white/5 space-y-6">
+                <div className="grid gap-6 lg:grid-cols-[1fr_2fr]">
+                  {/* Left Column: Form */}
+                  <div className="rounded-xl border border-white/8 bg-[#040f21]/40 p-5 space-y-4">
+                    <h3 className="font-display text-sm font-bold text-white flex items-center gap-1.5 uppercase tracking-wider text-[10px] text-yellow-500">
+                      Assign Custom Outreach Task
+                    </h3>
+                    <form onSubmit={handleAssignTask} className="space-y-4 text-xs">
+                      <div>
+                        <label className="block text-[10px] font-semibold text-slate-400 mb-1.5 uppercase tracking-wider">Select Ambassador student *</label>
+                        <select
+                          required
+                          value={assignStudentId}
+                          onChange={(e) => setAssignStudentId(e.target.value)}
+                          className="w-full rounded-xl border border-white/8 bg-[#020B18] px-3 py-2 text-slate-200 outline-none"
+                        >
+                          <option value="">-- Choose Candidate --</option>
+                          {allUsers.map((u) => (
+                            <option key={u.id} value={u.id}>
+                              {u.name} ({u.role}) - {u.email}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="block text-[10px] font-semibold text-slate-400 mb-1.5 uppercase tracking-wider">Task Title *</label>
+                        <input
+                          type="text"
+                          required
+                          value={assignTaskTitle}
+                          onChange={(e) => setAssignTaskTitle(e.target.value)}
+                          placeholder="e.g. Conduct a Seminar at FAST"
+                          className="w-full rounded-xl border border-white/8 bg-[#020B18] px-3 py-2 text-slate-200 outline-none"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-[10px] font-semibold text-slate-400 mb-1.5 uppercase tracking-wider">Instructions / Description *</label>
+                        <textarea
+                          required
+                          rows={3}
+                          value={assignTaskDesc}
+                          onChange={(e) => setAssignTaskDesc(e.target.value)}
+                          placeholder="Provide clear steps for the student to execute and submit..."
+                          className="w-full rounded-xl border border-white/8 bg-[#020B18] px-3 py-2 text-slate-200 outline-none"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-[10px] font-semibold text-slate-400 mb-1.5 uppercase tracking-wider">Points Reward *</label>
+                        <input
+                          type="number"
+                          required
+                          value={assignTaskPoints}
+                          onChange={(e) => setAssignTaskPoints(Number(e.target.value))}
+                          className="w-full rounded-xl border border-white/8 bg-[#020B18] px-3 py-2 text-slate-200 outline-none"
+                        />
+                      </div>
+
+                      <button
+                        type="submit"
+                        className="w-full rounded-xl bg-gradient-to-r from-yellow-500 to-amber-500 py-2.5 font-bold text-[#020B18] hover:scale-[1.01] transition-transform cursor-pointer"
+                      >
+                        Assign Task
+                      </button>
+                    </form>
+                  </div>
+
+                  {/* Right Column: List of Assigned Tasks */}
+                  <div className="space-y-4">
+                    <h3 className="font-display text-sm font-bold text-white flex items-center gap-1.5 uppercase tracking-wider text-[10px] text-cyan-400">
+                      Assigned Custom Outreach Tasks
+                    </h3>
+                    <div className="overflow-x-auto rounded-xl border border-white/5 bg-black/40">
+                      <table className="w-full text-left text-xs border-collapse">
+                        <thead>
+                          <tr className="border-b border-white/5 text-slate-500">
+                            <th className="px-4 py-3">Ambassador</th>
+                            <th className="px-4 py-3">Task Title</th>
+                            <th className="px-4 py-3">Points</th>
+                            <th className="px-4 py-3">Status</th>
+                            <th className="px-4 py-3 text-right">Action</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-white/5 text-slate-300">
+                          {assignedTasks.map((task) => (
+                            <tr key={task.id} className="hover:bg-white/2 transition-colors">
+                              <td className="px-4 py-3">
+                                <p className="font-semibold text-white">{task.studentName}</p>
+                                <p className="text-[10px] text-slate-500 truncate max-w-[120px]">{task.studentEmail}</p>
+                              </td>
+                              <td className="px-4 py-3 font-medium text-slate-200">{task.taskTitle}</td>
+                              <td className="px-4 py-3 font-bold text-yellow-400">+{task.points} PTS</td>
+                              <td className="px-4 py-3">
+                                <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold ${
+                                  task.status === "APPROVED"
+                                    ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                                    : task.status === "REJECTED"
+                                    ? "bg-red-500/10 text-red-400 border border-red-500/20"
+                                    : task.status === "SUBMITTED"
+                                    ? "bg-blue-500/10 text-blue-400 border border-blue-500/20 animate-pulse"
+                                    : "bg-yellow-500/10 text-yellow-500 border border-yellow-500/20"
+                                }`}>
+                                  {task.status}
+                                </span>
+                              </td>
+                              <td className="px-4 py-3 text-right">
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setSelectedAssignedTask(task);
+                                  }}
+                                  className="text-2xs font-bold bg-white/5 border border-white/10 px-2 py-1 rounded hover:bg-cyan-500 hover:text-[#020B18] transition-all cursor-pointer"
+                                >
+                                  Inspect Details & Chat
+                                </button>
+                              </td>
+                            </tr>
+                          ))}
+                          {assignedTasks.length === 0 && (
+                            <tr>
+                              <td colSpan={5} className="text-center text-slate-500 py-8 italic">
+                                No assigned tasks found. Assign one on the left.
+                              </td>
+                            </tr>
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           )}
         </section>
@@ -2274,6 +2524,150 @@ export default function AdminDashboard() {
                     </a>
                   </div>
                 )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Lightbox / Modal for Assigned Task Details & Q&A Chat */}
+        {selectedAssignedTask && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 p-4 backdrop-blur-sm overflow-y-auto">
+            <div className="relative max-w-2xl w-full bg-[#030914] border border-white/10 rounded-2xl overflow-hidden shadow-2xl flex flex-col my-8">
+              
+              {/* Header */}
+              <div className="flex items-center justify-between px-6 py-4 border-b border-white/5 bg-slate-950">
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="text-cyan-400" size={16} />
+                  <div>
+                    <h3 className="text-sm font-bold text-white">Assigned Task: {selectedAssignedTask.taskTitle}</h3>
+                    <p className="text-[9px] text-slate-500 font-mono">Student: {selectedAssignedTask.studentName} ({selectedAssignedTask.studentEmail})</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setSelectedAssignedTask(null)}
+                  className="rounded-lg bg-white/5 px-3 py-1.5 text-xs text-slate-400 hover:text-white hover:bg-white/10 transition-all cursor-pointer"
+                >
+                  Close
+                </button>
+              </div>
+
+              {/* Body */}
+              <div className="p-6 space-y-6 text-xs text-slate-300 overflow-y-auto max-h-[70vh]">
+                
+                {/* Task Instructions */}
+                <div>
+                  <h4 className="font-bold text-cyan-400 uppercase tracking-wider text-[10px] mb-2">Instructions</h4>
+                  <div className="rounded-xl border border-white/8 bg-white/3 p-4">
+                    <p className="leading-relaxed whitespace-pre-wrap">{selectedAssignedTask.taskDesc}</p>
+                    <p className="mt-3 text-[10px] font-bold text-yellow-500 uppercase tracking-widest font-mono">Points Value: +{selectedAssignedTask.points}</p>
+                  </div>
+                </div>
+
+                {/* Submission Proof details */}
+                {(selectedAssignedTask.status === "SUBMITTED" || selectedAssignedTask.status === "APPROVED" || selectedAssignedTask.status === "REJECTED") ? (
+                  <div>
+                    <h4 className="font-bold text-cyan-400 uppercase tracking-wider text-[10px] mb-2">Student Submission Details</h4>
+                    <div className="rounded-xl border border-white/8 bg-blue-500/5 p-4 space-y-3">
+                      {selectedAssignedTask.proofUrl && (
+                        <div>
+                          <span className="text-slate-500">Proof URL / Link:</span>
+                          <p className="mt-1">
+                            <a href={selectedAssignedTask.proofUrl} target="_blank" rel="noopener noreferrer" className="text-cyan-400 hover:underline font-mono break-all text-[11px]">
+                              {selectedAssignedTask.proofUrl}
+                            </a>
+                          </p>
+                        </div>
+                      )}
+                      {selectedAssignedTask.submissionDesc && (
+                        <div>
+                          <span className="text-slate-500">Submission Description:</span>
+                          <p className="text-slate-200 mt-1 whitespace-pre-wrap">{selectedAssignedTask.submissionDesc}</p>
+                        </div>
+                      )}
+                      {selectedAssignedTask.submittedAt && (
+                        <p className="text-[10px] text-slate-500 font-mono">Submitted on: {new Date(selectedAssignedTask.submittedAt).toLocaleString()}</p>
+                      )}
+                    </div>
+                  </div>
+                ) : null}
+
+                {/* Q&A Conversation */}
+                <div>
+                  <h4 className="font-bold text-cyan-400 uppercase tracking-wider text-[10px] mb-2">Q&A Chat Thread</h4>
+                  <div className="rounded-xl border border-white/8 bg-black/40 p-4 space-y-3 max-h-48 overflow-y-auto flex flex-col">
+                    {selectedAssignedTask.questions && selectedAssignedTask.questions.length > 0 ? (
+                      selectedAssignedTask.questions.map((q: any, i: number) => (
+                        <div
+                          key={i}
+                          className={`flex flex-col max-w-[85%] rounded-xl p-3 mb-2 ${
+                            q.sender === "ADMIN"
+                              ? "bg-cyan-500/10 border border-cyan-500/20 text-cyan-200 self-end ml-auto"
+                              : "bg-white/5 border border-white/8 text-slate-200 self-start mr-auto"
+                          }`}
+                        >
+                          <span className="text-[8px] font-bold uppercase tracking-wider text-slate-500 mb-1">
+                            {q.sender === "ADMIN" ? "You (Admin)" : selectedAssignedTask.studentName}
+                          </span>
+                          <p className="leading-relaxed">{q.text}</p>
+                          <span className="text-[7px] text-slate-600 font-mono text-right mt-1">
+                            {new Date(q.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          </span>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-center text-slate-600 italic py-4">No questions asked yet on this task.</p>
+                    )}
+                  </div>
+
+                  {/* Send Reply Form */}
+                  <form onSubmit={(e) => handleSendAdminReply(e, selectedAssignedTask.id)} className="mt-3 flex gap-2">
+                    <input
+                      type="text"
+                      value={adminReplyText}
+                      onChange={(e) => setAdminReplyText(e.target.value)}
+                      placeholder="Type a response to the student's questions..."
+                      className="flex-1 rounded-xl border border-white/8 bg-[#020B18] px-4 py-2.5 text-xs text-slate-200 outline-none"
+                    />
+                    <button
+                      type="submit"
+                      className="rounded-xl bg-cyan-500 px-4 py-2.5 text-xs font-bold text-[#020B18] hover:scale-[1.02] transition-transform cursor-pointer"
+                    >
+                      Send Message
+                    </button>
+                  </form>
+                </div>
+
+                {/* Approval Actions */}
+                <div className="pt-4 border-t border-white/5 flex items-center justify-between">
+                  <div>
+                    <span className="text-slate-500 font-semibold">Status:</span>
+                    <span className="ml-2 font-mono font-bold text-yellow-500">{selectedAssignedTask.status}</span>
+                  </div>
+
+                  {selectedAssignedTask.status === "SUBMITTED" && (
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => {
+                          handleRejectAssignedTask(selectedAssignedTask.id);
+                          setSelectedAssignedTask(null);
+                        }}
+                        className="rounded-xl bg-red-500/10 border border-red-500/20 px-5 py-2 text-xs font-bold text-red-400 hover:bg-red-500/20 transition-all cursor-pointer"
+                      >
+                        Reject Submission
+                      </button>
+                      <button
+                        onClick={() => {
+                          handleVerifyAssignedTask(selectedAssignedTask.id);
+                          setSelectedAssignedTask(null);
+                        }}
+                        className="rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 px-5 py-2 text-xs font-extrabold text-[#020B18] hover:scale-[1.02] transition-all cursor-pointer"
+                      >
+                        Approve & Reward Points
+                      </button>
+                    </div>
+                  )}
+                </div>
+
               </div>
             </div>
           </div>

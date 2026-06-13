@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import CustomCursor from "@/components/ui/CustomCursor";
+import SessionGuard from "@/components/auth/SessionGuard";
 
 export const metadata: Metadata = {
   title: "Connexode — Tech Campus Ambassador & Developer Network",
@@ -34,6 +35,7 @@ export default function RootLayout({
       </head>
       <body className="min-h-full antialiased" suppressHydrationWarning>
         <CustomCursor />
+        <SessionGuard />
         {children}
       </body>
     </html>
