@@ -84,7 +84,7 @@ export default function DashboardSidebar() {
       {/* Logo */}
       <Link href="/" className="group flex items-center gap-3 border-b border-white/8 px-6 py-5">
         <img
-          src="/logo.png"
+          src="/logo.png?v=20"
           alt="Connexode Logo"
           className="h-9 w-9 rounded-xl object-cover shadow-[0_0_16px_rgba(0,245,255,0.4)] transition-shadow duration-300 group-hover:shadow-[0_0_24px_rgba(0,245,255,0.6)]"
         />

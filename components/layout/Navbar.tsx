@@ -71,7 +71,7 @@ export default function Navbar() {
           {/* Logo */}
           <Link href="/" className="group flex items-center gap-2.5">
             <img
-              src="/logo.png"
+              src="/logo.png?v=20"
               alt="Connexode Logo"
               className="h-9 w-9 rounded-xl object-cover shadow-[0_0_20px_rgba(0,245,255,0.4)] transition-shadow duration-300 group-hover:shadow-[0_0_30px_rgba(0,245,255,0.6)] animate-pulse-slow"
             />

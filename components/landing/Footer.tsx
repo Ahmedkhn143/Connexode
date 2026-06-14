@@ -36,7 +36,7 @@ export default function Footer() {
           <div className="lg:col-span-1">
             <Link href="/" className="group mb-5 flex items-center gap-2.5">
               <img
-                src="/logo.png"
+                src="/logo.png?v=20"
                 alt="Connexode Logo"
                 className="h-9 w-9 rounded-xl object-cover shadow-[0_0_16px_rgba(0,245,255,0.4)] transition-shadow duration-300 group-hover:shadow-[0_0_24px_rgba(0,245,255,0.6)] animate-pulse-slow"
               />
