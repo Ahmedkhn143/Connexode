@@ -37,32 +37,6 @@ export default function TrustSection() {
       </div>
 
       <div className="relative mx-auto max-w-7xl">
-        {/* Stats Row */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={inView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.6 }}
-          className="mb-24 grid grid-cols-2 gap-4 lg:grid-cols-4"
-        >
-          {PLATFORM_STATS.map((stat, i) => {
-            const Icon = ICON_MAP[stat.icon] ?? Users;
-            return (
-              <motion.div
-                key={stat.label}
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={inView ? { opacity: 1, scale: 1 } : {}}
-                transition={{ duration: 0.4, delay: i * 0.08 }}
-                className="flex flex-col items-center rounded-2xl border border-white/8 bg-white/4 px-6 py-7 text-center backdrop-blur-xl"
-              >
-                <Icon size={20} className="mb-3 text-cyan-400" />
-                <p className="font-display text-3xl font-extrabold text-white lg:text-4xl">
-                  {stat.value}
-                </p>
-                <p className="mt-1 text-sm text-slate-500">{stat.label}</p>
-              </motion.div>
-            );
-          })}
-        </motion.div>
 
         {/* Two columns */}
         <div className="grid gap-10 lg:grid-cols-2">

@@ -41,7 +41,7 @@ export default function CTASection() {
               transition={{ delay: 0.2 }}
               className="mb-3 text-sm font-semibold uppercase tracking-widest text-cyan-400"
             >
-              Ready to Build?
+              Partner With Us
             </motion.p>
             <motion.h2
               initial={{ opacity: 0, y: 20 }}
@@ -49,9 +49,9 @@ export default function CTASection() {
               transition={{ delay: 0.3, duration: 0.6 }}
               className="font-display mb-4 text-4xl font-extrabold text-white lg:text-5xl"
             >
-              Your Tech Career Starts{" "}
+              Build Your Product{" "}
               <span className="bg-gradient-to-r from-cyan-400 to-teal-400 bg-clip-text text-transparent">
-                Today
+                With Us
               </span>
             </motion.h2>
             <motion.p
@@ -60,7 +60,7 @@ export default function CTASection() {
               transition={{ delay: 0.4 }}
               className="mx-auto mb-10 max-w-xl text-slate-400"
             >
-              Join the next cohort starting soon. Drop your email and we&apos;ll send you everything you need to get started — completely free.
+              Drop your email below to receive our agency credentials deck, tech stack overview, and schedule a free design & architecture consultation.
             </motion.p>
 
             {status === "done" ? (
@@ -71,7 +71,7 @@ export default function CTASection() {
               >
                 <div className="flex items-center gap-2 rounded-2xl bg-emerald-500/15 px-8 py-4 text-emerald-400">
                   <CheckCircle2 size={20} />
-                  <span className="font-semibold">You&apos;re on the list! Check your inbox.</span>
+                  <span className="font-semibold">Message received! We will contact you within 24 hours.</span>
                 </div>
               </motion.div>
             ) : (
@@ -86,20 +86,20 @@ export default function CTASection() {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Enter your email address"
+                  placeholder="Enter your business email"
                   required
                   className="flex-1 rounded-xl border border-white/10 bg-white/5 px-5 py-3.5 text-sm text-slate-200 placeholder-slate-600 outline-none transition-all focus:border-cyan-400/40 focus:bg-white/8 focus:ring-2 focus:ring-cyan-400/15"
                 />
                 <button
                   type="submit"
                   disabled={status === "loading"}
-                  className="flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-cyan-500 to-teal-500 px-7 py-3.5 text-sm font-bold text-[#020B18] shadow-[0_0_20px_rgba(0,245,255,0.3)] transition-all hover:shadow-[0_0_30px_rgba(0,245,255,0.5)] hover:scale-105 disabled:opacity-70 disabled:scale-100"
+                  className="flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-cyan-500 to-teal-500 px-7 py-3.5 text-sm font-bold text-[#020B18] shadow-[0_0_20px_rgba(0,245,255,0.3)] transition-all hover:shadow-[0_0_30px_rgba(0,245,255,0.5)] hover:scale-105 disabled:opacity-70 disabled:scale-100 cursor-pointer"
                 >
                   {status === "loading" ? (
                     <Loader2 size={16} className="animate-spin" />
                   ) : (
                     <>
-                      Get Early Access <ArrowRight size={14} />
+                      Request Consultation <ArrowRight size={14} />
                     </>
                   )}
                 </button>
@@ -107,7 +107,7 @@ export default function CTASection() {
             )}
 
             <p className="mt-4 text-xs text-slate-600">
-              No spam. No credit card. Unsubscribe anytime.
+              No marketing spam. We respect your confidentiality.
             </p>
           </div>
         </motion.div>

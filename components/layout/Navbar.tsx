@@ -85,8 +85,7 @@ export default function Navbar() {
             <ul className="hidden items-center gap-6 md:flex">
                {!activeUser ? (
                 <>
-                  {/* <li><a href="#tracks" className="text-sm font-medium text-slate-400 hover:text-cyan-400 transition-colors">Tracks</a></li> */}
-                  {/* <li><a href="#how-it-works" className="text-sm font-medium text-slate-400 hover:text-cyan-400 transition-colors">How It Works</a></li> */}
+                  <li><Link href="/#services" className="text-sm font-medium text-slate-400 hover:text-cyan-400 transition-colors">Services</Link></li>
                   <li>
                     <Link href="/ambassador" className="flex items-center gap-1 text-sm font-medium text-yellow-400 hover:text-yellow-300 transition-colors">
                       <Star size={12} className="fill-yellow-400" />

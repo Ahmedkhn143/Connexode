@@ -1,6 +1,12 @@
 import type { Metadata } from "next";
 import Navbar from "@/components/layout/Navbar";
 import HeroSection from "@/components/landing/HeroSection";
+import ServicesSection from "@/components/landing/ServicesSection";
+import PortfolioSection from "@/components/landing/PortfolioSection";
+import TechStackSection from "@/components/landing/TechStackSection";
+import EngagementSection from "@/components/landing/EngagementSection";
+import IndustriesSection from "@/components/landing/IndustriesSection";
+import ContactModalTrigger from "@/components/landing/ContactModalTrigger";
 import TracksSection from "@/components/landing/TracksSection";
 import HowItWorksSection from "@/components/landing/HowItWorksSection";
 import CompanyDetailsSection from "@/components/landing/CompanyDetailsSection";
@@ -21,6 +27,11 @@ export default function HomePage() {
     <main className="relative bg-[#020B18]">
       <Navbar />
       <HeroSection />
+      <ServicesSection />
+      <PortfolioSection />
+      <TechStackSection />
+      <EngagementSection />
+      <IndustriesSection />
       {/* <TracksSection /> */}
       {/* <HowItWorksSection /> */}
       <CompanyDetailsSection />
@@ -29,7 +40,11 @@ export default function HomePage() {
       <CTASection />
       <Footer />
       <WelcomeBanner />
+      <ContactModalTrigger />
     </main>
   );
 }
+
+
+
 

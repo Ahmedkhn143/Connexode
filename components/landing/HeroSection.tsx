@@ -6,21 +6,21 @@ import { motion } from "framer-motion";
 import { ArrowRight, Sparkles, Terminal } from "lucide-react";
 
 const TYPEWRITER_WORDS = [
-  "Developer Leadership",
-  "Campus Tech Events",
-  "Peer Mentorship",
-  "Open Source Growth",
-  "Technical Advocacy",
-  "Community Building",
+  "AI Automations & Agents",
+  "Full-Stack Web Apps",
+  "Custom Software Solutions",
+  "Mobile App Development",
+  "Cloud Ops & Integrations",
+  "Staff Augmentation",
 ];
 
 const TERMINAL_LINES = [
-  { prefix: "$", text: " connexode join --ambassador", color: "text-slate-400" },
-  { prefix: "✓", text: " Application Registered Successfully", color: "text-emerald-400" },
-  { prefix: "→", text: " Welcome to Connexode Tech Leaders", color: "text-cyan-400" },
-  { prefix: "$", text: " connexode run --campus-community", color: "text-slate-400" },
-  { prefix: "✓", text: " Network initiated on 12 campuses", color: "text-emerald-400" },
-  { prefix: "🏆", text: " Badge Unlocked: Campus Leader!", color: "text-yellow-400" },
+  { prefix: "$", text: " connexode deploy --ai-agent", color: "text-slate-400" },
+  { prefix: "✓", text: " Vector DB & LLM Pipeline Connected", color: "text-emerald-400" },
+  { prefix: "→", text: " Agent status: Active & Autonomously Optimizing", color: "text-cyan-400" },
+  { prefix: "$", text: " connexode build --custom-saas", color: "text-slate-400" },
+  { prefix: "✓", text: " Microservices & CI/CD Pipelines Online", color: "text-emerald-400" },
+  { prefix: "🚀", text: " Deploy: Production Build Successful!", color: "text-yellow-400" },
 ];
 
 function useTypewriter(words: string[], speed = 80, pause = 2000) {
@@ -99,7 +99,7 @@ export default function HeroSection() {
             className="mb-6 inline-flex items-center gap-2 rounded-full border border-cyan-400/20 bg-cyan-400/8 px-4 py-2 text-sm font-medium text-cyan-400"
           >
             <Sparkles size={14} />
-            The #1 Tech Campus Ambassador Program — 2026
+            Empowering Startups & Enterprises Globally — 2026
           </motion.div>
 
           {/* Headline */}
@@ -109,11 +109,11 @@ export default function HeroSection() {
             transition={{ duration: 0.7, delay: 0.1 }}
             className="mb-6 font-display text-5xl font-extrabold leading-[1.08] tracking-tight text-white lg:text-6xl xl:text-7xl"
           >
-            Build Real Skills.{" "}
+            Building Software.{" "}
             <span className="bg-gradient-to-r from-cyan-400 to-teal-400 bg-clip-text text-transparent">
-              Lead Your Campus.
+              At the Speed of AI.
             </span>{" "}
-            Empower Peers.
+            Delivering Value.
           </motion.h1>
 
           {/* Sub-headline with typewriter */}
@@ -121,14 +121,14 @@ export default function HeroSection() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.25 }}
-            className="mb-10 max-w-xl text-lg text-slate-400 lg:text-xl"
+            className="mb-10 max-w-xl text-lg text-slate-400 lg:text-xl font-normal leading-relaxed"
           >
-            Master{" "}
+            Scale your engineering team and accelerate your technology life cycle with high-performance{" "}
             <span className="font-semibold text-cyan-400">
               {displayedTrack}
               <span className="animate-blink border-r-2 border-cyan-400">&nbsp;</span>
             </span>{" "}
-            through leadership, campus tech events, community mentoring, and verified reference credentials.
+            solutions, autonomous AI pipelines, and our elite developer placement pool.
           </motion.p>
 
           {/* CTAs */}
@@ -138,18 +138,18 @@ export default function HeroSection() {
             transition={{ duration: 0.6, delay: 0.4 }}
             className="flex flex-col items-center gap-4 sm:flex-row lg:items-start"
           >
-            <Link
-              href="/ambassador"
-              className="group flex items-center gap-2.5 rounded-2xl bg-gradient-to-r from-cyan-500 to-teal-500 px-8 py-4 text-base font-bold text-[#020B18] shadow-[0_0_30px_rgba(0,245,255,0.35)] transition-all duration-300 hover:scale-105 hover:shadow-[0_0_50px_rgba(0,245,255,0.55)]"
+            <button
+              onClick={() => window.dispatchEvent(new Event("open-contact-modal"))}
+              className="group flex items-center gap-2.5 rounded-2xl bg-gradient-to-r from-cyan-500 to-teal-500 px-8 py-4 text-base font-bold text-[#020B18] shadow-[0_0_30px_rgba(0,245,255,0.35)] transition-all duration-300 hover:scale-105 hover:shadow-[0_0_50px_rgba(0,245,255,0.55)] cursor-pointer"
             >
-              Join Campus Ambassador Program
+              Let's Talk Business
               <ArrowRight size={18} className="transition-transform group-hover:translate-x-1" />
-            </Link>
+            </button>
             <Link
               href="/ambassador"
               className="flex items-center gap-2.5 rounded-2xl border border-white/15 bg-white/5 px-8 py-4 text-base font-semibold text-slate-200 backdrop-blur-sm transition-all duration-300 hover:border-white/30 hover:bg-white/10"
             >
-              Learn More
+              Explore Careers & Internships
             </Link>
           </motion.div>
 
@@ -171,7 +171,7 @@ export default function HeroSection() {
               ))}
             </div>
             <span>
-              <span className="font-semibold text-slate-300">12,400+</span> community members
+              Unlocking access to <span className="font-semibold text-slate-300">2,000+</span> vetted engineers & campus leaders
             </span>
           </motion.div>
         </div>

@@ -34,6 +34,8 @@ export default function DashboardPage() {
   const [questions, setQuestions] = useState<any[]>([]);
   const [newQuestion, setNewQuestion] = useState("");
   const [announcements, setAnnouncements] = useState<any[]>([]);
+  const [supportMessages, setSupportMessages] = useState<any[]>([]);
+  const [newSupportMsg, setNewSupportMsg] = useState("");
 
   // ── Ambassador Application States ──
   const [fullName, setFullName] = useState("");
@@ -77,6 +79,47 @@ export default function DashboardPage() {
     }
   };
 
+  const loadSupportMessages = () => {
+    if (typeof window !== "undefined") {
+      const stored = localStorage.getItem("connexode_global_chats");
+      if (stored) {
+        try {
+          setSupportMessages(JSON.parse(stored));
+        } catch (e) {
+          console.error(e);
+        }
+      } else {
+        const defaultMessages = [
+          { id: "sm_1", studentId: "usr_001", studentName: "Alex Johnson", sender: "STUDENT", text: "Hello Admin, I organized a webinar at FAST Karachi today. Should I upload the recording Link?", timestamp: new Date(Date.now() - 3600000 * 2).toISOString() },
+          { id: "sm_2", studentId: "usr_001", studentName: "Alex Johnson", sender: "ADMIN", text: "Yes Alex! Please upload the Drive or YouTube link to the outreach logs queue along with expected peers reached.", timestamp: new Date(Date.now() - 3600000 * 1.8).toISOString() }
+        ];
+        localStorage.setItem("connexode_global_chats", JSON.stringify(defaultMessages));
+        setSupportMessages(defaultMessages);
+      }
+    }
+  };
+
+  const handleSendSupportMsg = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newSupportMsg.trim() || !activeUser) return;
+
+    const newMessage = {
+      id: `msg_${Date.now()}`,
+      studentId: activeUser.id,
+      studentName: activeUser.name,
+      sender: "STUDENT",
+      text: newSupportMsg.trim(),
+      timestamp: new Date().toISOString()
+    };
+
+    const stored = localStorage.getItem("connexode_global_chats");
+    const current = stored ? JSON.parse(stored) : [];
+    const updated = [...current, newMessage];
+    setSupportMessages(updated);
+    localStorage.setItem("connexode_global_chats", JSON.stringify(updated));
+    setNewSupportMsg("");
+  };
+
   useEffect(() => {
     const user = getActiveUser();
     if (!user) {
@@ -105,6 +148,7 @@ export default function DashboardPage() {
         }
       }
       loadQuestions();
+      loadSupportMessages();
 
       // Load announcements
       if (typeof window !== "undefined") {
@@ -1241,28 +1285,55 @@ export default function DashboardPage() {
       </div>
 
       {/* Support / Coordinator chat */}
-      <div className="rounded-2xl border border-white/8 bg-white/4 p-6 backdrop-blur-xl">
-        <h3 className="font-display text-lg font-bold text-white flex items-center gap-2">
-          <MessageSquare className="text-cyan-400" size={20} />
-          Coordinator Support Channels
-        </h3>
-        <p className="text-xs text-slate-500">Have a query or need support coordinating campus activities? Send a direct query to the Ambassador Management team below.</p>
+      <div className="rounded-2xl border border-white/8 bg-white/4 p-6 backdrop-blur-xl space-y-4">
+        <div>
+          <h3 className="font-display text-lg font-bold text-white flex items-center gap-2">
+            <MessageSquare className="text-cyan-400" size={20} />
+            Direct Admin Support Chat
+          </h3>
+          <p className="text-xs text-slate-500 mt-0.5">Have a query or need support coordinating campus activities? Chat directly with the Ambassador Management team below.</p>
+        </div>
 
-        <form onSubmit={handleAskQuestion} className="space-y-3 mt-4">
-          <textarea
+        {/* Support Chat thread */}
+        <div className="max-h-60 overflow-y-auto bg-black/40 p-4 rounded-xl border border-white/5 space-y-3 flex flex-col">
+          {supportMessages.filter((m) => m.studentId === activeUser.id).map((m, i) => (
+            <div
+              key={m.id || i}
+              className={`max-w-[85%] rounded-xl p-3 flex flex-col ${
+                m.sender === "STUDENT"
+                  ? "bg-cyan-500/10 border border-cyan-500/20 text-cyan-200 self-end ml-auto"
+                  : "bg-white/5 border border-white/8 text-slate-200 self-start mr-auto"
+              }`}
+            >
+              <span className="text-[8px] font-bold uppercase tracking-wider text-slate-500 mb-1">
+                {m.sender === "STUDENT" ? "You" : "Coordinator / Admin"}
+              </span>
+              <p className="text-xs leading-relaxed whitespace-pre-wrap">{m.text}</p>
+              <span className="text-[7px] text-slate-600 font-mono text-right mt-1">
+                {new Date(m.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+              </span>
+            </div>
+          ))}
+          {supportMessages.filter((m) => m.studentId === activeUser.id).length === 0 && (
+            <p className="text-center text-slate-600 italic py-6">No support messages sent yet. Start the conversation below!</p>
+          )}
+        </div>
+
+        <form onSubmit={handleSendSupportMsg} className="flex gap-2">
+          <input
+            type="text"
             required
-            rows={3}
-            value={newQuestion}
-            onChange={(e) => setNewQuestion(e.target.value)}
-            placeholder="Describe your question or request..."
-            className="w-full rounded-xl border border-white/10 bg-[#030c1c] px-4 py-3 text-xs text-slate-200 outline-none focus:border-cyan-400/40"
+            value={newSupportMsg}
+            onChange={(e) => setNewSupportMsg(e.target.value)}
+            placeholder="Type a support query or request help..."
+            className="flex-1 rounded-xl border border-white/10 bg-[#030c1c] px-4 py-3 text-xs text-slate-200 outline-none focus:border-cyan-400/40"
           />
           <button
             type="submit"
-            className="flex items-center justify-center gap-1.5 rounded-xl bg-cyan-400 px-6 py-2.5 text-xs font-bold text-[#020B18] hover:scale-[1.01] transition-transform cursor-pointer"
+            className="flex items-center justify-center gap-1.5 rounded-xl bg-cyan-400 px-6 py-3 text-xs font-bold text-[#020B18] hover:scale-[1.01] transition-transform cursor-pointer"
           >
             <Send size={12} />
-            Send Query to Coordinator
+            Send Message
           </button>
         </form>
       </div>
