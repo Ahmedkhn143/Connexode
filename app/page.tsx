@@ -3,6 +3,7 @@ import Navbar from "@/components/layout/Navbar";
 import HeroSection from "@/components/landing/HeroSection";
 import ServicesSection from "@/components/landing/ServicesSection";
 import PortfolioSection from "@/components/landing/PortfolioSection";
+import WebDemoSection from "@/components/landing/WebDemoSection";
 import TechStackSection from "@/components/landing/TechStackSection";
 import EngagementSection from "@/components/landing/EngagementSection";
 import IndustriesSection from "@/components/landing/IndustriesSection";
@@ -29,6 +30,7 @@ export default function HomePage() {
       <HeroSection />
       <ServicesSection />
       <PortfolioSection />
+      <WebDemoSection />
       <TechStackSection />
       <EngagementSection />
       <IndustriesSection />
@@ -44,6 +46,7 @@ export default function HomePage() {
     </main>
   );
 }
+
 
 
 

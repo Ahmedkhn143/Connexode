@@ -23,9 +23,10 @@ export default async function RegisterPage({
       <div className="absolute bottom-0 right-0 w-96 h-96 bg-purple-500/5 rounded-full blur-[120px] pointer-events-none" />
 
       {/* Left side: Premium Brand Highlights */}
-      <div className="hidden lg:flex lg:w-[45%] flex-col justify-between p-12 bg-gradient-to-br from-[#041126] to-[#020B18] border-r border-white/5 relative overflow-hidden">
+      <div className="brand-panel hidden lg:flex lg:w-[45%] flex-col justify-between p-12 bg-gradient-to-br from-[#041126] to-[#020B18] border-r border-white/5 relative overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-cyan-500/5 via-transparent to-transparent pointer-events-none" />
         
+
         {/* Brand logo */}
         <Link href="/" className="group flex items-center gap-2.5 relative z-10">
           <img

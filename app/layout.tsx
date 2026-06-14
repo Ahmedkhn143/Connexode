@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import CustomCursor from "@/components/ui/CustomCursor";
 import SessionGuard from "@/components/auth/SessionGuard";
+import ThemeToggle from "@/components/ui/ThemeToggle";
 
 export const metadata: Metadata = {
   title: "Connexode — Tech Campus Ambassador & Developer Network",
@@ -25,7 +26,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className="h-full"
+      className="h-full light"
       data-scroll-behavior="smooth"
     >
       <head>
@@ -37,8 +38,10 @@ export default function RootLayout({
         <CustomCursor />
         <SessionGuard />
         {children}
+        <ThemeToggle />
       </body>
     </html>
   );
 }
+
 
