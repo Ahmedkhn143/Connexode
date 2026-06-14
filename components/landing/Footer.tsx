@@ -35,9 +35,11 @@ export default function Footer() {
           {/* Brand */}
           <div className="lg:col-span-1">
             <Link href="/" className="group mb-5 flex items-center gap-2.5">
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-400 to-teal-500 shadow-[0_0_16px_rgba(0,245,255,0.4)]">
-                <Code2 size={18} className="text-[#020B18]" />
-              </div>
+              <img
+                src="/logo.png"
+                alt="Connexode Logo"
+                className="h-9 w-9 rounded-xl object-cover shadow-[0_0_16px_rgba(0,245,255,0.4)] transition-shadow duration-300 group-hover:shadow-[0_0_24px_rgba(0,245,255,0.6)] animate-pulse-slow"
+              />
               <span className="font-display text-xl font-bold text-white">
                 Connex<span className="text-cyan-400">ode</span>
               </span>
