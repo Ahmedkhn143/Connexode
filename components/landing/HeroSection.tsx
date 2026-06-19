@@ -138,18 +138,12 @@ export default function HeroSection() {
             transition={{ duration: 0.6, delay: 0.4 }}
             className="flex flex-col items-center gap-4 sm:flex-row lg:items-start"
           >
-            <button
-              onClick={() => window.dispatchEvent(new Event("open-contact-modal"))}
+            <Link
+              href="/register"
               className="group flex items-center gap-2.5 rounded-2xl bg-gradient-to-r from-cyan-500 to-teal-500 px-8 py-4 text-base font-bold text-[#020B18] shadow-[0_0_30px_rgba(0,245,255,0.35)] transition-all duration-300 hover:scale-105 hover:shadow-[0_0_50px_rgba(0,245,255,0.55)] cursor-pointer"
             >
-              Let's Talk Business
+              Get Started Now
               <ArrowRight size={18} className="transition-transform group-hover:translate-x-1" />
-            </button>
-            <Link
-              href="/ambassador"
-              className="flex items-center gap-2.5 rounded-2xl border border-white/15 bg-white/5 px-8 py-4 text-base font-semibold text-slate-200 backdrop-blur-sm transition-all duration-300 hover:border-white/30 hover:bg-white/10"
-            >
-              Explore Careers & Internships
             </Link>
           </motion.div>
 

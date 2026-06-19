@@ -85,34 +85,18 @@ export default function Navbar() {
             <ul className="hidden items-center gap-6 md:flex">
                {!activeUser ? (
                 <>
-                  <li><Link href="/#services" className="text-sm font-medium text-slate-400 hover:text-cyan-400 transition-colors">Services</Link></li>
-                  <li>
-                    <Link href="/ambassador" className="flex items-center gap-1 text-sm font-medium text-yellow-400 hover:text-yellow-300 transition-colors">
-                      <Star size={12} className="fill-yellow-400" />
-                      Ambassador Program
-                    </Link>
-                  </li>
-                  <li><Link href="/leaderboard" className="text-sm font-medium text-slate-400 hover:text-cyan-400 transition-colors">Leaderboard</Link></li>
-                  <li><Link href="/events" className="text-sm font-medium text-slate-400 hover:text-cyan-400 transition-colors">Events</Link></li>
+                  <li><Link href="/about" className="text-sm font-medium text-slate-400 hover:text-cyan-400 transition-colors">About</Link></li>
+                  <li><Link href="/services" className="text-sm font-medium text-slate-400 hover:text-cyan-400 transition-colors">Services</Link></li>
+                  <li><Link href="/careers" className="text-sm font-medium text-slate-400 hover:text-cyan-400 transition-colors">Careers</Link></li>
+                  <li><Link href="/contact" className="text-sm font-medium text-slate-400 hover:text-cyan-400 transition-colors">Contact</Link></li>
                 </>
               ) : (
                 // Logged-in student quick links
                 <>
-                  <li>
-                    <Link href="/events" className="text-sm font-medium text-slate-400 hover:text-cyan-400 transition-colors">Events</Link>
-                  </li>
-                  <li>
-                    <Link href="/leaderboard" className="text-sm font-medium text-slate-400 hover:text-cyan-400 transition-colors">Leaderboard</Link>
-                  </li>
-                  <li>
-                    <Link
-                      href="/ambassador"
-                      className="flex items-center gap-1.5 text-sm font-medium text-yellow-400 hover:text-yellow-300 transition-colors"
-                    >
-                      <Star size={13} className="fill-yellow-400" />
-                      Ambassador
-                    </Link>
-                  </li>
+                  <li><Link href="/about" className="text-sm font-medium text-slate-400 hover:text-cyan-400 transition-colors">About</Link></li>
+                  <li><Link href="/services" className="text-sm font-medium text-slate-400 hover:text-cyan-400 transition-colors">Services</Link></li>
+                  <li><Link href="/careers" className="text-sm font-medium text-slate-400 hover:text-cyan-400 transition-colors">Careers</Link></li>
+                  <li><Link href="/contact" className="text-sm font-medium text-slate-400 hover:text-cyan-400 transition-colors">Contact</Link></li>
                 </>
               )}
             </ul>
@@ -172,10 +156,10 @@ export default function Navbar() {
                   Sign In
                 </Link>
                 <Link
-                  href="/ambassador"
+                  href="/register"
                   className="group flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-cyan-500 to-teal-500 px-5 py-2.5 text-sm font-semibold text-[#020B18] shadow-[0_0_20px_rgba(0,245,255,0.3)] transition-all duration-300 hover:shadow-[0_0_30px_rgba(0,245,255,0.5)] hover:scale-105"
                 >
-                  Apply Ambassador
+                  Get Started
                   <ChevronRight size={14} className="transition-transform group-hover:translate-x-0.5" />
                 </Link>
               </>
@@ -202,20 +186,10 @@ export default function Navbar() {
           <div className="flex flex-col gap-1 px-6 py-4">
             {activeUser ? (
               <>
-                {role === "STUDENT" && (
-                  <>
-                    <Link href="/events" className="rounded-lg px-4 py-3 text-sm font-medium text-slate-300 hover:bg-white/5 hover:text-cyan-400" onClick={() => setMobileOpen(false)}>Events</Link>
-                    <Link href="/leaderboard" className="rounded-lg px-4 py-3 text-sm font-medium text-slate-300 hover:bg-white/5 hover:text-cyan-400" onClick={() => setMobileOpen(false)}>Leaderboard</Link>
-                    <Link
-                      href="/ambassador"
-                      className="rounded-lg px-4 py-3 text-sm font-medium text-yellow-400 hover:bg-yellow-500/5 flex items-center gap-2"
-                      onClick={() => setMobileOpen(false)}
-                    >
-                      <Star size={14} className="fill-yellow-400" />
-                      Ambassador Program
-                    </Link>
-                  </>
-                )}
+                <Link href="/about" className="rounded-lg px-4 py-3 text-sm font-medium text-slate-300 hover:bg-white/5 hover:text-cyan-400" onClick={() => setMobileOpen(false)}>About</Link>
+                <Link href="/services" className="rounded-lg px-4 py-3 text-sm font-medium text-slate-300 hover:bg-white/5 hover:text-cyan-400" onClick={() => setMobileOpen(false)}>Services</Link>
+                <Link href="/careers" className="rounded-lg px-4 py-3 text-sm font-medium text-slate-300 hover:bg-white/5 hover:text-cyan-400" onClick={() => setMobileOpen(false)}>Careers</Link>
+                <Link href="/contact" className="rounded-lg px-4 py-3 text-sm font-medium text-slate-300 hover:bg-white/5 hover:text-cyan-400" onClick={() => setMobileOpen(false)}>Contact</Link>
                 <div className="mt-3 flex flex-col gap-2">
                   <Link
                     href={dashboardLink}
@@ -234,17 +208,13 @@ export default function Navbar() {
               </>
             ) : (
               <>
-                {/* <a href="#tracks" className="rounded-lg px-4 py-3 text-sm font-medium text-slate-300 hover:bg-white/5 hover:text-cyan-400" onClick={() => setMobileOpen(false)}>Tracks</a> */}
-                {/* <a href="#how-it-works" className="rounded-lg px-4 py-3 text-sm font-medium text-slate-300 hover:bg-white/5 hover:text-cyan-400" onClick={() => setMobileOpen(false)}>How It Works</a> */}
-                <Link href="/ambassador" className="rounded-lg px-4 py-3 text-sm font-medium text-yellow-400 hover:bg-yellow-500/5 flex items-center gap-2" onClick={() => setMobileOpen(false)}>
-                  <Star size={13} className="fill-yellow-400" />
-                  Ambassador Program
-                </Link>
-                <Link href="/leaderboard" className="rounded-lg px-4 py-3 text-sm font-medium text-slate-300 hover:bg-white/5 hover:text-cyan-400" onClick={() => setMobileOpen(false)}>Leaderboard</Link>
-                <Link href="/events" className="rounded-lg px-4 py-3 text-sm font-medium text-slate-300 hover:bg-white/5 hover:text-cyan-400" onClick={() => setMobileOpen(false)}>Events</Link>
+                <Link href="/about" className="rounded-lg px-4 py-3 text-sm font-medium text-slate-300 hover:bg-white/5 hover:text-cyan-400" onClick={() => setMobileOpen(false)}>About</Link>
+                <Link href="/services" className="rounded-lg px-4 py-3 text-sm font-medium text-slate-300 hover:bg-white/5 hover:text-cyan-400" onClick={() => setMobileOpen(false)}>Services</Link>
+                <Link href="/careers" className="rounded-lg px-4 py-3 text-sm font-medium text-slate-300 hover:bg-white/5 hover:text-cyan-400" onClick={() => setMobileOpen(false)}>Careers</Link>
+                <Link href="/contact" className="rounded-lg px-4 py-3 text-sm font-medium text-slate-300 hover:bg-white/5 hover:text-cyan-400" onClick={() => setMobileOpen(false)}>Contact</Link>
                 <div className="mt-3 flex flex-col gap-2">
                   <Link href="/register" className="rounded-lg px-4 py-3 text-center text-sm font-medium text-slate-400 hover:text-white" onClick={() => setMobileOpen(false)}>Sign In</Link>
-                  <Link href="/ambassador" className="rounded-xl bg-gradient-to-r from-cyan-500 to-teal-500 px-4 py-3 text-center text-sm font-semibold text-[#020B18]" onClick={() => setMobileOpen(false)}>Apply Ambassador</Link>
+                  <Link href="/register" className="rounded-xl bg-gradient-to-r from-cyan-500 to-teal-500 px-4 py-3 text-center text-sm font-semibold text-[#020B18]" onClick={() => setMobileOpen(false)}>Get Started</Link>
                 </div>
               </>
             )}

@@ -650,8 +650,8 @@ export default function RegisterForm({ initialSignUp = false }: { initialSignUp?
           </button>
         </form>
 
-        {/* Mentor Application Trigger Commented Out */}
-        {/* <div className="text-center pt-2 border-t border-white/5">
+        {/* Mentor Application Trigger */}
+        <div className="text-center pt-2 border-t border-white/5">
           {!isMentorApply ? (
             <button
               type="button"
@@ -679,7 +679,7 @@ export default function RegisterForm({ initialSignUp = false }: { initialSignUp?
               ← Back to Student Sign In / Sign Up
             </button>
           )}
-        </div> */}
+        </div>
       </div>
     </div>
   );

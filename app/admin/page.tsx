@@ -745,7 +745,6 @@ export default function AdminDashboard() {
         <nav className="flex-1 px-3 py-3 space-y-1 overflow-y-auto">
           {([
             { id: "dashboard", label: "Overview Dashboard", icon: LineChart, badge: null },
-            /*
             { id: "students", label: "Enrolled Interns", icon: Users, badge: totalStudents },
             { id: "mentors", label: "Mentor Performance", icon: GraduationCap, badge: mentors.length },
             { id: "tracks", label: "Curriculum Tracks", icon: GitBranch, badge: totalTracks },
@@ -753,7 +752,6 @@ export default function AdminDashboard() {
             { id: "audits", label: "Audit Feed", icon: History, badge: null },
             { id: "payments", label: "Approvals Queue", icon: Clock, badge: payments.filter((p) => p.status === "PENDING").length || null, badgeAlert: true },
             { id: "mentor_applications", label: "Mentor Applications", icon: GraduationCap, badge: mentorApplications.filter((a) => a.status === "PENDING").length || null, badgeAlert: true },
-            */
             { id: "ambassador_applications", label: "Ambassador Apps", icon: Star, badge: ambassadorApplications.filter((a) => a.status === "PENDING").length || null, badgeAlert: true },
             { id: "support_inbox", label: "Support Inbox", icon: MessageSquare, badge: null },
             { id: "announcements", label: "Announcements Board", icon: ShieldAlert, badge: null },
