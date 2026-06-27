@@ -12,6 +12,8 @@ import {
 } from "lucide-react";
 import { AICareerAdvisor } from "@/components/dashboard/AICareerAdvisor";
 
+export const dynamic = "force-dynamic";
+
 // 8-week roadmap topics per track
 const trackRoadmap: Record<string, string[]> = {
   "Frontend Development": [

@@ -9,8 +9,9 @@ import { sendStatusUpdate } from "@/lib/email";
 
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   // ── Auth check ───────────────────────────────────────────────────────────
   const session = await auth();
   if (!session?.user || (session.user as { role?: string }).role !== "ADMIN") {
@@ -28,7 +29,7 @@ export async function PATCH(
 
     // ── Update DB ─────────────────────────────────────────────────────────
     const updated = await prisma.application.update({
-      where: { id: params.id },
+      where: { id },
       data:  { status },
     });
 

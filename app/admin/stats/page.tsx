@@ -5,6 +5,8 @@
 import { prisma } from "@/lib/prisma";
 import { BarChart2 } from "lucide-react";
 
+export const dynamic = "force-dynamic";
+
 async function getStats() {
   const [
     totalUsers,

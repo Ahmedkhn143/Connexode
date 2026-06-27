@@ -7,13 +7,16 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { ApplicationActions } from "@/components/admin/ApplicationActions";
 
+export const dynamic = "force-dynamic";
+
 export default async function ApplicationDetailPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
+  const { id } = await params;
   const app = await prisma.application.findUnique({
-    where: { id: params.id },
+    where: { id },
   });
 
   if (!app) notFound();

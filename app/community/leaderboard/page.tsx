@@ -172,12 +172,7 @@ export default function LeaderboardPage() {
           {/* Table header */}
           <div
             style={{ backgroundColor: "#082038", borderBottom: "1px solid rgba(126,200,216,0.08)" }}
-            className="grid px-6 py-3"
-            style2={{
-              gridTemplateColumns: tab === "ambassadors"
-                ? "48px 1fr 120px 100px 80px"
-                : "48px 1fr 120px 100px 80px",
-            }}
+            className="px-6 py-3"
           >
             {tab === "ambassadors" ? (
               <div className="grid w-full gap-4" style={{ gridTemplateColumns: "48px 1fr 130px 110px 80px" }}>
@@ -258,9 +253,9 @@ function LeaderboardRow({
       style={{
         backgroundColor: entry.rank <= 3 ? `rgba(${entry.rank === 1 ? "245,158,11" : entry.rank === 2 ? "148,163,184" : "192,132,252"},0.04)` : "transparent",
         borderBottom: isLast ? "none" : "1px solid rgba(126,200,216,0.06)",
+        gridTemplateColumns: "48px 1fr 130px 110px 80px",
       }}
       className="grid w-full items-center gap-4 px-6 py-4 transition-colors hover:bg-[rgba(8,32,56,0.5)]"
-      style={{ gridTemplateColumns: "48px 1fr 130px 110px 80px" }}
     >
       {/* Rank */}
       <div className="flex items-center justify-start">

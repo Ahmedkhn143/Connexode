@@ -6,6 +6,8 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { Heart, Quote, ArrowRight } from "lucide-react";
 
+export const dynamic = "force-dynamic";
+
 // Fetch published stories from DB
 // Model added in consolidated schema below
 async function getStories() {

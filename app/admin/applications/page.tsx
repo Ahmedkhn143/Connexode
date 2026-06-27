@@ -6,6 +6,8 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { ArrowRight, Filter } from "lucide-react";
 
+export const dynamic = "force-dynamic";
+
 const statusConfig = {
   PENDING:      { color: "#F59E0B", bg: "rgba(245,158,11,0.12)",  border: "rgba(245,158,11,0.3)",  label: "Pending"      },
   UNDER_REVIEW: { color: "#7EC8D8", bg: "rgba(126,200,216,0.12)", border: "rgba(126,200,216,0.25)", label: "Under Review" },

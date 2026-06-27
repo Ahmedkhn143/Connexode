@@ -5,6 +5,8 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { Trophy, FolderOpen, Heart, ArrowRight, Users } from "lucide-react";
 
+export const dynamic = "force-dynamic";
+
 async function getStats() {
   const [totalAmbassadors, totalInterns, totalProjects] = await Promise.all([
     prisma.application.count({ where: { type: "AMBASSADOR", status: "APPROVED" } }),

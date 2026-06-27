@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Logo from "@/components/ui/Logo";
 import {
   SUBMISSIONS,
   WEEKLY_TASKS,
@@ -647,12 +648,9 @@ export default function MentorDashboard() {
       <aside className="fixed top-0 left-0 h-screen w-[240px] bg-[#080f1e] border-r border-white/5 flex flex-col z-40 shrink-0 animate-fade-in">
         {/* Brand */}
         <div className="px-5 py-5 border-b border-white/5">
-          <div className="flex items-center gap-2">
-            <img src="/logo.png" alt="Logo" className="h-8 w-8 rounded-lg object-cover shadow-[0_0_12px_rgba(0,245,255,0.3)]" />
-            <div>
-              <p className="font-display text-sm font-bold text-white">Connex<span className="text-cyan-400">ode</span></p>
-              <p className="text-[9px] font-extrabold uppercase tracking-widest text-cyan-400">Mentor Panel</p>
-            </div>
+          <div className="flex flex-col gap-1">
+            <Logo size="sm" />
+            <p className="text-[9px] font-extrabold uppercase tracking-widest text-cyan-400 pl-8">Mentor Panel</p>
           </div>
         </div>
 

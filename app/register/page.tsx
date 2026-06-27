@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Sparkles, ShieldCheck, Award } from "lucide-react";
 import RegisterForm from "@/components/auth/RegisterForm";
+import Logo from "@/components/ui/Logo";
 
 export const metadata: Metadata = {
   title: "Create Your Account — Connexode",
@@ -29,14 +30,7 @@ export default async function RegisterPage({
 
         {/* Brand logo */}
         <Link href="/" className="group flex items-center gap-2.5 relative z-10">
-          <img
-            src="/logo.png"
-            alt="Connexode Logo"
-            className="h-9 w-9 rounded-xl object-cover shadow-[0_0_20px_rgba(0,245,255,0.4)] transition-shadow duration-300 group-hover:shadow-[0_0_30px_rgba(0,245,255,0.6)]"
-          />
-          <span className="font-display text-xl font-bold tracking-tight text-white">
-            Connex<span className="text-cyan-400">ode</span>
-          </span>
+          <Logo size="default" />
         </Link>
 
         {/* Feature Highlights */}
@@ -75,14 +69,7 @@ export default async function RegisterPage({
         
         {/* Mobile Logo */}
         <Link href="/" className="lg:hidden group flex items-center justify-center gap-2.5 mb-8">
-          <img
-            src="/logo.png"
-            alt="Connexode Logo"
-            className="h-8 w-8 rounded-xl object-cover shadow-[0_0_20px_rgba(0,245,255,0.4)]"
-          />
-          <span className="font-display text-lg font-bold tracking-tight text-white">
-            Connex<span className="text-cyan-400">ode</span>
-          </span>
+          <Logo size="sm" />
         </Link>
 
         <div className="w-full max-w-lg mb-4 text-center lg:text-left">

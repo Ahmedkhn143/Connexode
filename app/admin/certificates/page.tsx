@@ -7,6 +7,8 @@ import Link from "next/link";
 import { Award, ArrowRight } from "lucide-react";
 import { IssueCertificateButton } from "@/components/admin/IssueCertificateButton";
 
+export const dynamic = "force-dynamic";
+
 async function getData() {
   const [certificates, eligibleUsers] = await Promise.all([
     // All issued certificates

@@ -13,6 +13,8 @@ import {
 } from "lucide-react";
 import { AICareerAdvisor } from "@/components/dashboard/AICareerAdvisor";
 
+export const dynamic = "force-dynamic";
+
 const statusConfig = {
   PENDING:      { icon: <Clock size={18} />,       color: "#F59E0B", bg: "rgba(245,158,11,0.1)",  border: "rgba(245,158,11,0.3)",  label: "Application pending",     desc: "We review applications within 3–5 days." },
   UNDER_REVIEW: { icon: <AlertCircle size={18} />, color: "#7EC8D8", bg: "rgba(126,200,216,0.1)", border: "rgba(126,200,216,0.25)", label: "Under review",            desc: "Your application is being reviewed. You'll hear back within 1–2 days." },

@@ -6,6 +6,8 @@ import { prisma } from "@/lib/prisma";
 import { FolderOpen } from "lucide-react";
 import { ProjectToggleButtons } from "@/components/admin/ProjectToggleButtons";
 
+export const dynamic = "force-dynamic";
+
 async function getProjects() {
   return prisma.project.findMany({
     orderBy: [{ published: "desc" }, { createdAt: "desc" }],

@@ -4,7 +4,6 @@
 // Stack: Next.js 15 · TypeScript · Tailwind CSS · Lucide React
 
 import Link from "next/link";
-import Image from "next/image";
 import {
   ArrowRight,
   Users,
@@ -87,75 +86,6 @@ const steps: Step[] = [
   },
 ];
 
-// ─── NAV ──────────────────────────────────────────────────────────────────────
-function Nav() {
-  return (
-    <header
-      style={{ backgroundColor: "rgba(4,12,24,0.85)", borderBottom: "1px solid rgba(126,200,216,0.08)" }}
-      className="fixed top-0 left-0 right-0 z-50 backdrop-blur-md"
-    >
-      <nav className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
-        {/* Logo */}
-        <Link href="/" className="flex items-center gap-2.5">
-          <Image
-            src="/logo.png"
-            alt="Connexode"
-            width={34}
-            height={34}
-            className="rounded-lg"
-          />
-          <span
-            style={{ color: "#E8F4F8" }}
-            className="text-[15px] font-semibold tracking-tight"
-          >
-            Connexode
-          </span>
-        </Link>
-
-        {/* Center links */}
-        <ul className="hidden items-center gap-8 md:flex">
-          {[
-            ["About", "/about"],
-            ["Services", "/services"],
-            ["Community", "/community"],
-            ["Contact", "/contact"],
-          ].map(([label, href]) => (
-            <li key={href}>
-              <Link
-                href={href}
-                style={{ color: "rgba(126,200,216,0.55)" }}
-                className="text-sm transition-colors hover:text-[#7EC8D8]"
-              >
-                {label}
-              </Link>
-            </li>
-          ))}
-        </ul>
-
-        {/* Right CTAs */}
-        <div className="flex items-center gap-3">
-          <Link
-            href="/auth/signin"
-            style={{ color: "rgba(126,200,216,0.5)" }}
-            className="hidden text-sm transition-colors hover:text-[#7EC8D8] md:block"
-          >
-            Sign in
-          </Link>
-          <Link
-            href="/join"
-            style={{
-              backgroundColor: "#188080",
-              color: "#E8F4F8",
-            }}
-            className="rounded-full px-5 py-2 text-sm font-semibold transition-all hover:brightness-110 active:scale-95"
-          >
-            Join Connexode
-          </Link>
-        </div>
-      </nav>
-    </header>
-  );
-}
 
 // ─── HERO ─────────────────────────────────────────────────────────────────────
 function Hero() {
@@ -506,76 +436,14 @@ function CTABand() {
   );
 }
 
-// ─── FOOTER ───────────────────────────────────────────────────────────────────
-function Footer() {
-  const year = new Date().getFullYear();
-  return (
-    <footer
-      style={{
-        backgroundColor: "#061020",
-        borderTop: "1px solid rgba(126,200,216,0.06)",
-      }}
-      className="py-10"
-    >
-      <div className="mx-auto max-w-6xl px-6">
-        <div className="flex flex-col items-center justify-between gap-6 sm:flex-row">
-          {/* Logo + name */}
-          <div className="flex items-center gap-2.5">
-            <Image
-              src="/logo.png"
-              alt="Connexode"
-              width={26}
-              height={26}
-              className="rounded-md opacity-75"
-            />
-            <span
-              style={{ color: "rgba(126,200,216,0.35)" }}
-              className="text-sm"
-            >
-              Connexode · Campus talent network
-            </span>
-          </div>
-
-          {/* Social links — update with your real URLs */}
-          <ul className="flex items-center gap-6 text-xs">
-            {[
-              ["Instagram", "https://instagram.com/connexode"],
-              ["LinkedIn", "https://linkedin.com/company/connexode"],
-              ["Facebook", "https://facebook.com/connexode"],
-            ].map(([label, href]) => (
-              <li key={label}>
-                <a
-                  href={href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{ color: "rgba(126,200,216,0.3)" }}
-                  className="transition-colors hover:text-[#7EC8D8]"
-                >
-                  {label}
-                </a>
-              </li>
-            ))}
-          </ul>
-
-          <p style={{ color: "rgba(126,200,216,0.2)" }} className="text-xs">
-            © {year} Connexode
-          </p>
-        </div>
-      </div>
-    </footer>
-  );
-}
-
 // ─── PAGE ─────────────────────────────────────────────────────────────────────
 export default function HomePage() {
   return (
     <main style={{ backgroundColor: "#040C18" }} className="min-h-screen antialiased">
-      <Nav />
       <Hero />
       <PillarCards />
       <HowItWorks />
       <CTABand />
-      <Footer />
     </main>
   );
 }

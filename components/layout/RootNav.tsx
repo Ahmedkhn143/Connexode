@@ -6,7 +6,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import Image from "next/image";
+import Logo from "@/components/ui/Logo";
 import { usePathname } from "next/navigation";
 import { Menu, X, ChevronDown } from "lucide-react";
 
@@ -79,19 +79,7 @@ export function RootNav() {
 
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2.5 flex-shrink-0">
-            <Image
-              src="/logo.png"
-              alt="Connexode"
-              width={32}
-              height={32}
-              className="rounded-lg"
-            />
-            <span
-              style={{ color: "#E8F4F8" }}
-              className="text-[15px] font-bold tracking-tight"
-            >
-              Conne<span style={{ color: "#7EC8D8" }}>x</span>ode
-            </span>
+            <Logo size="default" />
           </Link>
 
           {/* Desktop links */}
@@ -232,10 +220,7 @@ export function RootNav() {
             className="flex items-center gap-2.5"
             onClick={() => setMobileOpen(false)}
           >
-            <Image src="/logo.png" alt="Connexode" width={28} height={28} className="rounded-md" />
-            <span style={{ color: "#E8F4F8" }} className="text-sm font-bold">
-              Conne<span style={{ color: "#7EC8D8" }}>x</span>ode
-            </span>
+            <Logo size="default" />
           </Link>
           <button
             onClick={() => setMobileOpen(false)}

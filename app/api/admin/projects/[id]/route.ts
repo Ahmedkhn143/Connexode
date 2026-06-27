@@ -7,8 +7,9 @@ import { prisma } from "@/lib/prisma";
 
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   const session = await auth();
   if (!session?.user || (session.user as { role?: string }).role !== "ADMIN") {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -22,7 +23,7 @@ export async function PATCH(
     );
 
     const updated = await prisma.project.update({
-      where: { id: params.id },
+      where: { id },
       data,
     });
 

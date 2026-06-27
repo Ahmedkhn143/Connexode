@@ -3,6 +3,7 @@
 // Colors: Navy #082038 · Teal #188080 · Cyan #7EC8D8
 
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowRight, Heart, Users, Zap, Shield } from "lucide-react";
 
 const pillars = [
@@ -103,11 +104,22 @@ export default function AboutPage() {
           <div className="mt-8 flex items-center gap-4">
             {/* Avatar placeholder — replace with real photo when ready */}
             <div
-              style={{ backgroundColor: "rgba(24,128,128,0.2)", border: "1px solid rgba(24,128,128,0.3)" }}
-              className="flex h-12 w-12 items-center justify-center rounded-full text-lg font-bold"
-              style2={{ color: "#7EC8D8" }}
+              style={{
+                width: 48,
+                height: 48,
+                borderRadius: "50%",
+                overflow: "hidden",
+                border: "2px solid rgba(24,128,128,0.4)",
+                flexShrink: 0,
+              }}
             >
-              <span style={{ color: "#7EC8D8" }}>A</span>
+              <Image
+                src="/founder.jpg"
+                alt="Ahmad Khan — Founder, Connexode"
+                width={48}
+                height={48}
+                style={{ objectFit: "cover", width: "100%", height: "100%" }}
+              />
             </div>
             <div>
               <p style={{ color: "#E8F4F8" }} className="text-sm font-semibold">Ahmad Khan</p>
@@ -196,10 +208,23 @@ export default function AboutPage() {
               className="rounded-xl p-5 text-center"
             >
               <div
-                style={{ backgroundColor: "rgba(24,128,128,0.2)", border: "1px solid rgba(24,128,128,0.3)" }}
-                className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full"
+                style={{
+                  width: 56,
+                  height: 56,
+                  borderRadius: "50%",
+                  overflow: "hidden",
+                  border: "2px solid rgba(24,128,128,0.35)",
+                  margin: "0 auto",
+                  marginBottom: "1rem",
+                }}
               >
-                <span style={{ color: "#7EC8D8" }} className="text-xl font-bold">A</span>
+                <Image
+                  src="/founder.jpg"
+                  alt="Ahmad Khan"
+                  width={56}
+                  height={56}
+                  style={{ objectFit: "cover", width: "100%", height: "100%" }}
+                />
               </div>
               <p style={{ color: "#E8F4F8" }} className="text-sm font-semibold">Ahmad Khan</p>
               <p style={{ color: "rgba(126,200,216,0.4)" }} className="mb-3 text-xs">Founder · Frontend Dev</p>

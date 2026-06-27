@@ -5,6 +5,8 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { Users, BookOpen, Award, Clock, CheckCircle, XCircle, ArrowRight } from "lucide-react";
 
+export const dynamic = "force-dynamic";
+
 async function getStats() {
   const [
     totalAmbassadorApps,
@@ -124,9 +126,9 @@ export default async function AdminPage() {
             style={{
               backgroundColor: "rgba(4,12,24,0.4)",
               borderBottom: "1px solid rgba(126,200,216,0.08)",
+              gridTemplateColumns: "1fr 120px 140px 100px",
             }}
             className="grid px-5 py-3"
-            style={{ gridTemplateColumns: "1fr 120px 140px 100px" } as React.CSSProperties}
           >
             {["Applicant", "Type", "University", "Status"].map((h) => (
               <span
@@ -160,7 +162,6 @@ export default async function AdminPage() {
                         : "none",
                   }}
                   className="grid items-center px-5 py-3.5 transition-colors hover:bg-[rgba(8,32,56,0.5)]"
-                  style2={{ gridTemplateColumns: "1fr 120px 140px 100px" }}
                 >
                   <div style={{ gridTemplateColumns: "1fr 120px 140px 100px" } as React.CSSProperties}
                     className="grid items-center w-full">

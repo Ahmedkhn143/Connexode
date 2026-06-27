@@ -21,11 +21,11 @@ const ROLE_ROUTES: Record<string, string[]> = {
   STUDENT:    ["/dashboard/student"],
 };
 
-export default auth(function middleware(req: NextRequest & { auth?: { user?: { role?: string } } }) {
+export default auth(function middleware(req) {
   const { pathname } = req.nextUrl;
-  const session = (req as { auth?: { user?: { role?: string } } }).auth;
+  const session = req.auth;
   const isLoggedIn = !!session?.user;
-  const role = session?.user?.role ?? null;
+  const role = (session?.user as { role?: string })?.role ?? null;
 
   // ── 1. Redirect logged-in users away from auth pages ──────────────────────
   if (isLoggedIn && AUTH_ONLY.some((p) => pathname.startsWith(p))) {

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Logo from "@/components/ui/Logo";
 import { Menu, X, ChevronRight, LayoutDashboard, Award, LogOut, ShieldAlert, BookOpen, Star } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -70,14 +71,7 @@ export default function Navbar() {
         <nav className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
           {/* Logo */}
           <Link href="/" className="group flex items-center gap-2.5">
-            <img
-              src="/logo.png?v=20"
-              alt="Connexode Logo"
-              className="h-9 w-9 rounded-xl object-cover shadow-[0_0_20px_rgba(0,245,255,0.4)] transition-shadow duration-300 group-hover:shadow-[0_0_30px_rgba(0,245,255,0.6)] animate-pulse-slow"
-            />
-            <span className="font-display text-xl font-bold tracking-tight text-white">
-              Connex<span className="text-cyan-400">ode</span>
-            </span>
+            <Logo size="default" />
           </Link>
 
           {/* Desktop Nav Links — only show for non-logged-in or students */}

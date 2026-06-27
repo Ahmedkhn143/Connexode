@@ -8,6 +8,7 @@ import {
   User as UserIcon, LogOut, Award, BookOpen, Flame, MessageSquare, Map
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import Logo from "@/components/ui/Logo";
 import { WEEKLY_TASKS, TRACKS, getActiveUser } from "@/lib/mock-data";
 
 export default function DashboardSidebar() {
@@ -83,14 +84,7 @@ export default function DashboardSidebar() {
     <aside className="flex h-full w-72 flex-col border-r border-white/8 bg-[#020B18]/60 backdrop-blur-xl">
       {/* Logo */}
       <Link href="/" className="group flex items-center gap-3 border-b border-white/8 px-6 py-5">
-        <img
-          src="/logo.png?v=20"
-          alt="Connexode Logo"
-          className="h-9 w-9 rounded-xl object-cover shadow-[0_0_16px_rgba(0,245,255,0.4)] transition-shadow duration-300 group-hover:shadow-[0_0_24px_rgba(0,245,255,0.6)]"
-        />
-        <span className="font-display text-xl font-bold tracking-tight text-white">
-          Connex<span className="text-cyan-400">ode</span>
-        </span>
+        <Logo size="sm" />
       </Link>
 
       {/* User Quick Info */}

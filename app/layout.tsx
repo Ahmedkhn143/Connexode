@@ -4,12 +4,9 @@
 // Colors: Navy #082038 · Teal #188080 · Cyan #7EC8D8
 
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
 import "./globals.css";
 import { RootNav } from "@/components/layout/RootNav";
 import { RootFooter } from "@/components/layout/RootFooter";
-
-const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
 // ─── SEO METADATA ────────────────────────────────────────────────────────────
 
@@ -71,7 +68,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={inter.variable}>
+    <html lang="en">
       <body
         style={{ backgroundColor: "#040C18" }}
         className="font-sans antialiased"

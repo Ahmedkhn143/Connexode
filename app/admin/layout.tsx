@@ -3,6 +3,8 @@
 // Only accessible to ADMIN role (middleware handles protection)
 
 import Link from "next/link";
+import Image from "next/image";
+import Logo from "@/components/ui/Logo";
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import {
@@ -57,9 +59,7 @@ export default async function AdminLayout({
           className="px-5 py-5"
         >
           <Link href="/admin" className="flex items-center gap-2">
-            <span style={{ color: "#E8F4F8" }} className="text-sm font-bold">
-              Conne<span style={{ color: "#7EC8D8" }}>x</span>ode
-            </span>
+            <Logo size="sm" />
           </Link>
           <span
             style={{
@@ -96,14 +96,20 @@ export default async function AdminLayout({
           <div className="flex items-center gap-2.5">
             <div
               style={{
-                backgroundColor: "rgba(24,128,128,0.2)",
+                width: 32,
+                height: 32,
+                borderRadius: "50%",
+                overflow: "hidden",
                 border: "1px solid rgba(24,128,128,0.3)",
               }}
-              className="flex h-8 w-8 items-center justify-center rounded-full"
             >
-              <span style={{ color: "#7EC8D8" }} className="text-xs font-bold">
-                {session.user.name?.charAt(0) ?? "A"}
-              </span>
+              <Image
+                src="/founder.jpg"
+                alt={session.user.name ?? "Admin"}
+                width={32}
+                height={32}
+                style={{ objectFit: "cover", width: "100%", height: "100%" }}
+              />
             </div>
             <div className="min-w-0">
               <p style={{ color: "#E8F4F8" }} className="truncate text-xs font-semibold">

@@ -3,7 +3,7 @@
 // Update social hrefs with your real URLs before deploying
 
 import Link from "next/link";
-import Image from "next/image";
+import Logo from "@/components/ui/Logo";
 
 const footerLinks = {
   Platform: [
@@ -43,16 +43,7 @@ export function RootFooter() {
           {/* Brand column */}
           <div className="lg:col-span-2">
             <Link href="/" className="mb-5 flex items-center gap-2.5">
-              <Image
-                src="/logo.png"
-                alt="Connexode"
-                width={30}
-                height={30}
-                className="rounded-md opacity-90"
-              />
-              <span style={{ color: "#E8F4F8" }} className="text-sm font-bold">
-                Conne<span style={{ color: "#7EC8D8" }}>x</span>ode
-              </span>
+              <Logo size="default" showTagline />
             </Link>
             <p
               style={{ color: "rgba(126,200,216,0.4)" }}
