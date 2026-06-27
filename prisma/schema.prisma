@@ -1,5 +1,14 @@
-// Prisma Schema — Connexode Virtual Internship Platform
-// Generated for PostgreSQL
+// prisma/schema.prisma
+// ─────────────────────────────────────────────────────────────────────────────
+// CONNEXODE — COMPLETE PRISMA SCHEMA (FINAL)
+// Replace ALL previous schema files with this one file only.
+// Delete: schema-v2-addition.prisma, schema-certificate-update.prisma,
+//         schema-project-addition.prisma, schema-auth-update.prisma
+//
+// After replacing, run:
+//   npx prisma db push
+//   npx prisma generate
+// ─────────────────────────────────────────────────────────────────────────────
 
 generator client {
   provider = "prisma-client-js"
@@ -11,151 +20,154 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
-// ── Enums ────────────────────────────────────────────────────
+// ─── ENUMS ───────────────────────────────────────────────────────────────────
 
-enum Role {
-  STUDENT
-  MENTOR
-  ADMIN
+enum ApplicationType {
+  AMBASSADOR
+  INTERNSHIP
 }
 
-enum SubmissionStatus {
+enum ApplicationStatus {
   PENDING
-  REVIEWING
+  UNDER_REVIEW
   APPROVED
   REJECTED
 }
 
-enum EnrollmentStatus {
-  ACTIVE
-  COMPLETED
-  DROPPED
+enum UserRole {
+  STUDENT
+  AMBASSADOR
+  MENTOR
+  ADMIN
 }
 
-// ── Models ───────────────────────────────────────────────────
+enum CertificateStatus {
+  ACTIVE
+  REVOKED
+}
+
+// ─── USER ────────────────────────────────────────────────────────────────────
 
 model User {
-  id          String   @id @default(cuid())
-  name        String
-  username    String   @unique
-  email       String   @unique
-  role        Role     @default(STUDENT)
-  points      Int      @default(0)
-  avatarUrl   String?
-  bio         String?
-  linkedinUrl String?
-  githubUrl   String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  // Relations
-  enrollments Enrollment[]
-  submissions Submission[]
-  badges      UserBadge[]
-
-  @@map("users")
-}
-
-model Track {
-  id            String   @id @default(cuid())
-  title         String
-  slug          String   @unique
-  description   String
-  icon          String   // Lucide icon name
-  color         String   // Hex color for UI
-  durationWeeks Int
-  isPublished   Boolean  @default(false)
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-
-  // Relations
-  weeklyTasks WeeklyTask[]
-  enrollments Enrollment[]
-
-  @@map("tracks")
-}
-
-model WeeklyTask {
   id             String   @id @default(cuid())
-  trackId        String
-  weekNo         Int
-  dayNo          Int
-  title          String
-  taskDetails    String   @db.Text
-  instructions   Json     // String[] stored as JSON array
-  estimatedHours Float    @default(3)
-  points         Int      @default(100)
+  email          String   @unique
+  name           String
+  hashedPassword String?
+  role           UserRole @default(STUDENT)
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
-  // Relations
-  track       Track        @relation(fields: [trackId], references: [id], onDelete: Cascade)
-  submissions Submission[]
-
-  @@unique([trackId, weekNo, dayNo])
-  @@map("weekly_tasks")
+  applications    Application[]
+  certificate     Certificate?
+  ambassadorStats AmbassadorStats?
+  internStats     InternStats?
+  projects        Project[]
 }
 
-model Submission {
-  id          String           @id @default(cuid())
-  userId      String
-  taskId      String
-  githubUrl   String
-  liveUrl     String?
-  status      SubmissionStatus @default(PENDING)
-  feedback    String?          @db.Text
-  submittedAt DateTime         @default(now())
-  reviewedAt  DateTime?
-  updatedAt   DateTime         @updatedAt
+// ─── APPLICATION ─────────────────────────────────────────────────────────────
 
-  // Relations
-  user User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  task WeeklyTask @relation(fields: [taskId], references: [id], onDelete: Cascade)
+model Application {
+  id           String            @id @default(cuid())
+  type         ApplicationType
+  status       ApplicationStatus @default(PENDING)
 
-  @@unique([userId, taskId]) // One submission per task per user
-  @@map("submissions")
+  fullName     String
+  email        String
+  university   String
+  semester     String
+  city         String
+  whyJoin      String
+  availability String?
+
+  instagram    String?
+  linkedin     String?
+
+  track        String?
+  github       String?
+  portfolio    String?
+  experience   String?
+
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  userId          String?
+  user            User?            @relation(fields: [userId], references: [id])
+  ambassadorStats AmbassadorStats?
+  internStats     InternStats?
+  projects        Project[]
 }
 
-model Badge {
+// ─── CERTIFICATE ─────────────────────────────────────────────────────────────
+
+model Certificate {
+  id       String            @id @default(cuid())
+  certId   String            @unique
+  userId   String            @unique
+  user     User              @relation(fields: [userId], references: [id])
+  type     ApplicationType
+  track    String?
+  issuedAt DateTime          @default(now())
+  status   CertificateStatus @default(ACTIVE)
+}
+
+// ─── AMBASSADOR STATS ────────────────────────────────────────────────────────
+
+model AmbassadorStats {
+  id              String      @id @default(cuid())
+  userId          String      @unique
+  user            User        @relation(fields: [userId], references: [id])
+  applicationId   String      @unique
+  application     Application @relation(fields: [applicationId], references: [id])
+  sessionsHosted  Int         @default(0)
+  webinarsHosted  Int         @default(0)
+  communityReach  Int         @default(0)
+  updatedAt       DateTime    @updatedAt
+}
+
+// ─── INTERN STATS ────────────────────────────────────────────────────────────
+
+model InternStats {
+  id              String      @id @default(cuid())
+  userId          String      @unique
+  user            User        @relation(fields: [userId], references: [id])
+  applicationId   String      @unique
+  application     Application @relation(fields: [applicationId], references: [id])
+  tasksCompleted  Int         @default(0)
+  totalScore      Float       @default(0)
+  averageScore    Float       @default(0)
+  updatedAt       DateTime    @updatedAt
+}
+
+// ─── PROJECT ─────────────────────────────────────────────────────────────────
+
+model Project {
+  id            String      @id @default(cuid())
+  title         String
+  description   String
+  stack         String[]
+  githubUrl     String?
+  liveUrl       String?
+  score         Int         @default(0)
+  published     Boolean     @default(false)
+  featured      Boolean     @default(false)
+  internId      String
+  intern        User        @relation(fields: [internId], references: [id])
+  applicationId String
+  application   Application @relation(fields: [applicationId], references: [id])
+  completedAt   DateTime    @default(now())
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+}
+
+// ─── SUCCESS STORY ───────────────────────────────────────────────────────────
+
+model SuccessStory {
   id          String   @id @default(cuid())
-  name        String   @unique
-  description String
-  icon        String   // Lucide icon name
-  color       String   // Hex color
+  name        String
+  university  String
+  role        String
+  quote       String
+  outcomeStat String?
+  published   Boolean  @default(false)
   createdAt   DateTime @default(now())
-
-  // Relations
-  users UserBadge[]
-
-  @@map("badges")
-}
-
-model UserBadge {
-  userId    String
-  badgeId   String
-  earnedAt  DateTime @default(now())
-
-  // Relations
-  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
-  badge Badge @relation(fields: [badgeId], references: [id], onDelete: Cascade)
-
-  @@id([userId, badgeId])
-  @@map("user_badges")
-}
-
-model Enrollment {
-  id          String           @id @default(cuid())
-  userId      String
-  trackId     String
-  status      EnrollmentStatus @default(ACTIVE)
-  enrolledAt  DateTime         @default(now())
-  completedAt DateTime?
-  updatedAt   DateTime         @updatedAt
-
-  // Relations
-  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
-  track Track @relation(fields: [trackId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, trackId]) // One enrollment per track per user
-  @@map("enrollments")
 }

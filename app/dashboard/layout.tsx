@@ -1,73 +1,84 @@
-"use client";
+// app/dashboard/layout.tsx
+// Shared dashboard shell — top bar + clean container
+// Works for both student and ambassador roles
 
-import { useState, useEffect } from "react";
-import DashboardSidebar from "@/components/layout/DashboardSidebar";
-import { getActiveUser, type User } from "@/lib/mock-data";
+import { auth } from "@/auth";
+import { redirect } from "next/navigation";
+import Link from "next/link";
+import { LayoutDashboard, LogOut } from "lucide-react";
 
-export default function DashboardLayout({
+export default async function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const [activeUser, setActiveUser] = useState<User | null>(null);
+  const session = await auth();
 
-  useEffect(() => {
-    const user = getActiveUser();
-    if (!user) {
-      window.location.href = "/register";
-    } else {
-      setActiveUser(user);
-    }
-  }, []);
+  if (!session?.user) redirect("/auth/signin");
 
-  if (!activeUser) {
-    return (
-      <div className="flex h-screen items-center justify-center bg-[#020B18] text-slate-400">
-        <div className="h-6 w-6 animate-spin rounded-full border-2 border-cyan-400 border-t-transparent" />
-      </div>
-    );
-  }
-
-  // Admin and Mentor views don't need the student sidebar layout
-  if (activeUser.role !== "STUDENT") {
-    return <div className="min-h-screen bg-[#020B18]">{children}</div>;
-  }
+  const user = session.user as { name?: string; email?: string; role?: string };
 
   return (
-    <div className="flex h-screen overflow-hidden bg-[#020B18]">
-      {/* Sidebar */}
-      <DashboardSidebar />
+    <div
+      style={{ backgroundColor: "#040C18" }}
+      className="min-h-screen"
+    >
+      {/* ── Top bar ── */}
+      <header
+        style={{
+          backgroundColor: "#061020",
+          borderBottom: "1px solid rgba(126,200,216,0.08)",
+        }}
+        className="fixed top-0 left-0 right-0 z-40"
+      >
+        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
 
-      {/* Main content */}
-      <div className="flex flex-1 flex-col overflow-y-auto">
-        {/* Top bar */}
-        <div className="flex items-center justify-between border-b border-white/8 bg-[#020B18]/80 px-8 py-4 backdrop-blur-xl sticky top-0 z-10">
-          <div>
-            <h1 className="font-display text-sm font-semibold text-slate-300">
-              Campus Ambassador Workspace
-            </h1>
-            <p className="text-xs text-slate-600">Manage your university campaigns</p>
+          {/* Logo */}
+          <Link href="/" className="flex items-center gap-2">
+            <span style={{ color: "#E8F4F8" }} className="text-sm font-bold">
+              Conne<span style={{ color: "#7EC8D8" }}>x</span>ode
+            </span>
+          </Link>
+
+          {/* Center — dashboard label */}
+          <div className="flex items-center gap-2">
+            <LayoutDashboard size={14} style={{ color: "rgba(126,200,216,0.4)" }} />
+            <span
+              style={{ color: "rgba(126,200,216,0.45)" }}
+              className="text-xs font-medium uppercase tracking-widest"
+            >
+              {user.role === "AMBASSADOR" ? "Ambassador" : "Student"} Dashboard
+            </span>
           </div>
-          <div className="flex items-center gap-3">
-            {activeUser.avatarImage ? (
-              <img
-                src={activeUser.avatarImage}
-                alt={activeUser.name}
-                className="h-9 w-9 rounded-full object-cover border border-white/10"
-              />
-            ) : (
-              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-cyan-500 to-teal-600 text-xs font-bold text-[#020B18]">
-                {activeUser.avatarInitials}
-              </div>
-            )}
+
+          {/* Right — user + signout */}
+          <div className="flex items-center gap-4">
+            <div className="hidden sm:block text-right">
+              <p style={{ color: "#E8F4F8" }} className="text-xs font-semibold">
+                {user.name}
+              </p>
+              <p style={{ color: "rgba(126,200,216,0.35)" }} className="text-[10px]">
+                {user.email}
+              </p>
+            </div>
+            <Link
+              href="/api/auth/signout"
+              style={{
+                border: "1px solid rgba(126,200,216,0.15)",
+                color: "rgba(126,200,216,0.5)",
+              }}
+              className="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs transition-all hover:text-[#7EC8D8] hover:border-[rgba(126,200,216,0.35)]"
+            >
+              <LogOut size={12} /> Sign out
+            </Link>
           </div>
         </div>
+      </header>
 
-        {/* Page content */}
-        <div className="flex-1 p-8">
-          {children}
-        </div>
-      </div>
+      {/* ── Page content ── */}
+      <main className="mx-auto max-w-6xl px-6 pt-24 pb-20">
+        {children}
+      </main>
     </div>
   );
 }

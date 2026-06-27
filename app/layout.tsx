@@ -1,47 +1,85 @@
+// app/layout.tsx
+// Root layout — Nav + Footer shared across ALL pages
+// Includes: mobile hamburger drawer, SEO metadata, OpenGraph
+// Colors: Navy #082038 · Teal #188080 · Cyan #7EC8D8
+
 import type { Metadata } from "next";
+import { Inter } from "next/font/google";
 import "./globals.css";
-import CustomCursor from "@/components/ui/CustomCursor";
-import SessionGuard from "@/components/auth/SessionGuard";
-import ThemeToggle from "@/components/ui/ThemeToggle";
+import { RootNav } from "@/components/layout/RootNav";
+import { RootFooter } from "@/components/layout/RootFooter";
+
+const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
+
+// ─── SEO METADATA ────────────────────────────────────────────────────────────
 
 export const metadata: Metadata = {
-  title: "Connexode — Tech Campus Ambassador & Developer Network",
+  metadataBase: new URL("https://connexode.vercel.app"),
+  title: {
+    default: "Connexode — Campus Talent Network",
+    template: "%s | Connexode",
+  },
   description:
-    "Empowering student tech leaders to run developer communities, organize workshops, and build real-world peer networks on campuses.",
+    "Connexode trains campus ambassadors and interns through mentorship, AI-skill workshops, and structured tracks — and delivers development, design, and growth services through a dedicated team.",
   keywords: [
-    "campus ambassador", "tech leadership", "developer community",
-    "student network", "peer learning", "coding community", "developer advocate",
+    "Connexode", "campus ambassador", "internship Pakistan",
+    "tech internship", "AI education", "web development internship",
+    "student community Pakistan", "KFUEIT", "tech education",
   ],
+  authors: [{ name: "Ahmad Khan", url: "https://connexode.vercel.app" }],
+  creator: "Connexode",
   openGraph: {
-    title: "Connexode — Empowering Campuses, Fostering Innovation",
-    description:
-      "A premium tech network for campus ambassadors and developer communities. Lead workshops, build connections, and get certified.",
     type: "website",
+    locale: "en_PK",
+    url: "https://connexode.vercel.app",
+    siteName: "Connexode",
+    title: "Connexode — Campus Talent Network",
+    description:
+      "Train, connect, and grow with Pakistan's campus tech community.",
+    images: [
+      {
+        url: "/og-image.png",   // add a 1200×630 branded image to /public/
+        width: 1200,
+        height: 630,
+        alt: "Connexode — Campus Talent Network",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Connexode — Campus Talent Network",
+    description: "Train, connect, and grow with Pakistan's campus tech community.",
+    images: ["/og-image.png"],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: { index: true, follow: true },
+  },
+  icons: {
+    icon: "/favicon.ico",
+    shortcut: "/favicon.ico",
+    apple: "/apple-touch-icon.png",
   },
 };
 
+// ─── LAYOUT ──────────────────────────────────────────────────────────────────
+
 export default function RootLayout({
   children,
-}: Readonly<{ children: React.ReactNode }>) {
+}: {
+  children: React.ReactNode;
+}) {
   return (
-    <html
-      lang="en"
-      className="h-full light"
-      data-scroll-behavior="smooth"
-    >
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=Space+Grotesk:wght@300..700&display=swap" rel="stylesheet" />
-      </head>
-      <body className="min-h-full antialiased" suppressHydrationWarning>
-        <CustomCursor />
-        <SessionGuard />
+    <html lang="en" className={inter.variable}>
+      <body
+        style={{ backgroundColor: "#040C18" }}
+        className="font-sans antialiased"
+      >
+        <RootNav />
         {children}
-        <ThemeToggle />
+        <RootFooter />
       </body>
     </html>
   );
 }
-
-
