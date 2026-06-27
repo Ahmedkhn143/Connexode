@@ -6,6 +6,7 @@ import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { LayoutDashboard, LogOut } from "lucide-react";
+import Logo from "@/components/ui/Logo";
 
 export default async function DashboardLayout({
   children,
@@ -17,6 +18,10 @@ export default async function DashboardLayout({
   if (!session?.user) redirect("/auth/signin");
 
   const user = session.user as { name?: string; email?: string; role?: string };
+
+  if (user.role === "MENTOR" || user.role === "ADMIN") {
+    return <>{children}</>;
+  }
 
   return (
     <div
@@ -35,9 +40,7 @@ export default async function DashboardLayout({
 
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2">
-            <span style={{ color: "#E8F4F8" }} className="text-sm font-bold">
-              Conne<span style={{ color: "#7EC8D8" }}>x</span>ode
-            </span>
+            <Logo size="sm" />
           </Link>
 
           {/* Center — dashboard label */}
@@ -47,7 +50,7 @@ export default async function DashboardLayout({
               style={{ color: "rgba(126,200,216,0.45)" }}
               className="text-xs font-medium uppercase tracking-widest"
             >
-              {user.role === "AMBASSADOR" ? "Ambassador" : "Student"} Dashboard
+              {user.role === "AMBASSADOR" ? "Ambassador" : user.role === "MENTOR" ? "Mentor" : "Student"} Dashboard
             </span>
           </div>
 

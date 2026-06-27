@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useSession } from "next-auth/react";
 import Logo from "@/components/ui/Logo";
 import {
   SUBMISSIONS,
@@ -121,13 +122,34 @@ export default function MentorDashboard() {
   const [profilePassword, setProfilePassword] = useState("");
   const [profileAvatarImage, setProfileAvatarImage] = useState("");
 
+  const { data: session } = useSession();
+
   useEffect(() => {
-    // Redirect to home since mentorship is currently inactive
-    if (typeof window !== "undefined") {
-      window.location.href = "/";
+    if (session?.user) {
+      const email = session.user.email;
+      const name = session.user.name || "Expert Mentor";
+      const found = MOCK_USERS.find((u) => u.email === email && u.role === "MENTOR");
+      setActiveMentor(
+        found || {
+          id: "usr_mentor1",
+          name,
+          username: email?.split("@")[0] || "mentor",
+          email: email || "mentor@connexode.pk",
+          role: "MENTOR",
+          points: 0,
+          avatarInitials: name.substring(0, 2).toUpperCase(),
+          enrolledTrackId: "",
+          joinDate: new Date().toISOString().split("T")[0],
+          streak: 0,
+          rank: "Expert Mentor",
+          currentWeek: 0,
+          currentDay: 0,
+        }
+      );
     }
-    return;
-    
+  }, [session]);
+
+  useEffect(() => {
     // Load local storage custom submissions
     if (typeof window !== "undefined") {
       const localSubs = localStorage.getItem("connexode_custom_submissions");

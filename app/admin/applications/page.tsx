@@ -18,10 +18,11 @@ const statusConfig = {
 export default async function ApplicationsPage({
   searchParams,
 }: {
-  searchParams: { type?: string; status?: string };
+  searchParams: Promise<{ type?: string; status?: string }>;
 }) {
-  const typeFilter   = searchParams.type   as "AMBASSADOR" | "INTERNSHIP" | undefined;
-  const statusFilter = searchParams.status as keyof typeof statusConfig | undefined;
+  const params = await searchParams;
+  const typeFilter   = params.type   as "AMBASSADOR" | "INTERNSHIP" | undefined;
+  const statusFilter = params.status as keyof typeof statusConfig | undefined;
 
   const applications = await prisma.application.findMany({
     where: {

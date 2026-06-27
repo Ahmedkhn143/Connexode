@@ -7,6 +7,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { RootNav } from "@/components/layout/RootNav";
 import { RootFooter } from "@/components/layout/RootFooter";
+import { SessionProvider } from "@/components/providers/SessionProvider";
 
 // ─── SEO METADATA ────────────────────────────────────────────────────────────
 
