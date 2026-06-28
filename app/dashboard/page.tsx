@@ -36,6 +36,7 @@ export default function DashboardPage() {
   const [announcements, setAnnouncements] = useState<any[]>([]);
   const [supportMessages, setSupportMessages] = useState<any[]>([]);
   const [newSupportMsg, setNewSupportMsg] = useState("");
+  const [dashboardMode, setDashboardMode] = useState<"INTERNSHIP" | "AMBASSADOR">("INTERNSHIP");
 
   // ΓöÇΓöÇ Ambassador Application States ΓöÇΓöÇ
   const [fullName, setFullName] = useState("");
@@ -299,16 +300,20 @@ export default function DashboardPage() {
 
   useEffect(() => {
     if (activeUser) {
+      const status = loadAmbassadorData(activeUser.email);
+      loadStudentAssignedTasks(activeUser.id, activeUser.email);
+
       if (activeUser.role === "STUDENT") {
-        const status = loadAmbassadorData(activeUser.email);
-        loadStudentAssignedTasks(activeUser.id, activeUser.email);
-        if (status !== "APPROVED") {
+        if (status !== "APPROVED" && !activeUser.enrolledTrackId) {
           window.location.href = "/";
           return;
         }
+      }
+
+      if (activeUser.enrolledTrackId) {
+        setDashboardMode("INTERNSHIP");
       } else {
-        loadAmbassadorData(activeUser.email);
-        loadStudentAssignedTasks(activeUser.id, activeUser.email);
+        setDashboardMode("AMBASSADOR");
       }
 
       // Set default referral code based on username or email username
@@ -355,7 +360,7 @@ export default function DashboardPage() {
         id: `q_${Math.random().toString(36).substring(2, 9)}`,
         userId: activeUser.id,
         userName: activeUser.name,
-        trackId: "AMBASSADOR",
+        trackId: dashboardMode === "INTERNSHIP" ? activeUser.enrolledTrackId : "AMBASSADOR",
         question: newQuestion,
         reply: null,
         status: "PENDING",
@@ -370,7 +375,7 @@ export default function DashboardPage() {
       if (stored) {
         setQuestions(JSON.parse(stored).filter((t: any) => t.userId === activeUser.id));
       }
-      alert("Your message has been sent to the Coordinator! Response will be sent in 24 hours.");
+      alert("Your message has been sent! Response will be sent in 24 hours.");
     }
   };
 
@@ -532,7 +537,7 @@ export default function DashboardPage() {
   const inputClsForm = (key: string) =>
     `w-full rounded-xl border ${formErrors[key] ? "border-red-500/50 bg-red-500/5" : "border-white/10 bg-[#0A1628]"} px-4 py-3 text-xs text-slate-200 placeholder-slate-600 outline-none focus:border-cyan-400/50 transition-colors`;
 
-  if (ambassadorStatus === "NONE") {
+  if (dashboardMode === "AMBASSADOR" && ambassadorStatus === "NONE") {
     return (
       <div className="mx-auto max-w-3xl py-6 px-4 space-y-8 animate-fade-in">
         
@@ -780,7 +785,7 @@ export default function DashboardPage() {
   }
 
   // ΓöÇΓöÇ STATE 2: Ambassador Application is Pending Review ΓöÇΓöÇ
-  if (ambassadorStatus === "PENDING") {
+  if (dashboardMode === "AMBASSADOR" && ambassadorStatus === "PENDING") {
     return (
       <div className="mx-auto max-w-4xl py-12 px-4 space-y-8 animate-fade-in">
         <div className="rounded-3xl border border-white/8 bg-gradient-to-br from-[#0A1628] to-[#020B18] p-10 text-center space-y-6 shadow-2xl">
@@ -811,6 +816,502 @@ export default function DashboardPage() {
     );
   }
 
+  // ΓöÇΓöÇ STATE 4: Internship Dashboard ΓöÇΓöÇ
+  const isAmbassadorApproved = ambassadorStatus === "APPROVED";
+
+  if (dashboardMode === "INTERNSHIP") {
+    // Check if user has no enrolled track ΓÇö show internship selection screen
+    if (!activeUser.enrolledTrackId) {
+      return (
+        <div className="mx-auto max-w-5xl space-y-8 py-4">
+          {/* Header */}
+          <div>
+            <span className="rounded bg-cyan-400/10 border border-cyan-400/25 px-2.5 py-1 text-[10px] font-extrabold text-cyan-400 uppercase tracking-wider">
+              Step 1 of 2 ΓÇö Choose Your Track
+            </span>
+            <h1 className="font-display text-3xl font-black text-white mt-3">
+              Select Your Internship Track
+            </h1>
+            <p className="text-sm text-slate-400 mt-1 max-w-xl">
+              Choose a program below, complete the registration form and pay the one-time fee (Rs. 500). Your internship workspace unlocks after admin verifies your payment.
+            </p>
+          </div>
+
+          {/* Payment flow steps */}
+          <div className="flex items-center gap-3 text-xs">
+            {[
+              { step: "1", label: "Select Track", done: false, active: true },
+              { step: "2", label: "Fill Application + Pay Fee", done: false, active: false },
+              { step: "3", label: "Admin Verifies Payment", done: false, active: false },
+              { step: "4", label: "Access LMS Dashboard", done: false, active: false },
+            ].map((s, i) => (
+              <div key={i} className="flex items-center gap-2">
+                <div className={`h-6 w-6 rounded-full flex items-center justify-center text-[10px] font-extrabold ${
+                  s.active ? "bg-cyan-400 text-[#020B18]" : "bg-white/8 text-slate-500"
+                }`}>{s.step}</div>
+                <span className={s.active ? "text-white font-semibold" : "text-slate-500"}>{s.label}</span>
+                {i < 3 && <span className="text-slate-700 mx-1">ΓåÆ</span>}
+              </div>
+            ))}
+          </div>
+
+          {/* Track Cards */}
+          <div className="grid gap-5 sm:grid-cols-2 md:grid-cols-3">
+            {TRACKS.map((t) => (
+              <div
+                key={t.id}
+                className="group rounded-2xl border border-white/8 bg-white/4 p-5 hover:border-opacity-60 transition-all flex flex-col justify-between hover:-translate-y-1"
+              >
+                <div className="space-y-3">
+                  {/* Color dot + icon */}
+                  <div
+                    className="h-11 w-11 rounded-xl flex items-center justify-center font-black text-base text-white"
+                    style={{ backgroundColor: `${t.color}20`, border: `1px solid ${t.color}40` }}
+                  >
+                    <span style={{ color: t.color }}>{t.title.substring(0, 2).toUpperCase()}</span>
+                  </div>
+                  <div>
+                    <h3 className="font-display text-base font-extrabold text-white">{t.title}</h3>
+                    <p className="text-[10px] font-semibold" style={{ color: t.color }}>{t.durationWeeks} Weeks ┬╖ Intensive Program</p>
+                  </div>
+                  <p className="text-xs text-slate-400 leading-normal line-clamp-3">{t.description}</p>
+                  {/* Tags */}
+                  <div className="flex flex-wrap gap-1">
+                    {t.tags.slice(0, 3).map((tag) => (
+                      <span key={tag} className="rounded bg-white/5 border border-white/8 px-2 py-0.5 text-[9px] text-slate-400 font-semibold">{tag}</span>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="pt-4 border-t border-white/5 mt-4 space-y-2">
+                  <div className="flex items-center justify-between text-xs text-slate-500">
+                    <span className="flex items-center gap-1"><Clock size={11} /> One-time fee</span>
+                    <span className="font-bold text-white">Rs. 500</span>
+                  </div>
+                  <Link
+                    href={`/checkout/${t.id}`}
+                    className="w-full flex items-center justify-center gap-1.5 rounded-xl py-2.5 text-xs font-bold text-[#020B18] hover:scale-[1.02] transition-transform"
+                    style={{ backgroundColor: t.color }}
+                  >
+                    Apply & Enroll
+                    <ArrowRight size={13} />
+                  </Link>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    }
+
+    const track = TRACKS.find((t) => t.id === activeUser.enrolledTrackId)!;
+    const mentor = getTrackMentor(activeUser.enrolledTrackId);
+    const currentWeek = activeUser.currentWeek || 1;
+    const weekTasks = WEEKLY_TASKS.filter(
+      (t) => t.trackId === activeUser.enrolledTrackId && t.weekNo === currentWeek
+    );
+    const continueTask =
+      weekTasks.find((t) => t.status === "IN_PROGRESS") ??
+      weekTasks.find((t) => t.status === "SUBMITTED") ??
+      weekTasks.find((t) => t.status !== "LOCKED") ??
+      weekTasks[0];
+    const pendingCount = SUBMISSIONS.filter(
+      (s) => s.userId === activeUser.id && s.status === "PENDING"
+    ).length;
+
+    if (currentView === "roadmap") {
+      return (
+        <div className="mx-auto max-w-5xl space-y-6 animate-fade-in">
+          <div className="flex items-center justify-between border-b border-white/5 pb-4">
+            <div>
+              <Link
+                href="/dashboard"
+                className="mb-3 inline-flex items-center gap-1.5 text-xs text-slate-500 hover:text-cyan-400 transition-colors"
+              >
+                ΓåÉ Back to Dashboard
+              </Link>
+              <h1 className="font-display text-2xl font-extrabold text-white">8-Week Track Roadmap</h1>
+              <p className="text-xs text-slate-400 mt-1">Detailed phase progression and weekly learning goals for {track.title}</p>
+            </div>
+          </div>
+          <TrackRoadmap />
+        </div>
+      );
+    }
+
+    if (currentView === "mentor") {
+      return (
+        <div className="mx-auto max-w-xl space-y-6 animate-fade-in py-8">
+          <div className="flex items-center justify-between border-b border-white/5 pb-4">
+            <div>
+              <Link
+                href="/dashboard"
+                className="mb-3 inline-flex items-center gap-1.5 text-xs text-slate-500 hover:text-cyan-400 transition-colors"
+              >
+                ΓåÉ Back to Dashboard
+              </Link>
+              <h1 className="font-display text-2xl font-extrabold text-white">My Mentor</h1>
+              <p className="text-xs text-slate-400 mt-1">Details about your assigned track advisor</p>
+            </div>
+          </div>
+
+          {mentor ? (
+            <div className="rounded-3xl border border-white/8 bg-white/4 p-8 backdrop-blur-xl space-y-6 shadow-2xl relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-cyan-500/10 rounded-full blur-2xl pointer-events-none" />
+              
+              <div className="flex items-center gap-2 pb-4 border-b border-white/5">
+                <BadgeCheck className="text-cyan-400" size={22} />
+                <h2 className="font-display text-lg font-extrabold text-white">Assigned Track Mentor</h2>
+              </div>
+              
+              <div className="flex flex-col items-center text-center space-y-4 py-4">
+                {mentor.avatarImage ? (
+                  <img
+                    src={mentor.avatarImage}
+                    alt={mentor.name}
+                    className="h-24 w-24 rounded-full object-cover border-2 border-cyan-400/20 shadow-[0_0_20px_rgba(34,211,238,0.2)]"
+                  />
+                ) : (
+                  <div className="h-24 w-24 rounded-full bg-gradient-to-tr from-cyan-400 to-purple-500 p-[2px] shadow-[0_0_20px_rgba(34,211,238,0.2)]">
+                    <div className="flex h-full w-full items-center justify-center rounded-full bg-[#030c1c] text-2xl font-black text-white">
+                      {mentor.avatarInitials || mentor.name.substring(0, 2).toUpperCase()}
+                    </div>
+                  </div>
+                )}
+                
+                <div>
+                  <h3 className="text-xl font-bold text-white">{mentor.name}</h3>
+                  <p className="text-xs uppercase tracking-wider text-cyan-400 font-black mt-1">
+                    {mentor.rank || "Expert Mentor"}
+                  </p>
+                  <p className="text-xs text-slate-500 font-mono mt-1">{mentor.email}</p>
+                </div>
+              </div>
+
+              <div className="space-y-4 pt-4 border-t border-white/5 text-xs leading-relaxed text-slate-400">
+                <div className="rounded-xl bg-white/2 border border-white/5 p-4 space-y-2">
+                  <span className="text-white font-bold block text-2xs uppercase tracking-wider text-cyan-400">How your mentor helps:</span>
+                  <ul className="list-disc pl-4 space-y-1">
+                    <li>Reviews and grades your weekly task submissions.</li>
+                    <li>Provides feedback and score boosts on approved tasks.</li>
+                    <li>Answers Q&A technical questions within 24 hours.</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="rounded-2xl border border-white/8 bg-white/4 p-8 text-center text-slate-400">
+              No mentor is currently assigned to this track.
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    const relevantInternAnnouncements = announcements.filter((ann) => {
+      if (ann.authorRole === "MENTOR") {
+        return ann.targetTrackId === activeUser.enrolledTrackId;
+      }
+      const audience = ann.targetAudience || "ALL";
+      return audience === "ALL" || audience === "INTERN";
+    });
+
+    return (
+      <div className="mx-auto max-w-5xl space-y-6">
+        {/* Mode Switcher */}
+        {isAmbassadorApproved && (
+          <div className="flex justify-between items-center bg-white/4 border border-white/8 rounded-2xl p-4 mb-6 backdrop-blur-xl">
+            <div>
+              <h3 className="text-sm font-bold text-white">Switch Dashboard Mode</h3>
+              <p className="text-[10px] text-slate-500">You are enrolled in both the Internship & Ambassador programs.</p>
+            </div>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setDashboardMode("INTERNSHIP")}
+                className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                  (dashboardMode as string) === "INTERNSHIP"
+                    ? "bg-cyan-500 text-[#020B18]"
+                    : "bg-white/5 text-slate-400 hover:text-white"
+                }`}
+              >
+                Internship Workspace
+              </button>
+              <button
+                onClick={() => setDashboardMode("AMBASSADOR")}
+                className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                  (dashboardMode as string) === "AMBASSADOR"
+                    ? "bg-yellow-500 text-[#020B18]"
+                    : "bg-white/5 text-slate-400 hover:text-white"
+                }`}
+              >
+                Ambassador Portal
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Announcements notice board */}
+        {relevantInternAnnouncements.length > 0 && (
+          <div className="rounded-2xl border border-white/8 bg-gradient-to-r from-purple-900/10 via-[#080f1e]/85 to-cyan-900/10 p-5 backdrop-blur-xl space-y-4 animate-fade-in">
+            <div className="flex items-center justify-between border-b border-white/5 pb-2.5">
+              <h3 className="font-display text-xs font-bold text-white flex items-center gap-2">
+                <span className="flex h-1.5 w-1.5 rounded-full bg-cyan-400 animate-ping" />
+                ≡ƒôó Board Announcements & Updates
+              </h3>
+              <span className="text-[9px] text-slate-500 font-extrabold uppercase tracking-widest bg-white/4 px-2 py-0.5 rounded">
+                {relevantInternAnnouncements.length} Alert{relevantInternAnnouncements.length > 1 ? "s" : ""}
+              </span>
+            </div>
+            <div className="space-y-3 max-h-[220px] overflow-y-auto pr-1 custom-scrollbar">
+              {relevantInternAnnouncements.map((ann) => (
+                <div
+                  key={ann.id}
+                  className={`p-3.5 rounded-xl border text-[11px] space-y-1.5 transition-all ${
+                    ann.authorRole === "ADMIN"
+                      ? "border-purple-500/15 bg-purple-500/5 hover:bg-purple-500/8"
+                      : "border-cyan-500/15 bg-cyan-500/5 hover:bg-cyan-500/8"
+                  }`}
+                >
+                  <div className="flex items-center justify-between flex-wrap gap-2">
+                    <div className="flex items-center gap-2">
+                      <span className={`rounded px-1.5 py-0.2 text-[8px] font-bold uppercase tracking-wider ${
+                        ann.authorRole === "ADMIN" ? "bg-purple-500/20 text-purple-400" : "bg-cyan-500/20 text-cyan-400"
+                      }`}>
+                        {ann.authorRole === "ADMIN" ? "Global Alert" : "Mentor Update"}
+                      </span>
+                      <h4 className="font-bold text-white">{ann.title}</h4>
+                    </div>
+                    <span className="text-[9px] text-slate-500 font-mono">{new Date(ann.createdAt).toLocaleString()}</span>
+                  </div>
+                  <p className="text-slate-300 leading-relaxed whitespace-pre-wrap">{ann.content}</p>
+                  <div className="text-[10px] text-slate-500">
+                    Posted by <span className="font-semibold text-slate-300">{ann.authorName}</span>{ann.authorRole === "ADMIN" && <span className="text-purple-400 font-bold ml-1.5">(Admin)</span>}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Payment Approved Banner */}
+        <PaymentApprovedBanner userId={activeUser.id} />
+        <div
+          className="relative overflow-hidden rounded-2xl border p-6"
+          style={{
+            borderColor: `${track.color}25`,
+            background: `linear-gradient(135deg, ${track.color}10 0%, rgba(2,11,24,0) 60%)`,
+          }}
+        >
+          <div
+            className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full blur-3xl"
+            style={{ backgroundColor: `${track.color}15` }}
+          />
+          <div className="relative flex flex-wrap items-center justify-between gap-4">
+            <div>
+              <p className="mb-1 text-sm text-slate-500">Welcome back ≡ƒæï</p>
+              <h2 className="font-display text-2xl font-extrabold text-white">
+                {activeUser.name}
+              </h2>
+              <p className="mt-1 flex items-center gap-2 text-sm text-slate-400">
+                <span
+                  className="inline-block h-2 w-2 rounded-full"
+                  style={{ backgroundColor: track.color }}
+                />
+                {track.title}
+              </p>
+            </div>
+            <div className="flex flex-col items-end gap-2">
+              {pendingCount > 0 && (
+                <div className="flex items-center gap-2 rounded-xl border border-blue-400/20 bg-blue-400/10 px-4 py-2.5 text-sm">
+                  <GitBranch size={14} className="text-blue-400" />
+                  <span className="text-slate-300">
+                    <span className="font-semibold text-blue-400">{pendingCount} submission</span>
+                    {pendingCount === 1 ? "" : "s"} pending review
+                  </span>
+                </div>
+              )}
+              {continueTask ? (
+                <Link
+                  href={`/dashboard/task/${continueTask.id}`}
+                  className="flex items-center gap-2 rounded-xl border border-yellow-400/20 bg-yellow-400/10 px-4 py-2.5 text-sm font-semibold text-yellow-400 transition-all hover:bg-yellow-400/15"
+                >
+                  Continue: Day {continueTask.dayNo} ΓÇö {continueTask.title} ΓåÆ
+                </Link>
+              ) : (
+                <div className="rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-slate-400">
+                  Week {currentWeek} tasks unlock soon.
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Stats */}
+        <StatsRow />
+
+        {/* Progress + Tasks ΓÇö side by side on large screens */}
+        <div className="grid gap-6 xl:grid-cols-[1fr_1.6fr] relative">
+          <PhaseProgress />
+          <TaskList weekNo={currentWeek} />
+        </div>
+
+        {/* Recent Activity */}
+        <div className="rounded-2xl border border-white/8 bg-white/4 p-6 backdrop-blur-xl">
+          <h2 className="font-display mb-4 text-lg font-bold text-white">Recent Mentor Feedback</h2>
+          <div className="space-y-3">
+            {SUBMISSIONS.filter((s) => s.feedback).map((sub) => (
+              <div
+                key={sub.id}
+                className="flex gap-4 rounded-xl border border-white/6 bg-white/4 p-4"
+              >
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-emerald-400/15">
+                  <BadgeCheck size={16} className="text-emerald-400" />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold text-slate-200">{sub.taskTitle}</p>
+                  <p className="mt-1 text-xs italic text-slate-500">&quot;{sub.feedback}&quot;</p>
+                </div>
+                <span className="ml-auto shrink-0 text-xs text-emerald-400 font-bold">
+                  +{sub.points} pts
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Profile & Q&A Grid */}
+        <div className="grid gap-6 md:grid-cols-2">
+          <div className="space-y-6">
+            {/* Profile Card */}
+            <div className="rounded-2xl border border-white/8 bg-white/4 p-6 backdrop-blur-xl space-y-4">
+              <h3 className="font-display text-lg font-bold text-white flex items-center gap-2">
+                <UserIcon className="text-cyan-400" size={20} />
+                My Internship Profile Details
+              </h3>
+              
+              {profileDetails ? (
+                <div className="space-y-4">
+                  <div className="flex items-center gap-4">
+                    {profileDetails.avatarImage ? (
+                      <img
+                        src={profileDetails.avatarImage}
+                        alt="Profile Avatar"
+                        className="h-16 w-16 rounded-full object-cover border border-white/10 shadow-lg"
+                      />
+                    ) : (
+                      <div className="h-16 w-16 rounded-full bg-cyan-500/10 text-cyan-400 flex items-center justify-center font-bold">
+                        {profileDetails.userName.substring(0, 2).toUpperCase()}
+                      </div>
+                    )}
+                    <div>
+                      <h4 className="font-bold text-white text-sm">{profileDetails.userName}</h4>
+                      <p className="text-xs text-slate-400">Track: {profileDetails.trackTitle}</p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3 text-xs leading-normal">
+                    <div>
+                      <span className="text-slate-500 font-semibold">Father's Name:</span>
+                      <p className="text-slate-200">{profileDetails.fatherName}</p>
+                    </div>
+                    <div>
+                      <span className="text-slate-500 font-semibold">Mobile:</span>
+                      <p className="text-slate-200 font-mono">{profileDetails.mobile}</p>
+                    </div>
+                    <div>
+                      <span className="text-slate-500 font-semibold">CNIC:</span>
+                      <p className="text-slate-200 font-mono">{profileDetails.cnic}</p>
+                    </div>
+                    <div>
+                      <span className="text-slate-500 font-semibold">Institute:</span>
+                      <p className="text-slate-200 truncate">{profileDetails.institute}</p>
+                    </div>
+                    <div className="col-span-2">
+                      <span className="text-slate-500 font-semibold">Permanent Address:</span>
+                      <p className="text-slate-200">{profileDetails.address}</p>
+                    </div>
+                    <div>
+                      <span className="text-slate-500 font-semibold">Experience:</span>
+                      <p className="text-slate-200">{profileDetails.experience}</p>
+                    </div>
+                    {profileDetails.projectsUrl && (
+                      <div>
+                        <span className="text-slate-500 font-semibold">LinkedIn / Projects:</span>
+                        <p className="text-slate-200 truncate">
+                          <a href={profileDetails.projectsUrl} target="_blank" rel="noopener noreferrer" className="text-cyan-400 hover:underline">
+                            View Profile
+                          </a>
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ) : (
+                <p className="text-xs text-slate-500 italic py-6 text-center">
+                  Profile details will load once you submit your internship application.
+                </p>
+              )}
+            </div>
+          </div>
+
+          {/* Q&A Helpdesk Card */}
+          <div id="helpdesk" className="rounded-2xl border border-white/8 bg-white/4 p-6 backdrop-blur-xl space-y-4">
+            <h3 className="font-display text-lg font-bold text-white flex items-center gap-2">
+              <MessageSquare className="text-cyan-400" size={20} />
+              Ask Mentor Helpdesk
+            </h3>
+            <p className="text-[10px] text-yellow-500 font-bold leading-normal bg-yellow-500/5 border border-yellow-500/10 rounded-lg p-2.5">
+              ΓÜá∩╕Å **SLA Notice:** Your assigned mentor will respond to your queries within **24 hours**.
+            </p>
+
+            <form onSubmit={handleAskQuestion} className="space-y-2">
+              <textarea
+                required
+                rows={3}
+                value={newQuestion}
+                onChange={(e) => setNewQuestion(e.target.value)}
+                placeholder="Ask your mentor a question (e.g. details regarding week tasks or code checks)..."
+                className="w-full rounded-xl border border-white/10 bg-[#030c1c] px-4 py-3 text-xs text-slate-200 outline-none focus:border-cyan-400/40"
+              />
+              <button
+                type="submit"
+                className="w-full flex items-center justify-center gap-1.5 rounded-xl bg-cyan-400 py-2.5 text-xs font-bold text-[#020B18] hover:scale-[1.01] transition-transform cursor-pointer"
+              >
+                <Send size={12} />
+                Submit Query to Mentor
+              </button>
+            </form>
+
+            {/* Ticket Feed list */}
+            <div className="space-y-3 pt-2 max-h-[160px] overflow-y-auto pr-1">
+              {questions.map((q) => (
+                <div key={q.id} className="p-3 rounded-lg bg-black/20 border border-white/5 space-y-1.5 text-xs">
+                  <div className="flex justify-between items-center text-[10px]">
+                    <span className="text-slate-500">{new Date(q.askedAt).toLocaleDateString()}</span>
+                    <span className={`rounded px-1.5 py-0.5 text-[9px] font-extrabold ${
+                      q.status === "ANSWERED" ? "bg-emerald-500/10 text-emerald-400" : "bg-yellow-500/10 text-yellow-500 animate-pulse"
+                    }`}>
+                      {q.status}
+                    </span>
+                  </div>
+                  <p className="text-slate-300 font-semibold">&quot;{q.question}&quot;</p>
+                  {q.reply && (
+                    <div className="pl-2 border-l border-cyan-500/40 text-[11px] text-cyan-400 leading-normal">
+                      <span className="font-bold text-slate-400">Mentor reply:</span> &quot;{q.reply}&quot;
+                    </div>
+                  )}
+                </div>
+              ))}
+              {questions.length === 0 && (
+                <p className="text-center text-xs text-slate-500 py-6 italic">No questions submitted yet.</p>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   // ΓöÇΓöÇ STATE 3: Approved Campus Ambassador Dashboard ΓöÇΓöÇ
   const totalPoints = outreachSubmissions
     .filter((s) => s.status === "APPROVED")
@@ -826,6 +1327,29 @@ export default function DashboardPage() {
 
   return (
     <div className="mx-auto max-w-5xl space-y-6">
+      {/* Mode Switcher */}
+      {isAmbassadorApproved && activeUser.enrolledTrackId && (
+        <div className="flex justify-between items-center bg-white/4 border border-white/8 rounded-2xl p-4 mb-6 backdrop-blur-xl">
+          <div>
+            <h3 className="text-sm font-bold text-white">Switch Dashboard Mode</h3>
+            <p className="text-[10px] text-slate-500">You are enrolled in both the Internship & Ambassador programs.</p>
+          </div>
+          <div className="flex gap-2">
+            <button
+              onClick={() => setDashboardMode("INTERNSHIP")}
+              className="px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer bg-white/5 text-slate-400 hover:text-white"
+            >
+              Internship Workspace
+            </button>
+            <button
+              onClick={() => setDashboardMode("AMBASSADOR")}
+              className="px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer bg-yellow-500 text-[#020B18]"
+            >
+              Ambassador Portal
+            </button>
+          </div>
+        </div>
+      )}
       
       {/* Announcements Notice Board */}
       {relevantAnnouncements.length > 0 && (
