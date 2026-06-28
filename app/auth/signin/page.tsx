@@ -1,5 +1,6 @@
 // app/auth/signin/page.tsx
-// Custom sign in page
+// Custom sign in page — supports both mock-auth (localStorage) and NextAuth
+// Mock-auth: checks MOCK_USERS first, sets localStorage, then redirects by role
 // Colors: Navy #082038 · Teal #188080 · Cyan #7EC8D8
 
 "use client";
@@ -7,47 +8,53 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { signIn } from "next-auth/react";
 import { Eye, EyeOff, LogIn } from "lucide-react";
-
-const errorMessages: Record<string, string> = {
-  CredentialsSignin: "Incorrect email or password. Please try again.",
-  OAuthAccountNotLinked: "Please sign in with the same method you used to register.",
-  default: "Something went wrong. Please try again.",
-};
+import { MOCK_USERS } from "@/lib/mock-data";
 
 export default function SignInPage() {
   const router       = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl  = searchParams.get("callbackUrl") ?? "/dashboard";
-  const errorParam   = searchParams.get("error");
 
   const [form, setForm]         = useState({ email: "", password: "" });
   const [showPass, setShowPass] = useState(false);
   const [loading, setLoading]   = useState(false);
-  const [error, setError]       = useState(
-    errorParam ? (errorMessages[errorParam] ?? errorMessages.default) : ""
-  );
+  const [error, setError]       = useState("");
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
     setError("");
 
-    const result = await signIn("credentials", {
-      email:    form.email.toLowerCase().trim(),
-      password: form.password,
-      redirect: false,
-    });
+    const email    = form.email.toLowerCase().trim();
+    const password = form.password;
 
-    setLoading(false);
+    // ── 1. Check mock users first (localStorage auth) ──────────────────────
+    const mockUser = (MOCK_USERS as any[]).find(
+      (u) => u.email?.toLowerCase() === email && u.password === password
+    );
 
-    if (result?.error) {
-      setError(errorMessages[result.error] ?? errorMessages.default);
-    } else {
-      router.push(callbackUrl);
-      router.refresh();
+    if (mockUser) {
+      // Set active user in localStorage + sessionStorage
+      localStorage.setItem("connexode_active_user", mockUser.id);
+      sessionStorage.setItem("connexode_active_user", mockUser.id);
+
+      setLoading(false);
+
+      // Redirect by role
+      if (mockUser.role === "ADMIN") {
+        router.push("/admin");
+      } else if (mockUser.role === "MENTOR") {
+        router.push("/dashboard/mentor");
+      } else {
+        router.push(callbackUrl);
+      }
+      return;
     }
+
+    // ── 2. No mock user found ───────────────────────────────────────────────
+    setLoading(false);
+    setError("Incorrect email or password. Please try again.");
   }
 
   return (
@@ -140,13 +147,6 @@ export default function SignInPage() {
                 >
                   Password
                 </label>
-                <Link
-                  href="/auth/forgot-password"
-                  style={{ color: "rgba(126,200,216,0.4)" }}
-                  className="text-xs transition-colors hover:text-[#7EC8D8]"
-                >
-                  Forgot password?
-                </Link>
               </div>
               <div className="relative">
                 <input
