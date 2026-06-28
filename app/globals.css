@@ -1,17 +1,42 @@
 @import "tailwindcss";
 
-/* ── Connexode Design Tokens ─────────────────────────────── */
-:root {
-  --bg-primary: #020B18;
-  --bg-surface: rgba(255, 255, 255, 0.04);
-  --accent-cyan: #00F5FF;
-  --accent-teal: #00BFA5;
-  --text-primary: #F0F6FF;
-  --text-muted: #8899AA;
-  --border-glass: rgba(0, 245, 255, 0.10);
-  --glow-cyan: 0 0 40px rgba(0, 245, 255, 0.20);
-  --font-display: "Space Grotesk", system-ui, sans-serif;
-  --font-body: "Inter", system-ui, sans-serif;
+/* ── Connexode Design Tokens — Dark Theme (default) ─────────── */
+:root,
+[data-theme="dark"] {
+  --bg-primary:    #020B18;
+  --bg-nav:        rgba(2, 11, 24, 0.85);
+  --bg-surface:    rgba(255, 255, 255, 0.04);
+  --bg-card:       rgba(255, 255, 255, 0.04);
+  --accent-cyan:   #00F5FF;
+  --accent-teal:   #00BFA5;
+  --text-primary:  #F0F6FF;
+  --text-muted:    #8899AA;
+  --text-dim:      #4A6070;
+  --border-glass:  rgba(0, 245, 255, 0.10);
+  --border-subtle: rgba(255, 255, 255, 0.08);
+  --glow-cyan:     0 0 40px rgba(0, 245, 255, 0.20);
+  --shadow-card:   0 8px 32px rgba(0, 0, 0, 0.4);
+  --font-display:  "Space Grotesk", system-ui, sans-serif;
+  --font-body:     "Inter", system-ui, sans-serif;
+  color-scheme: dark;
+}
+
+/* ── Light Theme Overrides ────────────────────────────────── */
+[data-theme="light"] {
+  --bg-primary:    #F0F4FF;
+  --bg-nav:        rgba(240, 244, 255, 0.92);
+  --bg-surface:    rgba(0, 0, 0, 0.03);
+  --bg-card:       rgba(255, 255, 255, 0.80);
+  --accent-cyan:   #0099CC;
+  --accent-teal:   #007A6A;
+  --text-primary:  #0A1628;
+  --text-muted:    #4A6080;
+  --text-dim:      #8899AA;
+  --border-glass:  rgba(0, 153, 204, 0.15);
+  --border-subtle: rgba(0, 0, 0, 0.08);
+  --glow-cyan:     0 0 30px rgba(0, 153, 204, 0.15);
+  --shadow-card:   0 4px 24px rgba(0, 0, 0, 0.08);
+  color-scheme: light;
 }
 
 /* ── Tailwind v4 Theme Extension ──────────────────────────── */
@@ -29,7 +54,6 @@
 
 html {
   scroll-behavior: smooth;
-  color-scheme: dark;
 }
 
 body {
@@ -41,6 +65,7 @@ body {
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
   cursor: none; /* Hide default — custom cursor active */
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 /* ── Custom Cursor ───────────────────────────────────────── */
@@ -499,6 +524,138 @@ body {
 spline-viewer::part(logo) {
   display: none !important;
 }
+
+/* ══════════════════════════════════════════════════════════════
+   LIGHT THEME OVERRIDES  [data-theme="light"]
+   Applied when user switches to light/white mode
+   ══════════════════════════════════════════════════════════════ */
+
+/* Background overrides */
+[data-theme="light"] body {
+  background-color: var(--bg-primary);
+}
+
+/* Navbar — light mode frosted glass */
+[data-theme="light"] header[class*="fixed"] {
+  background-color: rgba(240, 244, 255, 0.88) !important;
+  border-bottom-color: rgba(0, 100, 180, 0.12) !important;
+  backdrop-filter: blur(20px);
+}
+
+/* Nav links */
+[data-theme="light"] nav a,
+[data-theme="light"] nav button {
+  color: #1a3a5c !important;
+}
+[data-theme="light"] nav a:hover,
+[data-theme="light"] nav button:hover {
+  color: #0077aa !important;
+}
+
+/* Dropdown menus */
+[data-theme="light"] nav .absolute {
+  background-color: #ffffff !important;
+  border-color: rgba(0, 100, 180, 0.12) !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12) !important;
+}
+[data-theme="light"] nav .absolute a {
+  color: #1a3a5c !important;
+  border-bottom-color: rgba(0, 0, 0, 0.06) !important;
+}
+[data-theme="light"] nav .absolute a:hover {
+  background-color: rgba(0, 100, 180, 0.06) !important;
+  color: #0077aa !important;
+}
+
+/* Cards / glass panels */
+[data-theme="light"] .glass {
+  background: rgba(255, 255, 255, 0.75) !important;
+  border-color: rgba(0, 100, 180, 0.12) !important;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.07) !important;
+}
+
+[data-theme="light"] .glass-hover:hover {
+  border-color: rgba(0, 100, 180, 0.25) !important;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.1), 0 0 20px rgba(0, 100, 180, 0.08) !important;
+}
+
+/* Section backgrounds */
+[data-theme="light"] section,
+[data-theme="light"] [style*="background-color: #040C18"],
+[data-theme="light"] [style*="background-color: #020B18"],
+[data-theme="light"] [style*="background-color: #082038"],
+[data-theme="light"] [style*="background-color: #061020"],
+[data-theme="light"] [style*="background-color: #0A1628"],
+[data-theme="light"] [style*="backgroundColor: \"#040C18\""],
+[data-theme="light"] [style*="backgroundColor: \"#020B18\""] {
+  background-color: transparent !important;
+}
+
+/* Text: white → dark navy */
+[data-theme="light"] .text-white,
+[data-theme="light"] [style*="color: #E8F4F8"],
+[data-theme="light"] [style*="color: #F0F6FF"] {
+  color: #0A1628 !important;
+}
+
+/* Muted text → readable on light */
+[data-theme="light"] .text-slate-400,
+[data-theme="light"] .text-slate-500 {
+  color: #4A6080 !important;
+}
+[data-theme="light"] .text-slate-300,
+[data-theme="light"] .text-slate-200 {
+  color: #2a4060 !important;
+}
+
+/* Borders */
+[data-theme="light"] [class*="border-white"] {
+  border-color: rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Scrollbar */
+[data-theme="light"] ::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.04);
+}
+[data-theme="light"] ::-webkit-scrollbar-thumb {
+  background: rgba(0, 100, 180, 0.2);
+}
+[data-theme="light"] ::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 100, 180, 0.4);
+}
+
+/* Mobile drawer */
+[data-theme="light"] .fixed.z-50 {
+  background-color: #ffffff !important;
+  border-right-color: rgba(0, 100, 180, 0.1) !important;
+}
+
+/* Footer */
+[data-theme="light"] footer {
+  background-color: #e8eef8 !important;
+  border-top-color: rgba(0, 100, 180, 0.1) !important;
+}
+
+/* Form inputs */
+[data-theme="light"] input,
+[data-theme="light"] textarea,
+[data-theme="light"] select {
+  background-color: #ffffff !important;
+  border-color: rgba(0, 100, 180, 0.2) !important;
+  color: #0A1628 !important;
+}
+[data-theme="light"] input::placeholder,
+[data-theme="light"] textarea::placeholder {
+  color: #8899aa !important;
+}
+
+/* Code editor areas — keep dark even in light mode for readability */
+[data-theme="light"] .CodeMirror,
+[data-theme="light"] pre,
+[data-theme="light"] code {
+  filter: none !important;
+}
+
 
 
 

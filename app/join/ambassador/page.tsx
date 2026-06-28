@@ -45,21 +45,24 @@ export default function AmbassadorPage() {
     e.preventDefault();
     setLoading(true);
 
-    // TODO: Replace localStorage block below with Prisma API call:
-    // const res = await fetch("/api/applications/ambassador", {
-    //   method: "POST",
-    //   headers: { "Content-Type": "application/json" },
-    //   body: JSON.stringify({ ...form, status: "pending", type: "ambassador", createdAt: new Date().toISOString() }),
-    // });
+    try {
+      const res = await fetch("/api/applications/ambassador", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
 
-    // localStorage simulation (existing project pattern)
-    const existing = JSON.parse(localStorage.getItem("connexode_ambassador_applications") || "[]");
-    const newApp = { ...form, status: "pending", type: "ambassador", id: Date.now().toString(), createdAt: new Date().toISOString() };
-    localStorage.setItem("connexode_ambassador_applications", JSON.stringify([...existing, newApp]));
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || "Failed to submit application");
+      }
 
-    await new Promise((r) => setTimeout(r, 800)); // UX delay
-    setLoading(false);
-    setSubmitted(true);
+      setSubmitted(true);
+    } catch (err: any) {
+      alert(err.message || "Something went wrong. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   }
 
   // ── Success state ──

@@ -8,6 +8,7 @@ import "./globals.css";
 import { RootNav } from "@/components/layout/RootNav";
 import { RootFooter } from "@/components/layout/RootFooter";
 import { SessionProvider } from "@/components/providers/SessionProvider";
+import { ThemeProvider } from "@/components/providers/ThemeProvider";
 
 // ─── SEO METADATA ────────────────────────────────────────────────────────────
 
@@ -69,15 +70,20 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body
-        style={{ backgroundColor: "#040C18" }}
         className="font-sans antialiased"
+        suppressHydrationWarning
       >
-        <RootNav />
-        {children}
-        <RootFooter />
+        <SessionProvider>
+          <ThemeProvider>
+            <RootNav />
+            {children}
+            <RootFooter />
+          </ThemeProvider>
+        </SessionProvider>
       </body>
     </html>
   );
 }
+

@@ -1,25 +1,15 @@
 // middleware.ts — root level (next to app/)
 // Route protection — runs on every request BEFORE page renders
-// Blocks unauthenticated users from /dashboard routes
-// Blocks non-admin users from /admin routes
+// /admin routes are protected (NextAuth only)
+// /dashboard is open at middleware level — page itself handles both
+//   NextAuth session users AND mock-auth (localStorage) users
 
 import { auth } from "@/auth";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-// Routes that require login
-const PROTECTED = ["/dashboard", "/admin"];
-
-// Routes only accessible when NOT logged in
+// Routes only accessible when NOT logged in (NextAuth users)
 const AUTH_ONLY = ["/auth/signin", "/auth/signup"];
-
-// Role-based route map
-const ROLE_ROUTES: Record<string, string[]> = {
-  ADMIN:      ["/admin", "/dashboard"],
-  MENTOR:     ["/dashboard/mentor"],
-  AMBASSADOR: ["/dashboard/ambassador"],
-  STUDENT:    ["/dashboard/student"],
-};
 
 export default auth(function middleware(req) {
   const { pathname } = req.nextUrl;
@@ -27,30 +17,26 @@ export default auth(function middleware(req) {
   const isLoggedIn = !!session?.user;
   const role = (session?.user as { role?: string })?.role ?? null;
 
-  // ── 1. Redirect logged-in users away from auth pages ──────────────────────
+  // ── 1. Redirect logged-in (NextAuth) users away from auth pages ────────────
   if (isLoggedIn && AUTH_ONLY.some((p) => pathname.startsWith(p))) {
     return NextResponse.redirect(new URL("/dashboard", req.url));
   }
 
-  // ── 2. Block unauthenticated access to protected routes ───────────────────
-  if (!isLoggedIn && PROTECTED.some((p) => pathname.startsWith(p))) {
-    const signInUrl = new URL("/auth/signin", req.url);
-    signInUrl.searchParams.set("callbackUrl", pathname);
-    return NextResponse.redirect(signInUrl);
-  }
-
-  // ── 3. Block non-admin from /admin routes ─────────────────────────────────
+  // ── 2. Admin route protection — only ADMIN role allowed ───────────────────
   if (pathname.startsWith("/admin") && role !== "ADMIN") {
+    if (!isLoggedIn) {
+      const signInUrl = new URL("/auth/signin", req.url);
+      signInUrl.searchParams.set("callbackUrl", pathname);
+      return NextResponse.redirect(signInUrl);
+    }
     return NextResponse.redirect(new URL("/dashboard", req.url));
   }
 
-  // ── 4. Redirect /dashboard to role-specific dashboard ────────────────────
+  // ── 3. Redirect NextAuth users from /dashboard to role-specific view ───────
   if (pathname === "/dashboard" && isLoggedIn && role) {
     const destinations: Record<string, string> = {
-      ADMIN:      "/admin",
-      MENTOR:     "/dashboard/mentor",
-      AMBASSADOR: "/dashboard/ambassador",
-      STUDENT:    "/dashboard/student",
+      ADMIN:  "/admin",
+      MENTOR: "/dashboard/mentor",
     };
     const dest = destinations[role];
     if (dest) return NextResponse.redirect(new URL(dest, req.url));

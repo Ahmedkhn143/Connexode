@@ -8,7 +8,8 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import Logo from "@/components/ui/Logo";
 import { usePathname } from "next/navigation";
-import { Menu, X, ChevronDown } from "lucide-react";
+import { Menu, X, ChevronDown, Sun, Moon } from "lucide-react";
+import { useTheme } from "@/components/providers/ThemeProvider";
 
 const navLinks = [
   { label: "About",    href: "/about" },
@@ -38,6 +39,7 @@ export function RootNav() {
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [scrolled, setScrolled] = useState(false);
   const pathname = usePathname();
+  const { theme, toggleTheme } = useTheme();
 
   // Close mobile nav on route change
   useEffect(() => {
@@ -158,6 +160,22 @@ export function RootNav() {
 
           {/* Desktop right CTAs */}
           <div className="hidden items-center gap-3 md:flex">
+
+            {/* Theme toggle */}
+            <button
+              onClick={toggleTheme}
+              aria-label="Toggle theme"
+              title={theme === "dark" ? "Switch to Light Mode" : "Switch to Dark Mode"}
+              style={{
+                border: "1px solid rgba(126,200,216,0.15)",
+                color: "rgba(126,200,216,0.6)",
+                backgroundColor: theme === "light" ? "rgba(0,153,204,0.08)" : "transparent",
+              }}
+              className="flex h-8 w-8 items-center justify-center rounded-full transition-all hover:border-[rgba(126,200,216,0.4)] hover:text-[#7EC8D8] hover:scale-110"
+            >
+              {theme === "dark" ? <Sun size={15} /> : <Moon size={15} />}
+            </button>
+
             <Link
               href="/auth/signin"
               style={{ color: "rgba(126,200,216,0.5)" }}
@@ -222,13 +240,24 @@ export function RootNav() {
           >
             <Logo size="default" />
           </Link>
-          <button
-            onClick={() => setMobileOpen(false)}
-            style={{ color: "rgba(126,200,216,0.5)" }}
-            className="rounded-lg p-1.5 hover:bg-[rgba(126,200,216,0.08)]"
-          >
-            <X size={18} />
-          </button>
+          <div className="flex items-center gap-2">
+            {/* Theme toggle (mobile) */}
+            <button
+              onClick={toggleTheme}
+              aria-label="Toggle theme"
+              style={{ color: "rgba(126,200,216,0.6)", border: "1px solid rgba(126,200,216,0.15)" }}
+              className="flex h-8 w-8 items-center justify-center rounded-full transition-all hover:text-[#7EC8D8]"
+            >
+              {theme === "dark" ? <Sun size={14} /> : <Moon size={14} />}
+            </button>
+            <button
+              onClick={() => setMobileOpen(false)}
+              style={{ color: "rgba(126,200,216,0.5)" }}
+              className="rounded-lg p-1.5 hover:bg-[rgba(126,200,216,0.08)]"
+            >
+              <X size={18} />
+            </button>
+          </div>
         </div>
 
         {/* Drawer links */}

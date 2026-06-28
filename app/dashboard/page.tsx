@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useSession } from "next-auth/react";
 import StatsRow from "@/components/dashboard/StatsRow";
 import PhaseProgress from "@/components/dashboard/PhaseProgress";
 import TaskList from "@/components/dashboard/TaskList";
@@ -27,6 +28,7 @@ const CITIES = [
 export default function DashboardPage() {
   const searchParams = useSearchParams();
   const currentView = searchParams.get("view");
+  const { data: session } = useSession();
 
   const [activeUser, setActiveUser] = useState<User | null>(null);
   const [paymentStatus, setPaymentStatusState] = useState<"PENDING" | "PENDING_VERIFICATION" | "PAID">("PENDING");
@@ -121,17 +123,67 @@ export default function DashboardPage() {
     setNewSupportMsg("");
   };
 
+  // ── NextAuth → localStorage bridge ──────────────────────────────────────────
+  // When a user logs in via NextAuth (real DB), we inject them into the
+  // localStorage system so the full mock-data dashboard can find them.
   useEffect(() => {
-    const user = getActiveUser();
-    if (!user) {
-      window.location.href = "/register";
-      return;
+    if (!session?.user) return;
+    const sessionUser = session.user as { name?: string; email?: string; role?: string; id?: string };
+    const email = sessionUser.email || "";
+    const userId = `nextauth_${email.replace(/[^a-z0-9]/gi, "_")}`;
+
+    // Check if this NextAuth user already exists in dynamic users
+    const existingDynamic = localStorage.getItem("connexode_dynamic_users");
+    const dynamicUsers: any[] = existingDynamic ? JSON.parse(existingDynamic) : [];
+    const alreadyExists = dynamicUsers.find((u: any) => u.id === userId);
+
+    if (!alreadyExists) {
+      // Create a new dynamic user object from the NextAuth session
+      const newUser: any = {
+        id: userId,
+        name: sessionUser.name || email.split("@")[0],
+        username: email.split("@")[0].toLowerCase().replace(/[^a-z0-9]/g, "-"),
+        email: email,
+        role: (sessionUser.role as string) || "STUDENT",
+        points: 0,
+        avatarInitials: (sessionUser.name || email).substring(0, 2).toUpperCase(),
+        enrolledTrackId: "",
+        joinDate: new Date().toISOString().split("T")[0],
+        streak: 0,
+        rank: "New Member",
+        currentWeek: 1,
+        currentDay: 1,
+      };
+      dynamicUsers.push(newUser);
+      localStorage.setItem("connexode_dynamic_users", JSON.stringify(dynamicUsers));
     }
-    setActiveUser(user);
-    if (user.enrolledTrackId) {
-      setPaymentStatusState(getPaymentStatus(user.enrolledTrackId, user.id));
+
+    // Activate this user in the mock session
+    const currentActive = localStorage.getItem("connexode_active_user");
+    if (currentActive !== userId) {
+      localStorage.setItem("connexode_active_user", userId);
+      sessionStorage.setItem("connexode_active_user", userId);
     }
-  }, []);
+  }, [session]);
+
+  useEffect(() => {
+    // Wait a tick for the session bridge to set localStorage before reading it
+    const timer = setTimeout(() => {
+      const user = getActiveUser();
+      if (!user) {
+        // Only redirect if there's definitely no session coming
+        if (!session) {
+          window.location.href = "/auth/signin";
+        }
+        return;
+      }
+      setActiveUser(user);
+      if (user.enrolledTrackId) {
+        setPaymentStatusState(getPaymentStatus(user.enrolledTrackId, user.id));
+      }
+    }, 100);
+    return () => clearTimeout(timer);
+  }, [session]);
 
   useEffect(() => {
     if (activeUser) {

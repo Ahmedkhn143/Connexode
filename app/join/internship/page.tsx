@@ -74,26 +74,24 @@ export default function InternshipPage() {
     e.preventDefault();
     setLoading(true);
 
-    // TODO: Replace localStorage block with Prisma API call:
-    // const res = await fetch("/api/applications/internship", {
-    //   method: "POST",
-    //   headers: { "Content-Type": "application/json" },
-    //   body: JSON.stringify({ ...form, status: "pending", type: "internship", createdAt: new Date().toISOString() }),
-    // });
+    try {
+      const res = await fetch("/api/applications/internship", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
 
-    const existing = JSON.parse(localStorage.getItem("connexode_internship_applications") || "[]");
-    const newApp = {
-      ...form,
-      status: "pending",
-      type: "internship",
-      id: Date.now().toString(),
-      createdAt: new Date().toISOString(),
-    };
-    localStorage.setItem("connexode_internship_applications", JSON.stringify([...existing, newApp]));
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || "Failed to submit application");
+      }
 
-    await new Promise((r) => setTimeout(r, 800));
-    setLoading(false);
-    setSubmitted(true);
+      setSubmitted(true);
+    } catch (err: any) {
+      alert(err.message || "Something went wrong. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   }
 
   // ── Success state ──
