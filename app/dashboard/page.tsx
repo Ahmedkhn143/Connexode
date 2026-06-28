@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect } from "react";
 import StatsRow from "@/components/dashboard/StatsRow";
@@ -303,12 +303,7 @@ export default function DashboardPage() {
       const status = loadAmbassadorData(activeUser.email);
       loadStudentAssignedTasks(activeUser.id, activeUser.email);
 
-      if (activeUser.role === "STUDENT") {
-        if (status !== "APPROVED" && !activeUser.enrolledTrackId) {
-          window.location.href = "/";
-          return;
-        }
-      }
+
 
       if (activeUser.enrolledTrackId) {
         setDashboardMode("INTERNSHIP");
