@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useSession } from "next-auth/react";
 import Logo from "@/components/ui/Logo";
 import {
   SUBMISSIONS,
@@ -122,32 +121,23 @@ export default function MentorDashboard() {
   const [profilePassword, setProfilePassword] = useState("");
   const [profileAvatarImage, setProfileAvatarImage] = useState("");
 
-  const { data: session } = useSession();
-
+  // Load mentor from localStorage (mock-auth system)
   useEffect(() => {
-    if (session?.user) {
-      const email = session.user.email;
-      const name = session.user.name || "Expert Mentor";
-      const found = MOCK_USERS.find((u) => u.email === email && u.role === "MENTOR");
-      setActiveMentor(
-        found || {
-          id: "usr_mentor1",
-          name,
-          username: email?.split("@")[0] || "mentor",
-          email: email || "mentor@connexode.pk",
-          role: "MENTOR",
-          points: 0,
-          avatarInitials: name.substring(0, 2).toUpperCase(),
-          enrolledTrackId: "",
-          joinDate: new Date().toISOString().split("T")[0],
-          streak: 0,
-          rank: "Expert Mentor",
-          currentWeek: 0,
-          currentDay: 0,
-        }
-      );
+    const user = getActiveUser();
+    if (user && user.role === "MENTOR") {
+      setActiveMentor(user);
+    } else {
+      // Fallback: try to find any mentor in MOCK_USERS by localStorage ID
+      const savedId = typeof window !== "undefined" ? localStorage.getItem("connexode_active_user") : null;
+      const found = savedId ? MOCK_USERS.find((u) => u.id === savedId && u.role === "MENTOR") : null;
+      if (found) {
+        setActiveMentor(found as any);
+      } else {
+        // Default fallback mentor
+        setActiveMentor(MOCK_USERS.find((u) => u.role === "MENTOR") as any || null);
+      }
     }
-  }, [session]);
+  }, []);
 
   useEffect(() => {
     // Load local storage custom submissions

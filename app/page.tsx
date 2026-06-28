@@ -4,6 +4,8 @@
 // Stack: Next.js 15 · TypeScript · Tailwind CSS · Lucide React
 
 import Link from "next/link";
+import Navbar from "@/components/layout/Navbar";
+import { RootFooter } from "@/components/layout/RootFooter";
 import {
   ArrowRight,
   Users,
@@ -439,11 +441,15 @@ function CTABand() {
 // ─── PAGE ─────────────────────────────────────────────────────────────────────
 export default function HomePage() {
   return (
-    <main style={{ backgroundColor: "#040C18" }} className="min-h-screen antialiased">
-      <Hero />
-      <PillarCards />
-      <HowItWorks />
-      <CTABand />
-    </main>
+    <>
+      <Navbar />
+      <main style={{ backgroundColor: "#040C18" }} className="min-h-screen antialiased">
+        <Hero />
+        <PillarCards />
+        <HowItWorks />
+        <CTABand />
+      </main>
+      <RootFooter />
+    </>
   );
 }
