@@ -1,12 +1,9 @@
 // app/admin/layout.tsx
 // Admin sidebar layout — wraps all /admin pages
-// Only accessible to ADMIN role (middleware handles protection)
+// Auth check is handled client-side by each admin page via localStorage (mock-auth)
 
 import Link from "next/link";
-import Image from "next/image";
 import Logo from "@/components/ui/Logo";
-import { auth } from "@/auth";
-import { redirect } from "next/navigation";
 import {
   LayoutDashboard,
   Users,
@@ -18,25 +15,21 @@ import {
 } from "lucide-react";
 
 const sidebarLinks = [
-  { icon: <LayoutDashboard size={16} />, label: "Overview",     href: "/admin" },
+  { icon: <LayoutDashboard size={16} />, label: "Overview",       href: "/admin" },
   { icon: <Users size={16} />,          label: "Ambassador Apps", href: "/admin/applications?type=AMBASSADOR" },
   { icon: <BookOpen size={16} />,       label: "Internship Apps", href: "/admin/applications?type=INTERNSHIP" },
-  { icon: <Award size={16} />,          label: "Certificates",  href: "/admin/certificates" },
-  { icon: <FolderOpen size={16} />,     label: "Projects",      href: "/admin/projects" },
-  { icon: <BarChart2 size={16} />,      label: "Stats",         href: "/admin/stats" },
+  { icon: <Award size={16} />,          label: "Certificates",    href: "/admin/certificates" },
+  { icon: <FolderOpen size={16} />,     label: "Projects",        href: "/admin/projects" },
+  { icon: <BarChart2 size={16} />,      label: "Stats",           href: "/admin/stats" },
 ];
 
-export default async function AdminLayout({
+export default function AdminLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const session = await auth();
-
-  // Double-check role server-side (middleware also blocks, but defense in depth)
-  if (!session?.user || (session.user as { role?: string }).role !== "ADMIN") {
-    redirect("/auth/signin");
-  }
+  // Auth check is handled client-side by each admin page via localStorage.
+  // We render the sidebar shell for all users here.
 
   return (
     <div
@@ -88,7 +81,7 @@ export default async function AdminLayout({
           ))}
         </nav>
 
-        {/* Bottom — user info + sign out */}
+        {/* Bottom — sign out */}
         <div
           style={{ borderTop: "1px solid rgba(126,200,216,0.08)" }}
           className="px-4 py-4 space-y-3"
@@ -99,21 +92,18 @@ export default async function AdminLayout({
                 width: 32,
                 height: 32,
                 borderRadius: "50%",
-                overflow: "hidden",
+                background: "rgba(24,128,128,0.2)",
                 border: "1px solid rgba(24,128,128,0.3)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
               }}
             >
-              <Image
-                src="/founder.jpg"
-                alt={session.user.name ?? "Admin"}
-                width={32}
-                height={32}
-                style={{ objectFit: "cover", width: "100%", height: "100%" }}
-              />
+              <span style={{ color: "#7EC8D8", fontSize: 14 }}>A</span>
             </div>
             <div className="min-w-0">
               <p style={{ color: "#E8F4F8" }} className="truncate text-xs font-semibold">
-                {session.user.name}
+                Admin
               </p>
               <p style={{ color: "rgba(126,200,216,0.3)" }} className="text-[10px]">
                 Administrator
@@ -121,7 +111,7 @@ export default async function AdminLayout({
             </div>
           </div>
           <Link
-            href="/api/auth/signout"
+            href="/register"
             style={{ color: "rgba(126,200,216,0.4)" }}
             className="flex items-center gap-2 text-xs transition-colors hover:text-[#7EC8D8]"
           >
