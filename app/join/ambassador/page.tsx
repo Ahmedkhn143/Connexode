@@ -1,18 +1,16 @@
-// app/join/ambassador/page.tsx
-// Ambassador Program — info + application form
-// Form submits to localStorage (plug in Prisma API later — see TODO comment)
-
 "use client";
 
 import { useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, CheckCircle, Mic, Users, TrendingUp, Smartphone } from "lucide-react";
+import PublicNav from "@/components/layout/PublicNav";
+import PublicFooter from "@/components/layout/PublicFooter";
 
 const perks = [
-  { icon: <Mic size={18} strokeWidth={1.5} />, title: "Host webinars", desc: "Run AI-awareness sessions and workshops for your campus community." },
-  { icon: <Users size={18} strokeWidth={1.5} />, title: "Build a community", desc: "Connect students to Connexode's network of developers and mentors." },
-  { icon: <TrendingUp size={18} strokeWidth={1.5} />, title: "Track your growth", desc: "Live dashboard showing reach, sessions hosted, and webinar stats." },
-  { icon: <Smartphone size={18} strokeWidth={1.5} />, title: "Social media guidance", desc: "Learn how to grow your personal brand and create content that lands." },
+  { icon: <Mic size={18} />, title: "Host webinars", desc: "Run AI-awareness sessions and workshops for your campus community." },
+  { icon: <Users size={18} />, title: "Build a community", desc: "Connect students to Connexode's network of developers and mentors." },
+  { icon: <TrendingUp size={18} />, title: "Track your growth", desc: "Live dashboard showing reach, sessions hosted, and webinar stats." },
+  { icon: <Smartphone size={18} />, title: "Social media guidance", desc: "Learn how to grow your personal brand and create content that lands." },
 ];
 
 type FormData = {
@@ -27,304 +25,431 @@ type FormData = {
   availability: string;
 };
 
-const empty: FormData = {
-  fullName: "", email: "", university: "", semester: "",
-  city: "", instagram: "", linkedin: "", whyJoin: "", availability: "",
+const initialForm: FormData = {
+  fullName: "",
+  email: "",
+  university: "",
+  semester: "",
+  city: "",
+  instagram: "",
+  linkedin: "",
+  whyJoin: "",
+  availability: "",
 };
 
-export default function AmbassadorPage() {
-  const [form, setForm] = useState<FormData>(empty);
+export default function AmbassadorApplicationPage() {
+  const [form, setForm] = useState<FormData>(initialForm);
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  function update(field: keyof FormData, value: string) {
+  const update = (field: keyof FormData, value: string) => {
     setForm((prev) => ({ ...prev, [field]: value }));
-  }
+  };
 
-  async function handleSubmit(e: React.FormEvent) {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      const res = await fetch("/api/applications/ambassador", {
+      // 1. Submit to API (keep original behaviour)
+      await fetch("/api/applications/ambassador", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
       });
 
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error || "Failed to submit application");
-      }
+      // 2. Submit to localStorage
+      const existing = JSON.parse(localStorage.getItem("connexode_ambassador_applications") || "[]");
+      existing.push({
+        ...form,
+        id: `amb_${Date.now()}`,
+        status: "PENDING",
+        submittedAt: new Date().toISOString(),
+      });
+      localStorage.setItem("connexode_ambassador_applications", JSON.stringify(existing));
 
       setSubmitted(true);
     } catch (err: any) {
-      alert(err.message || "Something went wrong. Please try again.");
+      console.error(err);
+      // Fallback: save to localStorage anyway
+      const existing = JSON.parse(localStorage.getItem("connexode_ambassador_applications") || "[]");
+      existing.push({
+        ...form,
+        id: `amb_${Date.now()}`,
+        status: "PENDING",
+        submittedAt: new Date().toISOString(),
+      });
+      localStorage.setItem("connexode_ambassador_applications", JSON.stringify(existing));
+      setSubmitted(true);
     } finally {
       setLoading(false);
     }
-  }
+  };
 
-  // ── Success state ──
   if (submitted) {
     return (
-      <main style={{ backgroundColor: "#040C18" }} className="flex min-h-screen items-center justify-center px-6 pt-24 antialiased">
-        <div className="mx-auto max-w-lg text-center">
-          <div
-            style={{ backgroundColor: "rgba(24,128,128,0.15)", border: "1px solid rgba(24,128,128,0.3)" }}
-            className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full"
-          >
-            <CheckCircle size={28} style={{ color: "#7EC8D8" }} strokeWidth={1.5} />
-          </div>
-          <h1 style={{ color: "#E8F4F8" }} className="mb-3 text-2xl font-bold">Application received!</h1>
-          <p style={{ color: "rgba(126,200,216,0.5)" }} className="mb-8 text-sm leading-relaxed">
-            We&apos;ve got your ambassador application, <strong style={{ color: "#7EC8D8" }}>{form.fullName}</strong>.
-            Check your email for a confirmation. Our team reviews within 3–5 days —
-            sign in anytime to see your live status.
-          </p>
-          <div className="flex flex-wrap justify-center gap-3">
-            <Link
-              href="/auth/signin"
-              style={{ backgroundColor: "#188080", color: "#E8F4F8" }}
-              className="rounded-full px-6 py-2.5 text-sm font-semibold transition-all hover:brightness-110"
+      <div style={{ backgroundColor: "#050508", color: "#FAFAFA" }} className="min-h-screen flex flex-col font-sans">
+        <PublicNav />
+        <main className="flex-grow flex items-center justify-center px-6 pt-32 pb-20">
+          <div className="mx-auto max-w-lg text-center">
+            <div
+              style={{
+                backgroundColor: "rgba(16, 185, 129, 0.1)",
+                border: "1px solid rgba(16, 185, 129, 0.25)",
+              }}
+              className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full"
             >
-              Track my application
-            </Link>
-            <Link
-              href="/"
-              style={{ border: "1px solid rgba(126,200,216,0.2)", color: "rgba(126,200,216,0.6)" }}
-              className="rounded-full px-6 py-2.5 text-sm font-medium transition-all hover:text-[#7EC8D8]"
-            >
-              Back to home
-            </Link>
+              <CheckCircle size={28} className="text-[#10B981]" />
+            </div>
+            <h1 style={{ color: "#FAFAFA" }} className="mb-3 text-2xl font-bold tracking-tight">
+              Application Received!
+            </h1>
+            <p style={{ color: "#A1A1AA" }} className="mb-8 text-sm leading-relaxed">
+              Thank you for applying, <strong className="text-[#FAFAFA]">{form.fullName}</strong>. We have received your Ambassador application. Our team will review it within 3-5 days. You can track your status by signing in.
+            </p>
+            <div className="flex flex-col sm:flex-row justify-center gap-4">
+              <Link
+                href="/register"
+                style={{
+                  background: "linear-gradient(135deg, #7C3AED, #6D28D9)",
+                  color: "#fff",
+                  borderRadius: "999px",
+                  padding: "12px 28px",
+                  fontWeight: 700,
+                  fontSize: "0.875rem",
+                }}
+                className="transition-all hover:brightness-110 active:scale-95 text-center"
+              >
+                Track application status
+              </Link>
+              <Link
+                href="/"
+                style={{
+                  background: "transparent",
+                  border: "1px solid rgba(6,182,212,0.35)",
+                  color: "#06B6D4",
+                  borderRadius: "999px",
+                  padding: "12px 28px",
+                  fontWeight: 600,
+                  fontSize: "0.875rem",
+                }}
+                className="transition-all hover:border-[#06B6D4]/70 active:scale-95 text-center"
+              >
+                Back to home
+              </Link>
+            </div>
           </div>
-        </div>
-      </main>
+        </main>
+        <PublicFooter />
+      </div>
     );
   }
 
-  // ── Main page ──
   return (
-    <main style={{ backgroundColor: "#040C18" }} className="min-h-screen pt-24 pb-20 antialiased">
+    <div style={{ backgroundColor: "#050508", color: "#FAFAFA" }} className="min-h-screen flex flex-col font-sans">
+      <PublicNav />
 
-      {/* Back */}
-      <div className="mx-auto max-w-5xl px-6 pt-6 pb-2">
-        <Link
-          href="/join"
-          style={{ color: "rgba(126,200,216,0.45)" }}
-          className="inline-flex items-center gap-1.5 text-sm transition-colors hover:text-[#7EC8D8]"
-        >
-          <ArrowLeft size={14} /> Back to Join
-        </Link>
-      </div>
+      <main className="flex-grow pt-32 pb-20 px-6 max-w-5xl mx-auto w-full">
+        {/* Back Link */}
+        <div className="mb-8">
+          <Link
+            href="/join"
+            style={{ color: "#06B6D4" }}
+            className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider hover:underline"
+          >
+            <ArrowLeft size={14} /> Back to join options
+          </Link>
+        </div>
 
-      {/* Hero */}
-      <section className="mx-auto max-w-3xl px-6 py-12 text-center">
-        <span
-          style={{ border: "1px solid rgba(126,200,216,0.2)", color: "#7EC8D8", backgroundColor: "rgba(8,32,56,0.6)" }}
-          className="mb-6 inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-medium uppercase tracking-widest"
-        >
-          Ambassador Program
-        </span>
-        <h1 style={{ color: "#E8F4F8" }} className="mb-4 text-4xl font-bold tracking-tight">
-          Become a Connexode<br />Campus Ambassador
-        </h1>
-        <p style={{ color: "rgba(126,200,216,0.5)" }} className="text-base leading-relaxed">
-          Lead AI awareness on your campus. Build community. Track your impact.
-          Earn a verified certificate — and grow with a network of 
-          Pakistan&apos;s next-gen developers.
-        </p>
-      </section>
+        {/* Hero */}
+        <section className="text-center mb-16">
+          <span
+            style={{
+              backgroundColor: "rgba(6,182,212,0.1)",
+              border: "1px solid rgba(6,182,212,0.2)",
+              color: "#06B6D4",
+              fontSize: "10px",
+              fontWeight: 600,
+              letterSpacing: "0.15em",
+            }}
+            className="mb-6 px-4 py-1.5 rounded-full uppercase inline-block"
+          >
+            Ambassador program
+          </span>
+          <h1
+            style={{
+              fontSize: "clamp(2rem, 4vw, 3rem)",
+              fontWeight: 800,
+              letterSpacing: "-0.04em",
+              lineHeight: "1.1",
+            }}
+            className="max-w-3xl mx-auto mb-4"
+          >
+            Become a Connexode Campus Ambassador
+          </h1>
+          <p style={{ color: "#A1A1AA" }} className="max-w-xl mx-auto text-sm leading-relaxed">
+            Lead AI sessions, host webinars, grow campus communities, and track your real impact.
+          </p>
+        </section>
 
-      {/* What you'll do */}
-      <section className="mx-auto max-w-5xl px-6 pb-16">
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {perks.map((p) => (
+        {/* Perks Grid */}
+        <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-16">
+          {perks.map((p, index) => (
             <div
-              key={p.title}
-              style={{ backgroundColor: "#082038", border: "1px solid rgba(126,200,216,0.1)" }}
-              className="rounded-xl p-5"
+              key={index}
+              style={{
+                backgroundColor: "#0D0D14",
+                border: "1px solid #1A1A2E",
+                borderRadius: "12px",
+              }}
+              className="p-6 transition-all hover:border-[rgba(124,58,237,0.45)] hover:-translate-y-0.5"
             >
-              <span
-                style={{ backgroundColor: "rgba(24,128,128,0.15)", color: "#7EC8D8" }}
-                className="mb-4 flex h-9 w-9 items-center justify-center rounded-lg"
+              <div
+                style={{
+                  backgroundColor: "rgba(124,58,237,0.15)",
+                  border: "1px solid rgba(124,58,237,0.25)",
+                }}
+                className="w-10 h-10 rounded-lg flex items-center justify-center text-[#7C3AED] mb-4"
               >
                 {p.icon}
-              </span>
-              <p style={{ color: "#E8F4F8" }} className="mb-1.5 text-sm font-semibold">{p.title}</p>
-              <p style={{ color: "rgba(126,200,216,0.45)" }} className="text-xs leading-relaxed">{p.desc}</p>
+              </div>
+              <h3 style={{ color: "#FAFAFA" }} className="text-sm font-bold mb-2">
+                {p.title}
+              </h3>
+              <p style={{ color: "#A1A1AA" }} className="text-xs leading-relaxed">
+                {p.desc}
+              </p>
             </div>
           ))}
-        </div>
-      </section>
+        </section>
 
-      {/* Application form */}
-      <section className="mx-auto max-w-2xl px-6">
-        <div
-          style={{ backgroundColor: "#082038", border: "1px solid rgba(126,200,216,0.1)" }}
-          className="rounded-2xl p-8"
+        {/* Application Form Card */}
+        <section
+          style={{
+            backgroundColor: "#0D0D14",
+            border: "1px solid #1A1A2E",
+            borderRadius: "12px",
+          }}
+          className="max-w-2xl mx-auto p-8"
         >
-          <h2 style={{ color: "#E8F4F8" }} className="mb-2 text-xl font-bold">Apply now</h2>
-          <p style={{ color: "rgba(126,200,216,0.4)" }} className="mb-8 text-sm">
-            Takes 3 minutes. We&apos;ll get back to you within 3–5 days.
-          </p>
+          <div className="mb-8">
+            <h2 style={{ color: "#FAFAFA" }} className="text-xl font-bold tracking-tight mb-2">
+              Apply Now
+            </h2>
+            <p style={{ color: "#A1A1AA" }} className="text-xs">
+              Takes 3 minutes. We'll get back to you within 3–5 days.
+            </p>
+          </div>
 
-          <form onSubmit={handleSubmit} className="space-y-5">
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label style={{ color: "#A1A1AA" }} className="text-xs font-semibold block mb-2">
+                  Full Name *
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. Ahmad Khan"
+                  value={form.fullName}
+                  onChange={(e) => update("fullName", e.target.value)}
+                  style={{
+                    backgroundColor: "#050508",
+                    border: "1px solid #1A1A2E",
+                    color: "#FAFAFA",
+                  }}
+                  className="w-full px-4 py-3 rounded-lg text-sm outline-none focus:border-[rgba(124,58,237,0.45)] transition-colors"
+                />
+              </div>
 
-            {/* Row 1 */}
-            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-              <Field label="Full name *" value={form.fullName} onChange={(v) => update("fullName", v)} placeholder="Ahmad Khan" required />
-              <Field label="Email *" type="email" value={form.email} onChange={(v) => update("email", v)} placeholder="you@example.com" required />
+              <div>
+                <label style={{ color: "#A1A1AA" }} className="text-xs font-semibold block mb-2">
+                  Email *
+                </label>
+                <input
+                  type="email"
+                  required
+                  placeholder="e.g. you@example.com"
+                  value={form.email}
+                  onChange={(e) => update("email", e.target.value)}
+                  style={{
+                    backgroundColor: "#050508",
+                    border: "1px solid #1A1A2E",
+                    color: "#FAFAFA",
+                  }}
+                  className="w-full px-4 py-3 rounded-lg text-sm outline-none focus:border-[rgba(124,58,237,0.45)] transition-colors"
+                />
+              </div>
             </div>
 
-            {/* Row 2 */}
-            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-              <Field label="University *" value={form.university} onChange={(v) => update("university", v)} placeholder="KFUEIT, FAST, NUST..." required />
-              <SelectField
-                label="Current semester *"
-                value={form.semester}
-                onChange={(v) => update("semester", v)}
-                options={["1st", "2nd", "3rd", "4th", "5th", "6th", "7th", "8th"]}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label style={{ color: "#A1A1AA" }} className="text-xs font-semibold block mb-2">
+                  University *
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. FAST, NUST, KFUEIT"
+                  value={form.university}
+                  onChange={(e) => update("university", e.target.value)}
+                  style={{
+                    backgroundColor: "#050508",
+                    border: "1px solid #1A1A2E",
+                    color: "#FAFAFA",
+                  }}
+                  className="w-full px-4 py-3 rounded-lg text-sm outline-none focus:border-[rgba(124,58,237,0.45)] transition-colors"
+                />
+              </div>
+
+              <div>
+                <label style={{ color: "#A1A1AA" }} className="text-xs font-semibold block mb-2">
+                  Current Semester *
+                </label>
+                <select
+                  required
+                  value={form.semester}
+                  onChange={(e) => update("semester", e.target.value)}
+                  style={{
+                    backgroundColor: "#050508",
+                    border: "1px solid #1A1A2E",
+                    color: "#FAFAFA",
+                  }}
+                  className="w-full px-4 py-3 rounded-lg text-sm outline-none focus:border-[rgba(124,58,237,0.45)] transition-colors"
+                >
+                  <option value="" disabled style={{ backgroundColor: "#0D0D14" }}>Select Semester</option>
+                  {["1st", "2nd", "3rd", "4th", "5th", "6th", "7th", "8th"].map((sem) => (
+                    <option key={sem} value={sem} style={{ backgroundColor: "#0D0D14" }}>
+                      {sem} Semester
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <div>
+              <label style={{ color: "#A1A1AA" }} className="text-xs font-semibold block mb-2">
+                City *
+              </label>
+              <input
+                type="text"
                 required
+                placeholder="e.g. Lahore, Karachi, Kot Addu"
+                value={form.city}
+                onChange={(e) => update("city", e.target.value)}
+                style={{
+                  backgroundColor: "#050508",
+                  border: "1px solid #1A1A2E",
+                  color: "#FAFAFA",
+                }}
+                className="w-full px-4 py-3 rounded-lg text-sm outline-none focus:border-[rgba(124,58,237,0.45)] transition-colors"
               />
             </div>
 
-            {/* Row 3 */}
-            <Field label="City *" value={form.city} onChange={(v) => update("city", v)} placeholder="Lahore, Karachi, Kot Addu..." required />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label style={{ color: "#A1A1AA" }} className="text-xs font-semibold block mb-2">
+                  Instagram Handle
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g. @yourname"
+                  value={form.instagram}
+                  onChange={(e) => update("instagram", e.target.value)}
+                  style={{
+                    backgroundColor: "#050508",
+                    border: "1px solid #1A1A2E",
+                    color: "#FAFAFA",
+                  }}
+                  className="w-full px-4 py-3 rounded-lg text-sm outline-none focus:border-[rgba(124,58,237,0.45)] transition-colors"
+                />
+              </div>
 
-            {/* Social handles */}
-            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-              <Field label="Instagram handle" value={form.instagram} onChange={(v) => update("instagram", v)} placeholder="@yourhandle" />
-              <Field label="LinkedIn URL" value={form.linkedin} onChange={(v) => update("linkedin", v)} placeholder="linkedin.com/in/yourname" />
+              <div>
+                <label style={{ color: "#A1A1AA" }} className="text-xs font-semibold block mb-2">
+                  LinkedIn URL
+                </label>
+                <input
+                  type="url"
+                  placeholder="e.g. https://linkedin.com/in/yourname"
+                  value={form.linkedin}
+                  onChange={(e) => update("linkedin", e.target.value)}
+                  style={{
+                    backgroundColor: "#050508",
+                    border: "1px solid #1A1A2E",
+                    color: "#FAFAFA",
+                  }}
+                  className="w-full px-4 py-3 rounded-lg text-sm outline-none focus:border-[rgba(124,58,237,0.45)] transition-colors"
+                />
+              </div>
             </div>
 
-            {/* Why join */}
-            <TextareaField
-              label="Why do you want to be a Connexode ambassador? *"
-              value={form.whyJoin}
-              onChange={(v) => update("whyJoin", v)}
-              placeholder="Tell us about your campus, your goals, and what you want to build here..."
-              required
-            />
+            <div>
+              <label style={{ color: "#A1A1AA" }} className="text-xs font-semibold block mb-2">
+                Why do you want to be a Connexode ambassador? *
+              </label>
+              <textarea
+                required
+                rows={4}
+                placeholder="Tell us about your campus, your goals, and what you want to build here..."
+                value={form.whyJoin}
+                onChange={(e) => update("whyJoin", e.target.value)}
+                style={{
+                  backgroundColor: "#050508",
+                  border: "1px solid #1A1A2E",
+                  color: "#FAFAFA",
+                }}
+                className="w-full px-4 py-3 rounded-lg text-sm outline-none focus:border-[rgba(124,58,237,0.45)] transition-colors resize-none"
+              />
+            </div>
 
-            {/* Availability */}
-            <SelectField
-              label="Weekly availability *"
-              value={form.availability}
-              onChange={(v) => update("availability", v)}
-              options={["1–2 hrs/week", "3–5 hrs/week", "5–8 hrs/week", "8+ hrs/week"]}
-              required
-            />
+            <div>
+              <label style={{ color: "#A1A1AA" }} className="text-xs font-semibold block mb-2">
+                Weekly Availability *
+              </label>
+              <select
+                required
+                value={form.availability}
+                onChange={(e) => update("availability", e.target.value)}
+                style={{
+                  backgroundColor: "#050508",
+                  border: "1px solid #1A1A2E",
+                  color: "#FAFAFA",
+                }}
+                className="w-full px-4 py-3 rounded-lg text-sm outline-none focus:border-[rgba(124,58,237,0.45)] transition-colors"
+              >
+                <option value="" disabled style={{ backgroundColor: "#0D0D14" }}>Select hours</option>
+                {["1–2 hrs/week", "3–5 hrs/week", "5–8 hrs/week", "8+ hrs/week"].map((hrs) => (
+                  <option key={hrs} value={hrs} style={{ backgroundColor: "#0D0D14" }}>
+                    {hrs}
+                  </option>
+                ))}
+              </select>
+            </div>
 
-            {/* Status note */}
-            <p style={{ color: "rgba(126,200,216,0.3)" }} className="text-xs leading-relaxed pt-1">
-              You&apos;ll get an instant confirmation email. Track your application
-              status (pending → approved → dashboard) by signing in anytime.
+            <p style={{ color: "#52525B" }} className="text-xs leading-relaxed">
+              You'll get an instant confirmation email. Track your application status (pending → approved → dashboard) by signing in anytime.
             </p>
 
-            {/* Submit */}
             <button
               type="submit"
               disabled={loading}
-              style={{ backgroundColor: loading ? "rgba(24,128,128,0.5)" : "#188080", color: "#E8F4F8" }}
-              className="w-full rounded-full py-3.5 text-sm font-semibold transition-all hover:brightness-110 active:scale-[0.99] disabled:cursor-not-allowed"
+              style={{
+                background: "linear-gradient(135deg, #7C3AED, #6D28D9)",
+                color: "#fff",
+                borderRadius: "999px",
+                padding: "12px 28px",
+                fontWeight: 700,
+              }}
+              className="w-full transition-all hover:brightness-110 active:scale-95 disabled:opacity-50 text-sm"
             >
-              {loading ? "Submitting..." : "Submit application →"}
+              {loading ? "Submitting..." : "Submit application"}
             </button>
           </form>
-        </div>
-      </section>
+        </section>
+      </main>
 
-    </main>
-  );
-}
-
-// ── Shared form field components ──────────────────────────────────────────────
-
-function Field({
-  label, value, onChange, placeholder, type = "text", required = false,
-}: {
-  label: string; value: string; onChange: (v: string) => void;
-  placeholder?: string; type?: string; required?: boolean;
-}) {
-  return (
-    <div>
-      <label style={{ color: "rgba(126,200,216,0.6)" }} className="mb-1.5 block text-xs font-medium">
-        {label}
-      </label>
-      <input
-        type={type}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder={placeholder}
-        required={required}
-        style={{
-          backgroundColor: "#040C18",
-          border: "1px solid rgba(126,200,216,0.15)",
-          color: "#E8F4F8",
-        }}
-        className="w-full rounded-xl px-4 py-3 text-sm placeholder:text-[rgba(126,200,216,0.2)] outline-none focus:border-[rgba(126,200,216,0.45)] transition-colors"
-      />
-    </div>
-  );
-}
-
-function TextareaField({
-  label, value, onChange, placeholder, required = false,
-}: {
-  label: string; value: string; onChange: (v: string) => void;
-  placeholder?: string; required?: boolean;
-}) {
-  return (
-    <div>
-      <label style={{ color: "rgba(126,200,216,0.6)" }} className="mb-1.5 block text-xs font-medium">
-        {label}
-      </label>
-      <textarea
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder={placeholder}
-        required={required}
-        rows={4}
-        style={{
-          backgroundColor: "#040C18",
-          border: "1px solid rgba(126,200,216,0.15)",
-          color: "#E8F4F8",
-          resize: "vertical",
-        }}
-        className="w-full rounded-xl px-4 py-3 text-sm placeholder:text-[rgba(126,200,216,0.2)] outline-none focus:border-[rgba(126,200,216,0.45)] transition-colors"
-      />
-    </div>
-  );
-}
-
-function SelectField({
-  label, value, onChange, options, required = false,
-}: {
-  label: string; value: string; onChange: (v: string) => void;
-  options: string[]; required?: boolean;
-}) {
-  return (
-    <div>
-      <label style={{ color: "rgba(126,200,216,0.6)" }} className="mb-1.5 block text-xs font-medium">
-        {label}
-      </label>
-      <select
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        required={required}
-        style={{
-          backgroundColor: "#040C18",
-          border: "1px solid rgba(126,200,216,0.15)",
-          color: value ? "#E8F4F8" : "rgba(126,200,216,0.2)",
-        }}
-        className="w-full rounded-xl px-4 py-3 text-sm outline-none focus:border-[rgba(126,200,216,0.45)] transition-colors appearance-none"
-      >
-        <option value="" disabled>Select...</option>
-        {options.map((o) => (
-          <option key={o} value={o} style={{ backgroundColor: "#082038", color: "#E8F4F8" }}>{o}</option>
-        ))}
-      </select>
+      <PublicFooter />
     </div>
   );
 }

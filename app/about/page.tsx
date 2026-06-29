@@ -1,289 +1,385 @@
-// app/about/page.tsx
-// About — founder note + 3 pillars + values + team/mentor section
-// Colors: Navy #082038 · Teal #188080 · Cyan #7EC8D8
+"use client";
 
 import Link from "next/link";
-import Image from "next/image";
-import { ArrowRight, Heart, Users, Zap, Shield } from "lucide-react";
-
-const pillars = [
-  {
-    number: "01",
-    title: "Campus Ambassador Program",
-    desc: "We train students to lead AI-awareness sessions, host webinars, and grow communities on their campuses. Every approved ambassador gets a live growth dashboard and direct mentor access.",
-  },
-  {
-    number: "02",
-    title: "Internship Program",
-    desc: "Structured 8-week tracks in Frontend, Full Stack, AI/Automation, and UI/UX. Real projects, mentor-graded submissions, and a verified certificate — not just a participation trophy.",
-  },
-  {
-    number: "03",
-    title: "Client Services",
-    desc: "Our team delivers development, design, video, and social media work for real clients. Many of our team members came through our own internship program — so the pipeline is the product.",
-  },
-];
-
-const values = [
-  {
-    icon: <Heart size={18} strokeWidth={1.5} />,
-    title: "Mentorship over lectures",
-    desc: "We believe real growth happens in conversation, not one-way content. Every intern and ambassador gets direct access to a mentor.",
-  },
-  {
-    icon: <Users size={18} strokeWidth={1.5} />,
-    title: "Community first",
-    desc: "Connexode is not a course platform. It is a network. The people you meet here matter more than any certificate.",
-  },
-  {
-    icon: <Zap size={18} strokeWidth={1.5} />,
-    title: "Real skills, real work",
-    desc: "No fake projects. No simulated tasks. Everything built in our internship is something you can show in a job interview or portfolio.",
-  },
-  {
-    icon: <Shield size={18} strokeWidth={1.5} />,
-    title: "Honesty over hype",
-    desc: "We are a growing team, not a 500-person agency. We say that clearly. Our credibility is built on what we actually deliver.",
-  },
-];
+import { Heart, Users, Zap, Shield, Briefcase, BookOpen } from "lucide-react";
+import PublicNav from "@/components/layout/PublicNav";
+import PublicFooter from "@/components/layout/PublicFooter";
 
 export default function AboutPage() {
-  return (
-    <main style={{ backgroundColor: "#040C18" }} className="min-h-screen pt-24 pb-20 antialiased">
+  const values = [
+    {
+      icon: <Heart size={18} />,
+      title: "Mentorship",
+      desc: "We believe real growth happens in conversation, not one-way lectures. Every student gets direct access to active mentors.",
+    },
+    {
+      icon: <Users size={18} />,
+      title: "Community",
+      desc: "Connexode is a network of builders. The relationships you form here are designed to help you throughout your career.",
+    },
+    {
+      icon: <Zap size={18} />,
+      title: "Real Skills",
+      desc: "No mock assignments or dry tutorials. Everything built in our program is a live asset to showcase in your portfolio.",
+    },
+    {
+      icon: <Shield size={18} />,
+      title: "Honesty",
+      desc: "We prioritize clean, honest execution. We're open about our progress, challenges, and client expectations.",
+    },
+  ];
 
-      {/* ── Hero ── */}
-      <section className="mx-auto max-w-4xl px-6 py-14 text-center">
+  return (
+    <div style={{ backgroundColor: "#050508", color: "#FAFAFA" }} className="min-h-screen flex flex-col font-sans">
+      <PublicNav />
+
+      {/* Hero */}
+      <section
+        style={{
+          background: "radial-gradient(ellipse 80% 50% at 50% 20%, rgba(124,58,237,0.12) 0%, transparent 70%)",
+        }}
+        className="pt-36 pb-16 px-6 text-center animate-fadeIn"
+      >
         <span
-          style={{ border: "1px solid rgba(126,200,216,0.2)", color: "#7EC8D8", backgroundColor: "rgba(8,32,56,0.6)" }}
-          className="mb-6 inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-medium uppercase tracking-widest"
+          style={{
+            backgroundColor: "rgba(6,182,212,0.1)",
+            border: "1px solid rgba(6,182,212,0.2)",
+            color: "#06B6D4",
+            fontSize: "10px",
+            fontWeight: 600,
+            letterSpacing: "0.15em",
+          }}
+          className="mb-6 px-4 py-1.5 rounded-full uppercase inline-block"
         >
           Our story
         </span>
-        <h1 style={{ color: "#E8F4F8" }} className="mb-5 text-4xl font-bold tracking-tight sm:text-5xl">
-          Why we started
-          <br />
+        <h1
+          style={{
+            fontSize: "clamp(2.2rem, 5vw, 3.5rem)",
+            fontWeight: 800,
+            letterSpacing: "-0.04em",
+            lineHeight: "1.1",
+          }}
+          className="max-w-4xl mx-auto mb-4"
+        >
+          Why we started<br />
           <span
             style={{
-              background: "linear-gradient(135deg, #7EC8D8 0%, #188080 60%)",
+              background: "linear-gradient(135deg, #7C3AED, #06B6D4)",
               WebkitBackgroundClip: "text",
               WebkitTextFillColor: "transparent",
-              backgroundClip: "text",
             }}
           >
             Connexode
           </span>
         </h1>
+        <p style={{ color: "#A1A1AA" }} className="max-w-[500px] mx-auto text-sm leading-relaxed">
+          Bridging the gap between university campuses and the global tech market.
+        </p>
       </section>
 
-      {/* ── Founder note ── */}
-      <section className="mx-auto max-w-3xl px-6 pb-20">
+      {/* Founder blockquote card */}
+      <section className="py-8 px-6 max-w-3xl mx-auto w-full">
         <div
-          style={{ backgroundColor: "#082038", border: "1px solid rgba(126,200,216,0.1)" }}
-          className="rounded-2xl p-8 sm:p-10"
+          style={{
+            backgroundColor: "#0D0D14",
+            border: "1px solid #1A1A2E",
+            borderLeft: "4px solid #7C3AED",
+            borderRadius: "12px",
+          }}
+          className="p-8 sm:p-10 transition-all hover:border-color-[rgba(124,58,237,0.45)]"
         >
-          {/* Accent line */}
-          <div
-            style={{ background: "linear-gradient(90deg, #188080, rgba(24,128,128,0))" }}
-            className="mb-7 h-px w-16"
-          />
-
-          <blockquote style={{ color: "rgba(126,200,216,0.7)" }} className="text-base leading-relaxed sm:text-lg">
-            "Most students in Pakistan do not lack ability — they lack structured
-            access. Access to mentors who have actually built things. Access to
-            real projects they can show employers. Access to a community that
-            pushes them forward instead of leaving them to figure it out alone.
+          <blockquote style={{ color: "#A1A1AA" }} className="text-sm italic leading-relaxed mb-6">
+            "Most students in Pakistan do not lack ability — they lack structured access. Access to mentors who have actually built things. Access to real projects they can show employers. Access to a community that pushes them forward instead of leaving them to figure it out alone.
             <br /><br />
-            Connexode started as a simple idea to fix that — one campus
-            ambassador, one intern, one real project at a time. The agency arm
-            came next, because the talent we were training deserved real client
-            work to put that training to use.
-            <br /><br />
-            We are still building. But we are building honestly."
+            Connexode started as a simple idea to fix that — one campus ambassador, one intern, one real project at a time. The agency arm came next, because the talent we were training deserved real client work to put that training to use."
           </blockquote>
+          <div className="flex flex-col gap-1">
+            <span style={{ color: "#FAFAFA" }} className="text-sm font-bold">
+              Ahmad Khan
+            </span>
+            <span style={{ color: "#06B6D4" }} className="text-xs">
+              Founder, Connexode
+            </span>
+          </div>
+        </div>
+      </section>
 
-          <div className="mt-8 flex items-center gap-4">
-            {/* Avatar placeholder — replace with real photo when ready */}
-            <div
-              style={{
-                width: 48,
-                height: 48,
-                borderRadius: "50%",
-                overflow: "hidden",
-                border: "2px solid rgba(24,128,128,0.4)",
-                flexShrink: 0,
-              }}
-            >
-              <Image
-                src="/founder.jpg"
-                alt="Ahmad Khan — Founder, Connexode"
-                width={48}
-                height={48}
-                style={{ objectFit: "cover", width: "100%", height: "100%" }}
-              />
-            </div>
+      {/* 3 Pillars Section */}
+      <section className="py-16 px-6 max-w-5xl mx-auto w-full">
+        <div className="text-center mb-12">
+          <span
+            style={{
+              color: "#06B6D4",
+              fontSize: "11px",
+              fontWeight: 600,
+              letterSpacing: "0.2em",
+            }}
+            className="uppercase block mb-2"
+          >
+            Pillars
+          </span>
+          <h2 style={{ color: "#FAFAFA" }} className="text-2xl font-bold">
+            Our Core Pillars
+          </h2>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* Card 1 */}
+          <div
+            style={{
+              backgroundColor: "#0D0D14",
+              border: "1px solid #1A1A2E",
+              borderRadius: "12px",
+            }}
+            className="p-6 transition-all hover:border-[rgba(124,58,237,0.45)] hover:-translate-y-1 flex flex-col justify-between"
+          >
             <div>
-              <p style={{ color: "#E8F4F8" }} className="text-sm font-semibold">Ahmad Khan</p>
-              <p style={{ color: "rgba(126,200,216,0.4)" }} className="text-xs">Founder, Connexode · KFUEIT</p>
+              <div
+                style={{
+                  backgroundColor: "rgba(124,58,237,0.15)",
+                  border: "1px solid rgba(124,58,237,0.25)",
+                }}
+                className="w-10 h-10 rounded-lg flex items-center justify-center text-[#7C3AED] mb-4"
+              >
+                <Briefcase size={20} />
+              </div>
+              <h3 style={{ color: "#FAFAFA" }} className="text-base font-bold mb-2">
+                Client Services
+              </h3>
+              <p style={{ color: "#A1A1AA" }} className="text-xs leading-relaxed">
+                Full-stack development, AI automation, SEO, and social media — built for global clients.
+              </p>
+            </div>
+          </div>
+
+          {/* Card 2 */}
+          <div
+            style={{
+              backgroundColor: "#0D0D14",
+              border: "1px solid #1A1A2E",
+              borderRadius: "12px",
+            }}
+            className="p-6 transition-all hover:border-[rgba(124,58,237,0.45)] hover:-translate-y-1 flex flex-col justify-between"
+          >
+            <div>
+              <div
+                style={{
+                  backgroundColor: "rgba(124,58,237,0.15)",
+                  border: "1px solid rgba(124,58,237,0.25)",
+                }}
+                className="w-10 h-10 rounded-lg flex items-center justify-center text-[#7C3AED] mb-4"
+              >
+                <BookOpen size={20} />
+              </div>
+              <h3 style={{ color: "#FAFAFA" }} className="text-base font-bold mb-2">
+                Internship Program
+              </h3>
+              <p style={{ color: "#A1A1AA" }} className="text-xs leading-relaxed">
+                8-week structured tracks, mentor feedback, GitHub projects, verified certificates.
+              </p>
+            </div>
+          </div>
+
+          {/* Card 3 */}
+          <div
+            style={{
+              backgroundColor: "#0D0D14",
+              border: "1px solid #1A1A2E",
+              borderRadius: "12px",
+            }}
+            className="p-6 transition-all hover:border-[rgba(124,58,237,0.45)] hover:-translate-y-1 flex flex-col justify-between"
+          >
+            <div>
+              <div
+                style={{
+                  backgroundColor: "rgba(124,58,237,0.15)",
+                  border: "1px solid rgba(124,58,237,0.25)",
+                }}
+                className="w-10 h-10 rounded-lg flex items-center justify-center text-[#7C3AED] mb-4"
+              >
+                <Users size={20} />
+              </div>
+              <h3 style={{ color: "#FAFAFA" }} className="text-base font-bold mb-2">
+                Ambassador Program
+              </h3>
+              <p style={{ color: "#A1A1AA" }} className="text-xs leading-relaxed">
+                Lead AI sessions, host webinars, grow campus communities, track real impact.
+              </p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* ── Three pillars ── */}
-      <section
-        style={{ borderTop: "1px solid rgba(126,200,216,0.06)", borderBottom: "1px solid rgba(126,200,216,0.06)", backgroundColor: "#061020" }}
-        className="py-20"
-      >
-        <div className="mx-auto max-w-6xl px-6">
-          <div className="mb-14 text-center">
-            <p style={{ color: "#7EC8D8" }} className="mb-3 text-xs font-medium uppercase tracking-widest">What we do</p>
-            <h2 style={{ color: "#E8F4F8" }} className="text-2xl font-bold sm:text-3xl">Three pillars, one mission</h2>
-          </div>
-
-          <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
-            {pillars.map((p) => (
-              <div
-                key={p.number}
-                style={{ backgroundColor: "#082038", border: "1px solid rgba(126,200,216,0.1)" }}
-                className="rounded-2xl p-7 transition-all hover:border-[rgba(126,200,216,0.3)]"
-              >
-                <span style={{ color: "rgba(126,200,216,0.2)" }} className="mb-4 block text-3xl font-bold">{p.number}</span>
-                <h3 style={{ color: "#E8F4F8" }} className="mb-3 text-[16px] font-semibold leading-snug">{p.title}</h3>
-                <p style={{ color: "rgba(126,200,216,0.45)" }} className="text-sm leading-relaxed">{p.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── Values ── */}
-      <section className="mx-auto max-w-6xl px-6 py-20">
-        <div className="mb-14 text-center">
-          <p style={{ color: "#7EC8D8" }} className="mb-3 text-xs font-medium uppercase tracking-widest">What we believe</p>
-          <h2 style={{ color: "#E8F4F8" }} className="text-2xl font-bold sm:text-3xl">Our values</h2>
+      {/* Values Section */}
+      <section className="py-16 px-6 max-w-5xl mx-auto w-full">
+        <div className="text-center mb-12">
+          <span
+            style={{
+              color: "#06B6D4",
+              fontSize: "11px",
+              fontWeight: 600,
+              letterSpacing: "0.2em",
+            }}
+            className="uppercase block mb-2"
+          >
+            Values
+          </span>
+          <h2 style={{ color: "#FAFAFA" }} className="text-2xl font-bold">
+            What We Believe In
+          </h2>
         </div>
 
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-          {values.map((v) => (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          {values.map((v, index) => (
             <div
-              key={v.title}
-              style={{ backgroundColor: "#082038", border: "1px solid rgba(126,200,216,0.1)" }}
-              className="flex gap-5 rounded-xl p-6 transition-all hover:border-[rgba(126,200,216,0.25)]"
+              key={index}
+              style={{
+                backgroundColor: "#0D0D14",
+                border: "1px solid #1A1A2E",
+                borderRadius: "12px",
+              }}
+              className="p-6 flex gap-4 transition-all hover:border-[rgba(124,58,237,0.45)]"
             >
-              <span
-                style={{ backgroundColor: "rgba(24,128,128,0.15)", color: "#7EC8D8", flexShrink: 0 }}
-                className="flex h-10 w-10 items-center justify-center rounded-lg"
+              <div
+                style={{
+                  backgroundColor: "rgba(6, 182, 212, 0.1)",
+                  border: "1px solid rgba(6, 182, 212, 0.2)",
+                }}
+                className="w-10 h-10 rounded-lg flex items-center justify-center text-[#06B6D4] shrink-0"
               >
                 {v.icon}
-              </span>
+              </div>
               <div>
-                <p style={{ color: "#E8F4F8" }} className="mb-1.5 text-sm font-semibold">{v.title}</p>
-                <p style={{ color: "rgba(126,200,216,0.45)" }} className="text-sm leading-relaxed">{v.desc}</p>
+                <h3 style={{ color: "#FAFAFA" }} className="text-sm font-bold mb-2">
+                  {v.title}
+                </h3>
+                <p style={{ color: "#A1A1AA" }} className="text-xs leading-relaxed">
+                  {v.desc}
+                </p>
               </div>
             </div>
           ))}
         </div>
       </section>
 
-      {/* ── Team / Mentor placeholder ── */}
-      <section
-        style={{ borderTop: "1px solid rgba(126,200,216,0.06)", backgroundColor: "#061020" }}
-        className="py-20"
-      >
-        <div className="mx-auto max-w-6xl px-6">
-          <div className="mb-14 text-center">
-            <p style={{ color: "#7EC8D8" }} className="mb-3 text-xs font-medium uppercase tracking-widest">The people</p>
-            <h2 style={{ color: "#E8F4F8" }} className="text-2xl font-bold sm:text-3xl">Team & mentors</h2>
-            <p style={{ color: "rgba(126,200,216,0.4)" }} className="mx-auto mt-4 max-w-lg text-sm leading-relaxed">
-              Our team is growing. As mentors and core members join,
-              their profiles will appear here with bios and LinkedIn links.
+      {/* Team Section */}
+      <section className="py-16 px-6 max-w-5xl mx-auto w-full">
+        <div className="text-center mb-12">
+          <span
+            style={{
+              color: "#06B6D4",
+              fontSize: "11px",
+              fontWeight: 600,
+              letterSpacing: "0.2em",
+            }}
+            className="uppercase block mb-2"
+          >
+            Team
+          </span>
+          <h2 style={{ color: "#FAFAFA" }} className="text-2xl font-bold">
+            Meet the Builders
+          </h2>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {/* Founder Card */}
+          <div
+            style={{
+              backgroundColor: "#0D0D14",
+              border: "1px solid #1A1A2E",
+              borderRadius: "12px",
+            }}
+            className="p-6 text-center"
+          >
+            <div className="w-20 h-20 rounded-full bg-[#1A1A2E] mx-auto mb-4 flex items-center justify-center text-[#FAFAFA] font-bold text-lg">
+              AK
+            </div>
+            <h3 style={{ color: "#FAFAFA" }} className="text-sm font-bold mb-1">
+              Ahmad Khan
+            </h3>
+            <p style={{ color: "#06B6D4" }} className="text-xs font-semibold mb-3">
+              Founder & Builder
+            </p>
+            <p style={{ color: "#A1A1AA" }} className="text-xs leading-relaxed">
+              Full-Stack Developer, AI Automation Consultant.
             </p>
           </div>
 
-          {/* Placeholder grid — replace cards with real team data */}
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-            {/* Founder card — always visible */}
+          {/* Placeholder Slots */}
+          {[1, 2, 3].map((slot) => (
             <div
-              style={{ backgroundColor: "#082038", border: "1px solid rgba(126,200,216,0.12)" }}
-              className="rounded-xl p-5 text-center"
+              key={slot}
+              style={{
+                backgroundColor: "#0D0D14",
+                border: "1px dashed #1A1A2E",
+                borderRadius: "12px",
+              }}
+              className="p-6 text-center flex flex-col items-center justify-center min-h-[220px]"
             >
-              <div
-                style={{
-                  width: 56,
-                  height: 56,
-                  borderRadius: "50%",
-                  overflow: "hidden",
-                  border: "2px solid rgba(24,128,128,0.35)",
-                  margin: "0 auto",
-                  marginBottom: "1rem",
-                }}
-              >
-                <Image
-                  src="/founder.jpg"
-                  alt="Ahmad Khan"
-                  width={56}
-                  height={56}
-                  style={{ objectFit: "cover", width: "100%", height: "100%" }}
-                />
+              <div className="w-12 h-12 rounded-full border border-dashed border-[#52525B] flex items-center justify-center text-[#52525B] text-xl font-bold mb-4">
+                ?
               </div>
-              <p style={{ color: "#E8F4F8" }} className="text-sm font-semibold">Ahmad Khan</p>
-              <p style={{ color: "rgba(126,200,216,0.4)" }} className="mb-3 text-xs">Founder · Frontend Dev</p>
-              <a
-                href="https://linkedin.com/in/muhamad-ahmd"
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{ color: "#188080", border: "1px solid rgba(24,128,128,0.3)" }}
-                className="inline-block rounded-full px-3 py-1 text-[10px] font-medium transition-all hover:bg-[rgba(24,128,128,0.1)]"
-              >
-                LinkedIn
-              </a>
+              <h3 style={{ color: "#52525B" }} className="text-sm font-bold mb-1">
+                Open Role
+              </h3>
+              <p style={{ color: "#52525B" }} className="text-xs">
+                To be announced
+              </p>
             </div>
+          ))}
+        </div>
+      </section>
 
-            {/* Coming soon slots */}
-            {[...Array(3)].map((_, i) => (
-              <div
-                key={i}
-                style={{ border: "1px dashed rgba(126,200,216,0.1)", backgroundColor: "rgba(8,32,56,0.3)" }}
-                className="flex flex-col items-center justify-center rounded-xl p-5 text-center"
-              >
-                <div
-                  style={{ border: "1px dashed rgba(126,200,216,0.15)" }}
-                  className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full"
-                >
-                  <span style={{ color: "rgba(126,200,216,0.2)" }} className="text-xl">+</span>
-                </div>
-                <p style={{ color: "rgba(126,200,216,0.2)" }} className="text-xs">Mentor / Team</p>
-                <p style={{ color: "rgba(126,200,216,0.15)" }} className="text-[10px]">Coming soon</p>
-              </div>
-            ))}
+      {/* CTA Section */}
+      <section className="py-16 px-6 max-w-5xl mx-auto w-full mb-12">
+        <div
+          style={{
+            border: "1px solid transparent",
+            background: "linear-gradient(#0D0D14, #0D0D14) padding-box, linear-gradient(135deg, #7C3AED, #06B6D4) border-box",
+            borderRadius: "16px",
+          }}
+          className="p-12 text-center"
+        >
+          <h2 style={{ color: "#FAFAFA" }} className="text-2xl font-extrabold mb-4 tracking-tight">
+            Want to help us bridge the gap?
+          </h2>
+          <p style={{ color: "#A1A1AA" }} className="max-w-lg mx-auto mb-8 text-xs leading-relaxed">
+            Get in touch with us to collaborate, volunteer, or hire our talented alumni.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 items-center justify-center">
+            <Link
+              href="/contact"
+              style={{
+                background: "linear-gradient(135deg, #7C3AED, #6D28D9)",
+                color: "#fff",
+                borderRadius: "999px",
+                padding: "12px 28px",
+                fontWeight: 700,
+              }}
+              className="transition-all hover:brightness-110 active:scale-95 text-center w-full sm:w-auto"
+            >
+              Contact Us
+            </Link>
+            <Link
+              href="/join"
+              style={{
+                background: "transparent",
+                border: "1px solid rgba(6,182,212,0.35)",
+                color: "#06B6D4",
+                borderRadius: "999px",
+                padding: "12px 28px",
+                fontWeight: 600,
+              }}
+              className="transition-all hover:border-[#06B6D4]/70 active:scale-95 text-center w-full sm:w-auto"
+            >
+              Join program
+            </Link>
           </div>
         </div>
       </section>
 
-      {/* ── CTA ── */}
-      <section className="mx-auto max-w-3xl px-6 py-16 text-center">
-        <h2 style={{ color: "#E8F4F8" }} className="mb-4 text-2xl font-bold">Want to be part of this?</h2>
-        <p style={{ color: "rgba(126,200,216,0.45)" }} className="mb-8 text-sm leading-relaxed">
-          Apply as an ambassador, join an internship track, or reach out about working with our team.
-        </p>
-        <div className="flex flex-wrap justify-center gap-4">
-          <Link
-            href="/join"
-            style={{ backgroundColor: "#188080", color: "#E8F4F8" }}
-            className="flex items-center gap-2 rounded-full px-7 py-3 text-sm font-semibold transition-all hover:brightness-110 active:scale-95"
-          >
-            Join Connexode <ArrowRight size={14} />
-          </Link>
-          <Link
-            href="/contact"
-            style={{ border: "1px solid rgba(126,200,216,0.2)", color: "rgba(126,200,216,0.6)" }}
-            className="rounded-full px-7 py-3 text-sm font-medium transition-all hover:text-[#7EC8D8]"
-          >
-            Contact us
-          </Link>
-        </div>
-      </section>
-
-    </main>
+      <PublicFooter />
+    </div>
   );
 }

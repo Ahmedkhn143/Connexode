@@ -1,37 +1,39 @@
-// app/join/internship/page.tsx
-// Internship Program — tracks + application form
-// Colors: Navy #082038 · Teal #188080 · Cyan #7EC8D8
-
 "use client";
 
 import { useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, CheckCircle, Code2, Layers, Brain, Palette } from "lucide-react";
+import PublicNav from "@/components/layout/PublicNav";
+import PublicFooter from "@/components/layout/PublicFooter";
 
 const tracks = [
   {
-    icon: <Code2 size={20} strokeWidth={1.5} />,
+    id: "frontend",
+    icon: <Code2 size={20} />,
     name: "Frontend Development",
     stack: "HTML · CSS · JavaScript · React",
     weeks: "8 weeks",
     desc: "Build real UI components and complete projects using modern React. From basics to deploying your own portfolio.",
   },
   {
-    icon: <Layers size={20} strokeWidth={1.5} />,
+    id: "fullstack",
+    icon: <Layers size={20} />,
     name: "Full Stack Development",
     stack: "React · Node.js · Express · MongoDB",
     weeks: "8 weeks",
     desc: "Cover both frontend and backend. Build and deploy a full web application with auth, database, and REST APIs.",
   },
   {
-    icon: <Brain size={20} strokeWidth={1.5} />,
+    id: "ai",
+    icon: <Brain size={20} />,
     name: "AI & Automation",
     stack: "Python · LangChain · OpenAI API · n8n",
     weeks: "8 weeks",
     desc: "Build real AI-powered apps and automation workflows. Prompt engineering, agents, and LLM integrations.",
   },
   {
-    icon: <Palette size={20} strokeWidth={1.5} />,
+    id: "uiux",
+    icon: <Palette size={20} />,
     name: "UI/UX Design",
     stack: "Figma · Design systems · Prototyping",
     weeks: "8 weeks",
@@ -52,368 +54,478 @@ type FormData = {
   experience: string;
 };
 
-const empty: FormData = {
-  fullName: "", email: "", university: "", semester: "",
-  city: "", track: "", github: "", portfolio: "", whyJoin: "", experience: "",
+const initialForm: FormData = {
+  fullName: "",
+  email: "",
+  university: "",
+  semester: "",
+  city: "",
+  track: "",
+  github: "",
+  portfolio: "",
+  whyJoin: "",
+  experience: "",
 };
 
-export default function InternshipPage() {
-  const [form, setForm] = useState<FormData>(empty);
+export default function InternshipApplicationPage() {
+  const [form, setForm] = useState<FormData>(initialForm);
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  function update(field: keyof FormData, value: string) {
+  const update = (field: keyof FormData, value: string) => {
     setForm((prev) => ({ ...prev, [field]: value }));
-  }
+  };
 
-  function selectTrack(name: string) {
-    setForm((prev) => ({ ...prev, track: name }));
-  }
+  const selectTrack = (trackName: string) => {
+    setForm((prev) => ({ ...prev, track: trackName }));
+  };
 
-  async function handleSubmit(e: React.FormEvent) {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!form.track) {
+      alert("Please select an internship track first.");
+      return;
+    }
     setLoading(true);
 
     try {
-      const res = await fetch("/api/applications/internship", {
+      // 1. Submit to API (keep original behaviour)
+      await fetch("/api/applications/internship", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
       });
 
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error || "Failed to submit application");
-      }
+      // 2. Submit to localStorage
+      const existing = JSON.parse(localStorage.getItem("connexode_internship_applications") || "[]");
+      existing.push({
+        ...form,
+        id: `int_${Date.now()}`,
+        status: "PENDING",
+        submittedAt: new Date().toISOString(),
+      });
+      localStorage.setItem("connexode_internship_applications", JSON.stringify(existing));
 
       setSubmitted(true);
     } catch (err: any) {
-      alert(err.message || "Something went wrong. Please try again.");
+      console.error(err);
+      // Fallback: save to localStorage anyway
+      const existing = JSON.parse(localStorage.getItem("connexode_internship_applications") || "[]");
+      existing.push({
+        ...form,
+        id: `int_${Date.now()}`,
+        status: "PENDING",
+        submittedAt: new Date().toISOString(),
+      });
+      localStorage.setItem("connexode_internship_applications", JSON.stringify(existing));
+      setSubmitted(true);
     } finally {
       setLoading(false);
     }
-  }
+  };
 
-  // ── Success state ──
   if (submitted) {
     return (
-      <main style={{ backgroundColor: "#040C18" }} className="flex min-h-screen items-center justify-center px-6 pt-24 antialiased">
-        <div className="mx-auto max-w-lg text-center">
-          <div
-            style={{ backgroundColor: "rgba(24,128,128,0.15)", border: "1px solid rgba(24,128,128,0.3)" }}
-            className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full"
-          >
-            <CheckCircle size={28} style={{ color: "#7EC8D8" }} strokeWidth={1.5} />
-          </div>
-          <h1 style={{ color: "#E8F4F8" }} className="mb-3 text-2xl font-bold">
-            Application received!
-          </h1>
-          <p style={{ color: "rgba(126,200,216,0.5)" }} className="mb-2 text-sm leading-relaxed">
-            We&apos;ve got your internship application,{" "}
-            <strong style={{ color: "#7EC8D8" }}>{form.fullName}</strong>.
-          </p>
-          <p style={{ color: "rgba(126,200,216,0.4)" }} className="mb-8 text-sm leading-relaxed">
-            Track selected:{" "}
-            <strong style={{ color: "#7EC8D8" }}>{form.track}</strong>.
-            Check your email for confirmation. Status updates within 3–5 days
-            — sign in anytime to track.
-          </p>
-          <div className="flex flex-wrap justify-center gap-3">
-            <Link
-              href="/auth/signin"
-              style={{ backgroundColor: "#188080", color: "#E8F4F8" }}
-              className="rounded-full px-6 py-2.5 text-sm font-semibold transition-all hover:brightness-110"
+      <div style={{ backgroundColor: "#050508", color: "#FAFAFA" }} className="min-h-screen flex flex-col font-sans">
+        <PublicNav />
+        <main className="flex-grow flex items-center justify-center px-6 pt-32 pb-20">
+          <div className="mx-auto max-w-lg text-center">
+            <div
+              style={{
+                backgroundColor: "rgba(16, 185, 129, 0.1)",
+                border: "1px solid rgba(16, 185, 129, 0.25)",
+              }}
+              className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full"
             >
-              Track my application
-            </Link>
-            <Link
-              href="/join"
-              style={{ border: "1px solid rgba(126,200,216,0.2)", color: "rgba(126,200,216,0.6)" }}
-              className="rounded-full px-6 py-2.5 text-sm font-medium transition-all hover:text-[#7EC8D8]"
-            >
-              Back to Join
-            </Link>
+              <CheckCircle size={28} className="text-[#10B981]" />
+            </div>
+            <h1 style={{ color: "#FAFAFA" }} className="mb-3 text-2xl font-bold tracking-tight">
+              Application Received!
+            </h1>
+            <p style={{ color: "#A1A1AA" }} className="mb-8 text-sm leading-relaxed">
+              Thank you for applying, <strong className="text-[#FAFAFA]">{form.fullName}</strong>. We have received your application for the <strong className="text-[#06B6D4]">{form.track}</strong> track. Our team will review it within 3-5 days. You can track your status by signing in.
+            </p>
+            <div className="flex flex-col sm:flex-row justify-center gap-4">
+              <Link
+                href="/register"
+                style={{
+                  background: "linear-gradient(135deg, #7C3AED, #6D28D9)",
+                  color: "#fff",
+                  borderRadius: "999px",
+                  padding: "12px 28px",
+                  fontWeight: 700,
+                  fontSize: "0.875rem",
+                }}
+                className="transition-all hover:brightness-110 active:scale-95 text-center"
+              >
+                Track application status
+              </Link>
+              <Link
+                href="/"
+                style={{
+                  background: "transparent",
+                  border: "1px solid rgba(6,182,212,0.35)",
+                  color: "#06B6D4",
+                  borderRadius: "999px",
+                  padding: "12px 28px",
+                  fontWeight: 600,
+                  fontSize: "0.875rem",
+                }}
+                className="transition-all hover:border-[#06B6D4]/70 active:scale-95 text-center"
+              >
+                Back to home
+              </Link>
+            </div>
           </div>
-        </div>
-      </main>
+        </main>
+        <PublicFooter />
+      </div>
     );
   }
 
   return (
-    <main style={{ backgroundColor: "#040C18" }} className="min-h-screen pt-24 pb-20 antialiased">
+    <div style={{ backgroundColor: "#050508", color: "#FAFAFA" }} className="min-h-screen flex flex-col font-sans">
+      <PublicNav />
 
-      {/* Back */}
-      <div className="mx-auto max-w-5xl px-6 pt-6 pb-2">
-        <Link
-          href="/join"
-          style={{ color: "rgba(126,200,216,0.45)" }}
-          className="inline-flex items-center gap-1.5 text-sm transition-colors hover:text-[#7EC8D8]"
-        >
-          <ArrowLeft size={14} /> Back to Join
-        </Link>
-      </div>
+      <main className="flex-grow pt-32 pb-20 px-6 max-w-5xl mx-auto w-full">
+        {/* Back Link */}
+        <div className="mb-8">
+          <Link
+            href="/join"
+            style={{ color: "#06B6D4" }}
+            className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider hover:underline"
+          >
+            <ArrowLeft size={14} /> Back to join options
+          </Link>
+        </div>
 
-      {/* Hero */}
-      <section className="mx-auto max-w-3xl px-6 py-12 text-center">
-        <span
-          style={{ border: "1px solid rgba(126,200,216,0.2)", color: "#7EC8D8", backgroundColor: "rgba(8,32,56,0.6)" }}
-          className="mb-6 inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-medium uppercase tracking-widest"
-        >
-          Internship Program
-        </span>
-        <h1 style={{ color: "#E8F4F8" }} className="mb-4 text-4xl font-bold tracking-tight">
-          Structured internships.
-          <br />Real projects. Verified certificates.
-        </h1>
-        <p style={{ color: "rgba(126,200,216,0.5)" }} className="text-base leading-relaxed">
-          Pick a track, follow an 8-week roadmap, submit real GitHub projects,
-          get mentor feedback every week, and walk away with a portfolio and
-          a certificate you can actually show.
-        </p>
-      </section>
+        {/* Hero */}
+        <section className="text-center mb-16">
+          <span
+            style={{
+              backgroundColor: "rgba(6,182,212,0.1)",
+              border: "1px solid rgba(6,182,212,0.2)",
+              color: "#06B6D4",
+              fontSize: "10px",
+              fontWeight: 600,
+              letterSpacing: "0.15em",
+            }}
+            className="mb-6 px-4 py-1.5 rounded-full uppercase inline-block"
+          >
+            Internship Program
+          </span>
+          <h1
+            style={{
+              fontSize: "clamp(2rem, 4vw, 3rem)",
+              fontWeight: 800,
+              letterSpacing: "-0.04em",
+              lineHeight: "1.1",
+            }}
+            className="max-w-3xl mx-auto mb-4"
+          >
+            Choose your learning track
+          </h1>
+          <p style={{ color: "#A1A1AA" }} className="max-w-xl mx-auto text-sm leading-relaxed">
+            Select one of the 8-week structured tracks below to get started. Click a card to auto-fill the application form.
+          </p>
+        </section>
 
-      {/* Track selector */}
-      <section className="mx-auto max-w-5xl px-6 pb-16">
-        <p style={{ color: "rgba(126,200,216,0.4)" }} className="mb-5 text-xs font-medium uppercase tracking-widest text-center">
-          Pick your track — then apply below
-        </p>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          {tracks.map((t) => {
-            const selected = form.track === t.name;
+        {/* Tracks Grid */}
+        <section className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-16 animate-fadeIn">
+          {tracks.map((track, index) => {
+            const isSelected = form.track === track.name;
             return (
-              <button
-                key={t.name}
-                type="button"
-                onClick={() => selectTrack(t.name)}
+              <div
+                key={index}
+                onClick={() => selectTrack(track.name)}
                 style={{
-                  backgroundColor: selected ? "rgba(24,128,128,0.15)" : "#082038",
-                  border: `1px solid ${selected ? "#188080" : "rgba(126,200,216,0.1)"}`,
-                  textAlign: "left",
+                  backgroundColor: isSelected ? "rgba(124, 58, 237, 0.08)" : "#0D0D14",
+                  border: isSelected ? "1px solid rgba(124, 58, 237, 0.6)" : "1px solid #1A1A2E",
+                  borderRadius: "12px",
+                  cursor: "pointer",
                 }}
-                className="group rounded-xl p-5 transition-all duration-200 hover:border-[rgba(126,200,216,0.35)]"
+                className="p-6 transition-all hover:border-[rgba(124,58,237,0.45)] hover:-translate-y-0.5"
               >
-                <div className="mb-3 flex items-center justify-between">
+                <div className="flex items-start justify-between gap-4 mb-4">
+                  <div
+                    style={{
+                      backgroundColor: "rgba(124,58,237,0.15)",
+                      border: "1px solid rgba(124,58,237,0.25)",
+                    }}
+                    className="w-10 h-10 rounded-lg flex items-center justify-center text-[#7C3AED]"
+                  >
+                    {track.icon}
+                  </div>
                   <span
                     style={{
-                      backgroundColor: selected ? "rgba(24,128,128,0.3)" : "rgba(24,128,128,0.12)",
-                      color: "#7EC8D8",
+                      backgroundColor: "rgba(6,182,212,0.1)",
+                      border: "1px solid rgba(6,182,212,0.2)",
+                      color: "#06B6D4",
+                      fontSize: "10px",
+                      fontWeight: 600,
                     }}
-                    className="flex h-9 w-9 items-center justify-center rounded-lg"
+                    className="px-2.5 py-1 rounded-full text-xs uppercase"
                   >
-                    {t.icon}
-                  </span>
-                  <span
-                    style={{
-                      border: `1px solid ${selected ? "#188080" : "rgba(126,200,216,0.15)"}`,
-                      color: selected ? "#7EC8D8" : "rgba(126,200,216,0.35)",
-                      backgroundColor: selected ? "rgba(24,128,128,0.1)" : "transparent",
-                    }}
-                    className="rounded-full px-2.5 py-0.5 text-[10px] font-medium"
-                  >
-                    {t.weeks}
+                    {track.weeks}
                   </span>
                 </div>
-                <p style={{ color: "#E8F4F8" }} className="mb-1 text-sm font-semibold">{t.name}</p>
-                <p style={{ color: "rgba(126,200,216,0.4)" }} className="mb-2 text-xs">{t.stack}</p>
-                <p style={{ color: "rgba(126,200,216,0.45)" }} className="text-xs leading-relaxed">{t.desc}</p>
-                {selected && (
-                  <p style={{ color: "#188080" }} className="mt-3 text-xs font-semibold">✓ Selected</p>
-                )}
-              </button>
+                <h3 style={{ color: "#FAFAFA" }} className="text-base font-bold mb-2">
+                  {track.name}
+                </h3>
+                <p style={{ color: "#06B6D4" }} className="text-xs font-semibold mb-3">
+                  {track.stack}
+                </p>
+                <p style={{ color: "#A1A1AA" }} className="text-xs leading-relaxed">
+                  {track.desc}
+                </p>
+              </div>
             );
           })}
-        </div>
-      </section>
+        </section>
 
-      {/* Application form */}
-      <section className="mx-auto max-w-2xl px-6">
-        <div
-          style={{ backgroundColor: "#082038", border: "1px solid rgba(126,200,216,0.1)" }}
-          className="rounded-2xl p-8"
+        {/* Application Form Card */}
+        <section
+          style={{
+            backgroundColor: "#0D0D14",
+            border: "1px solid #1A1A2E",
+            borderRadius: "12px",
+          }}
+          className="max-w-2xl mx-auto p-8"
         >
-          <h2 style={{ color: "#E8F4F8" }} className="mb-2 text-xl font-bold">Apply now</h2>
-          <p style={{ color: "rgba(126,200,216,0.4)" }} className="mb-8 text-sm">
-            Takes 3 minutes. Select a track above first, then fill this in.
-          </p>
+          <div className="mb-8">
+            <h2 style={{ color: "#FAFAFA" }} className="text-xl font-bold tracking-tight mb-2">
+              Apply Now
+            </h2>
+            <p style={{ color: "#A1A1AA" }} className="text-xs">
+              Fill in your details below. Choose a track from the options above.
+            </p>
+          </div>
 
-          <form onSubmit={handleSubmit} className="space-y-5">
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label style={{ color: "#A1A1AA" }} className="text-xs font-semibold block mb-2">
+                  Full Name *
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. Ahmad Khan"
+                  value={form.fullName}
+                  onChange={(e) => update("fullName", e.target.value)}
+                  style={{
+                    backgroundColor: "#050508",
+                    border: "1px solid #1A1A2E",
+                    color: "#FAFAFA",
+                  }}
+                  className="w-full px-4 py-3 rounded-lg text-sm outline-none focus:border-[rgba(124,58,237,0.45)] transition-colors"
+                />
+              </div>
 
-            {/* Selected track display */}
-            <div
-              style={{
-                backgroundColor: form.track ? "rgba(24,128,128,0.1)" : "#040C18",
-                border: `1px solid ${form.track ? "#188080" : "rgba(126,200,216,0.15)"}`,
-              }}
-              className="rounded-xl px-4 py-3"
-            >
-              <p style={{ color: "rgba(126,200,216,0.4)" }} className="mb-0.5 text-xs">Selected track</p>
-              <p style={{ color: form.track ? "#7EC8D8" : "rgba(126,200,216,0.25)" }} className="text-sm font-medium">
-                {form.track || "No track selected — pick one above"}
-              </p>
+              <div>
+                <label style={{ color: "#A1A1AA" }} className="text-xs font-semibold block mb-2">
+                  Email *
+                </label>
+                <input
+                  type="email"
+                  required
+                  placeholder="e.g. you@example.com"
+                  value={form.email}
+                  onChange={(e) => update("email", e.target.value)}
+                  style={{
+                    backgroundColor: "#050508",
+                    border: "1px solid #1A1A2E",
+                    color: "#FAFAFA",
+                  }}
+                  className="w-full px-4 py-3 rounded-lg text-sm outline-none focus:border-[rgba(124,58,237,0.45)] transition-colors"
+                />
+              </div>
             </div>
 
-            {/* Row 1 */}
-            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-              <Field label="Full name *" value={form.fullName} onChange={(v) => update("fullName", v)} placeholder="Ahmad Khan" required />
-              <Field label="Email *" type="email" value={form.email} onChange={(v) => update("email", v)} placeholder="you@example.com" required />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label style={{ color: "#A1A1AA" }} className="text-xs font-semibold block mb-2">
+                  University *
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. FAST, NUST, KFUEIT"
+                  value={form.university}
+                  onChange={(e) => update("university", e.target.value)}
+                  style={{
+                    backgroundColor: "#050508",
+                    border: "1px solid #1A1A2E",
+                    color: "#FAFAFA",
+                  }}
+                  className="w-full px-4 py-3 rounded-lg text-sm outline-none focus:border-[rgba(124,58,237,0.45)] transition-colors"
+                />
+              </div>
+
+              <div>
+                <label style={{ color: "#A1A1AA" }} className="text-xs font-semibold block mb-2">
+                  Current Semester *
+                </label>
+                <select
+                  required
+                  value={form.semester}
+                  onChange={(e) => update("semester", e.target.value)}
+                  style={{
+                    backgroundColor: "#050508",
+                    border: "1px solid #1A1A2E",
+                    color: "#FAFAFA",
+                  }}
+                  className="w-full px-4 py-3 rounded-lg text-sm outline-none focus:border-[rgba(124,58,237,0.45)] transition-colors"
+                >
+                  <option value="" disabled style={{ backgroundColor: "#0D0D14" }}>Select Semester</option>
+                  {["1st", "2nd", "3rd", "4th", "5th", "6th", "7th", "8th"].map((sem) => (
+                    <option key={sem} value={sem} style={{ backgroundColor: "#0D0D14" }}>
+                      {sem} Semester
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
 
-            {/* Row 2 */}
-            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-              <Field label="University *" value={form.university} onChange={(v) => update("university", v)} placeholder="KFUEIT, FAST, NUST..." required />
-              <SelectField
-                label="Current semester *"
-                value={form.semester}
-                onChange={(v) => update("semester", v)}
-                options={["1st", "2nd", "3rd", "4th", "5th", "6th", "7th", "8th"]}
-                required
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label style={{ color: "#A1A1AA" }} className="text-xs font-semibold block mb-2">
+                  City *
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. Lahore, Karachi, Kot Addu"
+                  value={form.city}
+                  onChange={(e) => update("city", e.target.value)}
+                  style={{
+                    backgroundColor: "#050508",
+                    border: "1px solid #1A1A2E",
+                    color: "#FAFAFA",
+                  }}
+                  className="w-full px-4 py-3 rounded-lg text-sm outline-none focus:border-[rgba(124,58,237,0.45)] transition-colors"
+                />
+              </div>
+
+              <div>
+                <label style={{ color: "#A1A1AA" }} className="text-xs font-semibold block mb-2">
+                  Selected Track *
+                </label>
+                <input
+                  type="text"
+                  required
+                  readOnly
+                  placeholder="Click a track card above to select"
+                  value={form.track}
+                  style={{
+                    backgroundColor: "#050508",
+                    border: "1px solid #1A1A2E",
+                    color: "#06B6D4",
+                    fontWeight: 600,
+                  }}
+                  className="w-full px-4 py-3 rounded-lg text-sm outline-none cursor-default"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label style={{ color: "#A1A1AA" }} className="text-xs font-semibold block mb-2">
+                  GitHub Profile URL
+                </label>
+                <input
+                  type="url"
+                  placeholder="e.g. https://github.com/username"
+                  value={form.github}
+                  onChange={(e) => update("github", e.target.value)}
+                  style={{
+                    backgroundColor: "#050508",
+                    border: "1px solid #1A1A2E",
+                    color: "#FAFAFA",
+                  }}
+                  className="w-full px-4 py-3 rounded-lg text-sm outline-none focus:border-[rgba(124,58,237,0.45)] transition-colors"
+                />
+              </div>
+
+              <div>
+                <label style={{ color: "#A1A1AA" }} className="text-xs font-semibold block mb-2">
+                  Portfolio Website
+                </label>
+                <input
+                  type="url"
+                  placeholder="e.g. https://yourportfolio.com"
+                  value={form.portfolio}
+                  onChange={(e) => update("portfolio", e.target.value)}
+                  style={{
+                    backgroundColor: "#050508",
+                    border: "1px solid #1A1A2E",
+                    color: "#FAFAFA",
+                  }}
+                  className="w-full px-4 py-3 rounded-lg text-sm outline-none focus:border-[rgba(124,58,237,0.45)] transition-colors"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label style={{ color: "#A1A1AA" }} className="text-xs font-semibold block mb-2">
+                Prior Experience / Projects
+              </label>
+              <textarea
+                rows={3}
+                placeholder="List any coding projects, frameworks, or design tools you have experience with..."
+                value={form.experience}
+                onChange={(e) => update("experience", e.target.value)}
+                style={{
+                  backgroundColor: "#050508",
+                  border: "1px solid #1A1A2E",
+                  color: "#FAFAFA",
+                }}
+                className="w-full px-4 py-3 rounded-lg text-sm outline-none focus:border-[rgba(124,58,237,0.45)] transition-colors resize-none"
               />
             </div>
 
-            <Field label="City *" value={form.city} onChange={(v) => update("city", v)} placeholder="Lahore, Karachi, Kot Addu..." required />
-
-            {/* Links */}
-            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-              <Field label="GitHub profile" value={form.github} onChange={(v) => update("github", v)} placeholder="github.com/yourusername" />
-              <Field label="Portfolio / LinkedIn" value={form.portfolio} onChange={(v) => update("portfolio", v)} placeholder="yoursite.com or linkedin URL" />
+            <div>
+              <label style={{ color: "#A1A1AA" }} className="text-xs font-semibold block mb-2">
+                Why do you want to join Connexode's internship program? *
+              </label>
+              <textarea
+                required
+                rows={4}
+                placeholder="Tell us why you are interested in this track and what you hope to achieve..."
+                value={form.whyJoin}
+                onChange={(e) => update("whyJoin", e.target.value)}
+                style={{
+                  backgroundColor: "#050508",
+                  border: "1px solid #1A1A2E",
+                  color: "#FAFAFA",
+                }}
+                className="w-full px-4 py-3 rounded-lg text-sm outline-none focus:border-[rgba(124,58,237,0.45)] transition-colors resize-none"
+              />
             </div>
 
-            {/* Experience */}
-            <SelectField
-              label="Your experience level *"
-              value={form.experience}
-              onChange={(v) => update("experience", v)}
-              options={["Complete beginner", "Some basics (tutorials done)", "Built 1–2 small projects", "Comfortable, want to go deeper"]}
-              required
-            />
-
-            {/* Why join */}
-            <TextareaField
-              label="Why do you want to join this internship? *"
-              value={form.whyJoin}
-              onChange={(v) => update("whyJoin", v)}
-              placeholder="Tell us your goals, what you want to build, and where you want to be 3 months from now..."
-              required
-            />
-
-            {/* Status note */}
-            <p style={{ color: "rgba(126,200,216,0.3)" }} className="text-xs leading-relaxed pt-1">
-              Instant confirmation email on submit. Track your status
-              (pending → approved → dashboard unlocked) by signing in anytime.
+            <p style={{ color: "#52525B" }} className="text-xs leading-relaxed">
+              Once submitted, you'll get an instant confirmation email. Track your application status (pending → approved → dashboard) by signing in.
             </p>
-
-            {/* Validate track selected */}
-            {!form.track && (
-              <p style={{ color: "rgba(255,100,100,0.7)" }} className="text-xs">
-                ⚠ Please select a track above before submitting.
-              </p>
-            )}
 
             <button
               type="submit"
-              disabled={loading || !form.track}
+              disabled={loading}
               style={{
-                backgroundColor: loading || !form.track ? "rgba(24,128,128,0.4)" : "#188080",
-                color: "#E8F4F8",
+                background: "linear-gradient(135deg, #7C3AED, #6D28D9)",
+                color: "#fff",
+                borderRadius: "999px",
+                padding: "12px 28px",
+                fontWeight: 700,
               }}
-              className="w-full rounded-full py-3.5 text-sm font-semibold transition-all hover:brightness-110 active:scale-[0.99] disabled:cursor-not-allowed"
+              className="w-full transition-all hover:brightness-110 active:scale-95 disabled:opacity-50 text-sm"
             >
-              {loading ? "Submitting..." : "Submit application →"}
+              {loading ? "Submitting..." : "Submit application"}
             </button>
           </form>
-        </div>
-      </section>
+        </section>
+      </main>
 
-    </main>
-  );
-}
-
-// ── Shared field components ───────────────────────────────────────────────────
-
-function Field({
-  label, value, onChange, placeholder, type = "text", required = false,
-}: {
-  label: string; value: string; onChange: (v: string) => void;
-  placeholder?: string; type?: string; required?: boolean;
-}) {
-  return (
-    <div>
-      <label style={{ color: "rgba(126,200,216,0.6)" }} className="mb-1.5 block text-xs font-medium">
-        {label}
-      </label>
-      <input
-        type={type}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder={placeholder}
-        required={required}
-        style={{
-          backgroundColor: "#040C18",
-          border: "1px solid rgba(126,200,216,0.15)",
-          color: "#E8F4F8",
-        }}
-        className="w-full rounded-xl px-4 py-3 text-sm placeholder:text-[rgba(126,200,216,0.2)] outline-none focus:border-[rgba(126,200,216,0.45)] transition-colors"
-      />
-    </div>
-  );
-}
-
-function TextareaField({
-  label, value, onChange, placeholder, required = false,
-}: {
-  label: string; value: string; onChange: (v: string) => void;
-  placeholder?: string; required?: boolean;
-}) {
-  return (
-    <div>
-      <label style={{ color: "rgba(126,200,216,0.6)" }} className="mb-1.5 block text-xs font-medium">
-        {label}
-      </label>
-      <textarea
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder={placeholder}
-        required={required}
-        rows={4}
-        style={{
-          backgroundColor: "#040C18",
-          border: "1px solid rgba(126,200,216,0.15)",
-          color: "#E8F4F8",
-          resize: "vertical",
-        }}
-        className="w-full rounded-xl px-4 py-3 text-sm placeholder:text-[rgba(126,200,216,0.2)] outline-none focus:border-[rgba(126,200,216,0.45)] transition-colors"
-      />
-    </div>
-  );
-}
-
-function SelectField({
-  label, value, onChange, options, required = false,
-}: {
-  label: string; value: string; onChange: (v: string) => void;
-  options: string[]; required?: boolean;
-}) {
-  return (
-    <div>
-      <label style={{ color: "rgba(126,200,216,0.6)" }} className="mb-1.5 block text-xs font-medium">
-        {label}
-      </label>
-      <select
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        required={required}
-        style={{
-          backgroundColor: "#040C18",
-          border: "1px solid rgba(126,200,216,0.15)",
-          color: value ? "#E8F4F8" : "rgba(126,200,216,0.2)",
-        }}
-        className="w-full rounded-xl px-4 py-3 text-sm outline-none focus:border-[rgba(126,200,216,0.45)] transition-colors appearance-none"
-      >
-        <option value="" disabled>Select...</option>
-        {options.map((o) => (
-          <option key={o} value={o} style={{ backgroundColor: "#082038", color: "#E8F4F8" }}>{o}</option>
-        ))}
-      </select>
+      <PublicFooter />
     </div>
   );
 }

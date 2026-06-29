@@ -1,337 +1,466 @@
-// app/services/page.tsx
-// Services — 4 clusters + process + FAQ + CTA
-// Colors: Navy #082038 · Teal #188080 · Cyan #7EC8D8
+"use client";
 
+import { useState } from "react";
 import Link from "next/link";
-import {
-  Code2,
-  Layers,
-  Video,
-  TrendingUp,
-  ArrowRight,
-  CheckCircle,
-  MessageSquare,
-  FileText,
-  Hammer,
-  PackageCheck,
-} from "lucide-react";
-
-// ─── DATA ────────────────────────────────────────────────────────────────────
-
-const clusters = [
-  {
-    id: "development",
-    icon: <Code2 size={22} strokeWidth={1.5} />,
-    tag: "Development",
-    title: "Frontend & Full Stack",
-    desc: "From pixel-perfect React UIs to complete full-stack applications with auth, database, and APIs — built clean and deployed fast.",
-    services: [
-      "Responsive React / Next.js websites",
-      "Full-stack apps (Node.js + MongoDB/PostgreSQL)",
-      "REST & tRPC API development",
-      "Authentication (NextAuth, JWT)",
-      "Performance optimisation & SEO",
-      "Vercel / Railway deployment",
-    ],
-    stack: ["React", "Next.js", "TypeScript", "Node.js", "PostgreSQL", "Prisma", "Tailwind CSS"],
-  },
-  {
-    id: "design",
-    icon: <FileText size={22} strokeWidth={1.5} />,
-    tag: "Design",
-    title: "Figma & UI/UX",
-    desc: "Clean, conversion-focused design — from wireframes to polished Figma prototypes that developers can build from directly.",
-    services: [
-      "UI/UX design from scratch",
-      "Wireframes & user flows",
-      "Design system creation",
-      "High-fidelity Figma prototypes",
-      "Landing page design",
-      "Component library design",
-    ],
-    stack: ["Figma", "FigJam", "Auto Layout", "Design Tokens", "Framer"],
-  },
-  {
-    id: "media",
-    icon: <Video size={22} strokeWidth={1.5} />,
-    tag: "Media",
-    title: "Video Editing & 3D",
-    desc: "Professional video production and 3D visuals — from short-form social content to product renders and explainer animations.",
-    services: [
-      "Short-form video editing (Reels, Shorts, TikTok)",
-      "Long-form video production",
-      "Motion graphics & transitions",
-      "3D product renders (Blender)",
-      "Brand intro animations",
-      "Thumbnail & poster design",
-    ],
-    stack: ["Premiere Pro", "DaVinci Resolve", "After Effects", "Blender", "Photoshop"],
-  },
-  {
-    id: "growth",
-    icon: <TrendingUp size={22} strokeWidth={1.5} />,
-    tag: "Growth",
-    title: "Social Media Marketing & Management",
-    desc: "Strategy, content, and execution — growing your brand on Instagram, LinkedIn, and Facebook with content that actually converts.",
-    services: [
-      "Social media strategy & content plan",
-      "Monthly content calendar",
-      "Caption writing & hashtag research",
-      "Graphic design for posts & stories",
-      "Page management (posting, engagement)",
-      "Analytics reporting",
-    ],
-    stack: ["Meta Business Suite", "Canva Pro", "Buffer", "Notion", "Google Analytics"],
-  },
-];
-
-const process = [
-  {
-    icon: <MessageSquare size={18} strokeWidth={1.5} />,
-    step: "01",
-    title: "Discovery call",
-    desc: "We learn about your project, goals, and timeline. Free, no commitment.",
-  },
-  {
-    icon: <FileText size={18} strokeWidth={1.5} />,
-    step: "02",
-    title: "Proposal & scope",
-    desc: "You get a clear written scope, timeline, and milestone-based pricing. No surprises.",
-  },
-  {
-    icon: <Hammer size={18} strokeWidth={1.5} />,
-    step: "03",
-    title: "Build & check-ins",
-    desc: "We build in stages with regular updates. You review before every major milestone.",
-  },
-  {
-    icon: <PackageCheck size={18} strokeWidth={1.5} />,
-    step: "04",
-    title: "Delivery & support",
-    desc: "Final delivery with documentation. Post-launch support included for 14 days.",
-  },
-];
-
-const faqs = [
-  {
-    q: "How much does it cost?",
-    a: "Pricing depends on project size and complexity. We provide a detailed quote after the discovery call. Payment is milestone-based — you pay in stages as work is delivered, never everything upfront.",
-  },
-  {
-    q: "How long does a project take?",
-    a: "A standard landing page takes 5–7 days. A full web app takes 3–6 weeks. Social media management starts immediately after onboarding. Every project gets a written timeline before we start.",
-  },
-  {
-    q: "Do you work with students and startups?",
-    a: "Yes — most of our early clients are student projects, startups, and small businesses. We offer competitive rates and are flexible with scope.",
-  },
-  {
-    q: "How many revisions do I get?",
-    a: "Every project includes 2 rounds of revisions per milestone. Additional revisions are billed separately and agreed on before starting.",
-  },
-  {
-    q: "Can I hire for one service only?",
-    a: "Absolutely. You can hire us for just video editing, just Figma design, or just social media management — no need to bundle.",
-  },
-];
-
-// ─── PAGE ─────────────────────────────────────────────────────────────────────
+import { Code2, Cpu, Search, Share2, Video, Check, ChevronDown, ChevronUp } from "lucide-react";
+import PublicNav from "@/components/layout/PublicNav";
+import PublicFooter from "@/components/layout/PublicFooter";
 
 export default function ServicesPage() {
-  return (
-    <main style={{ backgroundColor: "#040C18" }} className="min-h-screen pt-24 pb-20 antialiased">
+  // FAQ state
+  const [openFaq, setOpenFaq] = useState<number | null>(null);
 
-      {/* ── Hero ── */}
-      <section className="mx-auto max-w-4xl px-6 py-14 text-center">
+  const toggleFaq = (index: number) => {
+    setOpenFaq(openFaq === index ? null : index);
+  };
+
+  const servicesList = [
+    {
+      icon: <Code2 size={24} />,
+      tag: "Development",
+      title: "Full-Stack Development",
+      desc: "From pixel-perfect user interfaces to backend APIs, we build web applications that perform at scale and deliver exceptional user experiences.",
+      stack: ["React", "Next.js", "TypeScript", "Node.js", "PostgreSQL", "Prisma"],
+      checklist: [
+        "Frontend (React/Next.js)",
+        "Backend APIs (Node.js)",
+        "Database design",
+        "Auth & security",
+        "Vercel/Railway deployment",
+        "End-to-end web apps"
+      ]
+    },
+    {
+      icon: <Cpu size={24} />,
+      tag: "AI Automation",
+      title: "AI & Custom Chatbots",
+      desc: "Bring intelligence to your workflows. We design custom AI assistants and automate manual operations to save your business hundreds of hours.",
+      stack: ["OpenAI API", "Claude API", "LangChain", "n8n", "Python", "Pinecone"],
+      checklist: [
+        "Custom chatbots trained on your data",
+        "AI workflow automation",
+        "OpenAI/Claude API integration",
+        "LangChain agents",
+        "Business process automation",
+        "n8n/Make pipelines"
+      ]
+    },
+    {
+      icon: <Search size={24} />,
+      tag: "Growth",
+      title: "Search Engine Optimisation (SEO)",
+      desc: "Get discovered by the right customers. We perform in-depth technical audits and design custom search strategies to boost your organic search footprint.",
+      stack: ["Google Search Console", "Ahrefs", "Screaming Frog", "SEMrush", "Analytics"],
+      checklist: [
+        "Technical SEO audit",
+        "On-page optimisation",
+        "Keyword research & strategy",
+        "Link building",
+        "GSC setup & monitoring",
+        "Monthly reporting"
+      ]
+    },
+    {
+      icon: <Share2 size={24} />,
+      tag: "Social",
+      title: "Social Media Marketing & Management",
+      desc: "Grow your online presence and engage with your community. We develop content calendars, design visuals, and track page growth metrics.",
+      stack: ["Meta Business Suite", "Canva Pro", "Buffer", "Notion", "Analytics"],
+      checklist: [
+        "Social strategy (Instagram, LinkedIn, Facebook, TikTok)",
+        "Monthly content calendar",
+        "Caption writing & hashtags",
+        "Graphic design for posts/reels",
+        "Full page management",
+        "Analytics reporting"
+      ]
+    },
+    {
+      icon: <Video size={24} />,
+      tag: "Media",
+      title: "Design, Video & 3D",
+      desc: "Stand out with stunning UI/UX, premium video assets, and detailed 3D designs that keep users engaged and build brand authority.",
+      stack: ["Figma", "Premiere Pro", "DaVinci Resolve", "After Effects", "Blender"],
+      checklist: [
+        "Figma UI/UX design",
+        "Design systems",
+        "Short-form video editing",
+        "Long-form production",
+        "Blender 3D renders",
+        "Thumbnail & poster design"
+      ]
+    }
+  ];
+
+  const processSteps = [
+    {
+      step: "01",
+      title: "Discovery call",
+      desc: "We learn about your project, goals, and timeline. Free, no commitment."
+    },
+    {
+      step: "02",
+      title: "Proposal & scope",
+      desc: "You get a clear written scope, timeline, and milestone-based pricing. No surprises."
+    },
+    {
+      step: "03",
+      title: "Build & check-ins",
+      desc: "Regular updates, shared preview links, and constant direct communication."
+    },
+    {
+      step: "04",
+      title: "Delivery & support",
+      desc: "Final testing, deployment, handover session, and ongoing post-launch support."
+    }
+  ];
+
+  const faqs = [
+    {
+      q: "Do you work with international clients?",
+      a: "Yes, fully remote. We work with clients from North America, Europe, the Middle East, and beyond."
+    },
+    {
+      q: "How much does it cost?",
+      a: "Every project is priced dynamically based on scope and requirements. We offer transparent, milestone-based payments and quote after our discovery call."
+    },
+    {
+      q: "How long does it take?",
+      a: "Simple landing pages usually take 5–7 days. More complex web applications, automations, or design projects range from 3–6 weeks."
+    },
+    {
+      q: "Can I hire for one service only?",
+      a: "Absolutely. You can hire us for a single landing page design, a specific automation pipeline, or ongoing monthly SEO without any bundling."
+    },
+    {
+      q: "How do we communicate?",
+      a: "We communicate directly via WhatsApp, Slack, or Google Meet, based on your team's preference. You will always have direct contact with the project builder."
+    },
+    {
+      q: "Do you offer retainers?",
+      a: "Yes, specifically for Search Engine Optimisation (SEO) and Social Media Management where consistent monthly execution is required to see results."
+    }
+  ];
+
+  return (
+    <div style={{ backgroundColor: "#050508", color: "#FAFAFA" }} className="min-h-screen flex flex-col font-sans">
+      <PublicNav />
+
+      {/* Hero Section */}
+      <section
+        style={{
+          background: "radial-gradient(ellipse 80% 50% at 50% 20%, rgba(124,58,237,0.12) 0%, transparent 70%)",
+        }}
+        className="pt-36 pb-20 px-6 flex flex-col items-center text-center"
+      >
         <span
-          style={{ border: "1px solid rgba(126,200,216,0.2)", color: "#7EC8D8", backgroundColor: "rgba(8,32,56,0.6)" }}
-          className="mb-6 inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-medium uppercase tracking-widest"
+          style={{
+            backgroundColor: "rgba(6,182,212,0.1)",
+            border: "1px solid rgba(6,182,212,0.2)",
+            color: "#06B6D4",
+            fontSize: "10px",
+            fontWeight: 600,
+            letterSpacing: "0.15em",
+          }}
+          className="mb-6 px-4 py-1.5 rounded-full uppercase"
         >
-          What we deliver
+          Global services · Pakistan-built
         </span>
-        <h1 style={{ color: "#E8F4F8" }} className="mb-5 text-4xl font-bold tracking-tight sm:text-5xl">
-          Development, design, media
-          <br />
+
+        <h1
+          style={{
+            fontSize: "clamp(2.2rem, 5vw, 3.5rem)",
+            fontWeight: 800,
+            letterSpacing: "-0.04em",
+            lineHeight: "1.1",
+          }}
+          className="max-w-4xl mx-auto mb-6"
+        >
+          World-class tech services.<br />
           <span
             style={{
-              background: "linear-gradient(135deg, #7EC8D8 0%, #188080 60%)",
+              background: "linear-gradient(135deg, #7C3AED, #06B6D4)",
               WebkitBackgroundClip: "text",
               WebkitTextFillColor: "transparent",
-              backgroundClip: "text",
             }}
           >
-            & growth — by a dedicated team.
+            Delivered worldwide.
           </span>
         </h1>
-        <p style={{ color: "rgba(126,200,216,0.5)" }} className="mx-auto max-w-2xl text-base leading-relaxed">
-          Our team — trained through Connexode&apos;s own internship program —
-          delivers real client work across four service areas. Small team,
-          focused work, zero fluff.
+
+        <p style={{ color: "#A1A1AA" }} className="max-w-[600px] mx-auto text-base leading-relaxed">
+          From full-stack web apps to AI chatbots, SEO, and social media — our dedicated team delivers real work for clients anywhere.
         </p>
       </section>
 
-      {/* ── Service clusters ── */}
-      <section className="mx-auto max-w-6xl px-6 pb-24 space-y-6">
-        {clusters.map((c) => (
+      {/* Services List (Vertical Grid, full width cards) */}
+      <section className="py-12 px-6 max-w-5xl mx-auto w-full flex flex-col gap-8">
+        {servicesList.map((service, index) => (
           <div
-            key={c.id}
-            id={c.id}
-            style={{ backgroundColor: "#082038", border: "1px solid rgba(126,200,216,0.1)" }}
-            className="rounded-2xl p-8 transition-all hover:border-[rgba(126,200,216,0.25)]"
+            key={index}
+            style={{
+              backgroundColor: "#0D0D14",
+              border: "1px solid #1A1A2E",
+              borderRadius: "12px",
+            }}
+            className="p-8 md:p-12 transition-all hover:border-[rgba(124,58,237,0.45)] hover:-translate-y-1 flex flex-col md:flex-row justify-between gap-8 md:gap-12"
           >
-            <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
-
-              {/* Left — info */}
+            {/* Left Column */}
+            <div className="flex-1 flex flex-col justify-between">
               <div>
-                <div className="mb-5 flex items-center gap-3">
-                  <span
-                    style={{ backgroundColor: "rgba(24,128,128,0.15)", border: "1px solid rgba(24,128,128,0.3)", color: "#7EC8D8" }}
-                    className="flex h-11 w-11 items-center justify-center rounded-xl"
+                <div className="flex items-center gap-3 mb-6">
+                  <div
+                    style={{
+                      backgroundColor: "rgba(124,58,237,0.15)",
+                      border: "1px solid rgba(124,58,237,0.25)",
+                    }}
+                    className="w-12 h-12 rounded-xl flex items-center justify-center text-[#7C3AED]"
                   >
-                    {c.icon}
-                  </span>
+                    {service.icon}
+                  </div>
                   <span
-                    style={{ border: "1px solid rgba(126,200,216,0.15)", color: "rgba(126,200,216,0.45)", backgroundColor: "rgba(8,32,56,0.5)" }}
-                    className="rounded-full px-2.5 py-0.5 text-[10px] font-medium uppercase tracking-widest"
+                    style={{
+                      backgroundColor: "rgba(6,182,212,0.1)",
+                      border: "1px solid rgba(6,182,212,0.2)",
+                      color: "#06B6D4",
+                      fontSize: "10px",
+                      fontWeight: 600,
+                      letterSpacing: "0.1em",
+                    }}
+                    className="px-2.5 py-1 rounded-full uppercase"
                   >
-                    {c.tag}
+                    {service.tag}
                   </span>
                 </div>
-                <h2 style={{ color: "#E8F4F8" }} className="mb-3 text-xl font-bold">{c.title}</h2>
-                <p style={{ color: "rgba(126,200,216,0.5)" }} className="mb-6 text-sm leading-relaxed">{c.desc}</p>
 
-                {/* Stack badges */}
-                <div className="flex flex-wrap gap-2">
-                  {c.stack.map((s) => (
-                    <span
-                      key={s}
-                      style={{ border: "1px solid rgba(126,200,216,0.12)", color: "rgba(126,200,216,0.4)", backgroundColor: "rgba(4,12,24,0.6)" }}
-                      className="rounded-full px-3 py-1 text-[11px] font-medium"
-                    >
-                      {s}
-                    </span>
-                  ))}
-                </div>
+                <h3 style={{ color: "#FAFAFA" }} className="text-xl font-bold mb-3 tracking-tight">
+                  {service.title}
+                </h3>
+                <p style={{ color: "#A1A1AA" }} className="text-sm leading-relaxed mb-6">
+                  {service.desc}
+                </p>
               </div>
 
-              {/* Right — service list + CTA */}
-              <div className="flex flex-col justify-between">
-                <ul className="mb-6 space-y-2.5">
-                  {c.services.map((s) => (
-                    <li key={s} className="flex items-start gap-2.5">
-                      <CheckCircle size={14} style={{ color: "#188080", marginTop: 2, flexShrink: 0 }} strokeWidth={2} />
-                      <span style={{ color: "rgba(126,200,216,0.65)" }} className="text-sm leading-snug">{s}</span>
-                    </li>
-                  ))}
-                </ul>
-                <Link
-                  href="/contact"
-                  style={{ backgroundColor: "rgba(24,128,128,0.15)", border: "1px solid rgba(24,128,128,0.3)", color: "#7EC8D8" }}
-                  className="inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-medium transition-all hover:bg-[rgba(24,128,128,0.25)] self-start"
-                >
-                  Get a quote
-                  <ArrowRight size={14} />
-                </Link>
+              {/* Stack badges */}
+              <div className="flex flex-wrap gap-2 mt-auto">
+                {service.stack.map((tech, idx) => (
+                  <span
+                    key={idx}
+                    style={{
+                      backgroundColor: "#050508",
+                      border: "1px solid #1A1A2E",
+                      color: "#A1A1AA",
+                    }}
+                    className="px-3 py-1 rounded-full text-xs"
+                  >
+                    {tech}
+                  </span>
+                ))}
               </div>
+            </div>
+
+            {/* Right Column */}
+            <div
+              style={{
+                borderLeft: "1px solid #1A1A2E",
+              }}
+              className="md:pl-12 flex-1 flex flex-col justify-between"
+            >
+              <ul className="flex flex-col gap-3 mb-8">
+                {service.checklist.map((item, idx) => (
+                  <li key={idx} className="flex items-start gap-2.5 text-sm text-[#A1A1AA]">
+                    <Check size={16} className="text-[#06B6D4] shrink-0 mt-0.5" />
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+
+              <Link
+                href="/contact"
+                style={{
+                  background: "transparent",
+                  border: "1px solid rgba(6,182,212,0.35)",
+                  color: "#06B6D4",
+                  borderRadius: "999px",
+                  padding: "12px 28px",
+                  fontWeight: 600,
+                }}
+                className="transition-all hover:border-[#06B6D4]/70 active:scale-95 text-center w-full block"
+              >
+                Get quote
+              </Link>
             </div>
           </div>
         ))}
       </section>
 
-      {/* ── Process ── */}
+      {/* 4-Step Process Section */}
       <section
-        style={{ borderTop: "1px solid rgba(126,200,216,0.06)", borderBottom: "1px solid rgba(126,200,216,0.06)", backgroundColor: "#061020" }}
-        className="py-20"
+        style={{
+          backgroundColor: "#0D0D14",
+          borderTop: "1px solid #1A1A2E",
+          borderBottom: "1px solid #1A1A2E",
+        }}
+        className="py-24 px-6 w-full"
       >
-        <div className="mx-auto max-w-6xl px-6">
-          <div className="mb-14 text-center">
-            <p style={{ color: "#7EC8D8" }} className="mb-3 text-xs font-medium uppercase tracking-widest">How we work</p>
-            <h2 style={{ color: "#E8F4F8" }} className="text-2xl font-bold sm:text-3xl">
-              From first message to final delivery
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16">
+            <span
+              style={{
+                color: "#06B6D4",
+                fontSize: "11px",
+                fontWeight: 600,
+                letterSpacing: "0.2em",
+              }}
+              className="uppercase block mb-2"
+            >
+              How we work
+            </span>
+            <h2 style={{ color: "#FAFAFA" }} className="text-3xl font-bold tracking-tight">
+              Our 4-step process
             </h2>
           </div>
 
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {process.map((p) => (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {processSteps.map((step, idx) => (
               <div
-                key={p.step}
-                style={{ backgroundColor: "#082038", border: "1px solid rgba(126,200,216,0.1)" }}
-                className="rounded-xl p-6"
+                key={idx}
+                style={{
+                  backgroundColor: "#050508",
+                  border: "1px solid #1A1A2E",
+                  borderRadius: "12px",
+                }}
+                className="p-6 relative"
               >
-                <div className="mb-4 flex items-center gap-3">
-                  <span
-                    style={{ backgroundColor: "rgba(24,128,128,0.15)", color: "#7EC8D8" }}
-                    className="flex h-9 w-9 items-center justify-center rounded-lg"
-                  >
-                    {p.icon}
-                  </span>
-                  <span style={{ color: "rgba(126,200,216,0.25)" }} className="text-2xl font-bold">{p.step}</span>
-                </div>
-                <p style={{ color: "#E8F4F8" }} className="mb-2 text-sm font-semibold">{p.title}</p>
-                <p style={{ color: "rgba(126,200,216,0.45)" }} className="text-xs leading-relaxed">{p.desc}</p>
+                <span
+                  style={{
+                    background: "linear-gradient(135deg, #7C3AED, #06B6D4)",
+                    WebkitBackgroundClip: "text",
+                    WebkitTextFillColor: "transparent",
+                    fontSize: "2rem",
+                    fontWeight: 800,
+                  }}
+                  className="mb-4 block"
+                >
+                  {step.step}
+                </span>
+                <h3 style={{ color: "#FAFAFA" }} className="text-base font-bold mb-2">
+                  {step.title}
+                </h3>
+                <p style={{ color: "#A1A1AA" }} className="text-xs leading-relaxed">
+                  {step.desc}
+                </p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ── FAQ ── */}
-      <section className="mx-auto max-w-3xl px-6 py-20">
-        <div className="mb-12 text-center">
-          <p style={{ color: "#7EC8D8" }} className="mb-3 text-xs font-medium uppercase tracking-widest">Before you reach out</p>
-          <h2 style={{ color: "#E8F4F8" }} className="text-2xl font-bold">Common questions</h2>
+      {/* FAQ Section */}
+      <section className="py-24 px-6 max-w-3xl mx-auto w-full">
+        <div className="text-center mb-16">
+          <span
+            style={{
+              color: "#06B6D4",
+              fontSize: "11px",
+              fontWeight: 600,
+              letterSpacing: "0.2em",
+            }}
+            className="uppercase block mb-2"
+          >
+            Questions
+          </span>
+          <h2 style={{ color: "#FAFAFA" }} className="text-3xl font-bold tracking-tight">
+            Frequently Asked Questions
+          </h2>
         </div>
-        <div className="space-y-4">
-          {faqs.map((f) => (
-            <div
-              key={f.q}
-              style={{ backgroundColor: "#082038", border: "1px solid rgba(126,200,216,0.1)" }}
-              className="rounded-xl px-6 py-5"
-            >
-              <p style={{ color: "#E8F4F8" }} className="mb-2 text-sm font-semibold">{f.q}</p>
-              <p style={{ color: "rgba(126,200,216,0.5)" }} className="text-sm leading-relaxed">{f.a}</p>
-            </div>
-          ))}
+
+        <div className="flex flex-col gap-4">
+          {faqs.map((faq, index) => {
+            const isOpen = openFaq === index;
+            return (
+              <div
+                key={index}
+                style={{
+                  backgroundColor: "#0D0D14",
+                  border: "1px solid #1A1A2E",
+                  borderRadius: "12px",
+                }}
+                className="overflow-hidden"
+              >
+                <button
+                  onClick={() => toggleFaq(index)}
+                  className="w-full p-6 text-left flex items-center justify-between gap-4 font-semibold text-sm hover:text-[#FAFAFA] transition-colors"
+                >
+                  <span style={{ color: "#FAFAFA" }}>{faq.q}</span>
+                  {isOpen ? <ChevronUp size={18} className="text-[#A1A1AA]" /> : <ChevronDown size={18} className="text-[#A1A1AA]" />}
+                </button>
+                {isOpen && (
+                  <div
+                    style={{
+                      borderTop: "1px solid #1A1A2E",
+                      color: "#A1A1AA",
+                    }}
+                    className="p-6 text-xs leading-relaxed"
+                  >
+                    {faq.a}
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
       </section>
 
-      {/* ── CTA ── */}
-      <section className="mx-auto max-w-3xl px-6 pb-10 text-center">
+      {/* CTA Bottom Section */}
+      <section className="py-12 px-6 max-w-5xl mx-auto w-full mb-12">
         <div
-          style={{ backgroundColor: "#082038", border: "1px solid rgba(126,200,216,0.12)" }}
-          className="rounded-2xl px-8 py-12"
+          style={{
+            border: "1px solid transparent",
+            background: "linear-gradient(#0D0D14, #0D0D14) padding-box, linear-gradient(135deg, #7C3AED, #06B6D4) border-box",
+            borderRadius: "16px",
+          }}
+          className="p-12 text-center"
         >
-          <div
-            style={{ background: "linear-gradient(90deg, transparent, #188080, transparent)" }}
-            className="mx-auto mb-8 h-px w-20"
-          />
-          <h2 style={{ color: "#E8F4F8" }} className="mb-3 text-2xl font-bold">
-            Ready to start a project?
+          <h2 style={{ color: "#FAFAFA" }} className="text-3xl font-extrabold mb-4 tracking-tight">
+            Have a custom requirement?
           </h2>
-          <p style={{ color: "rgba(126,200,216,0.45)" }} className="mb-8 text-sm leading-relaxed">
-            Tell us what you&apos;re building. Discovery call is free —
-            no commitment, no pressure.
+          <p style={{ color: "#A1A1AA" }} className="max-w-lg mx-auto mb-8 text-sm leading-relaxed">
+            Get in touch with us and let's craft the perfect technical solution tailored to your goals.
           </p>
-          <div className="flex flex-wrap justify-center gap-3">
+          <div className="flex flex-col sm:flex-row gap-4 items-center justify-center">
             <Link
               href="/contact"
-              style={{ backgroundColor: "#188080", color: "#E8F4F8" }}
-              className="flex items-center gap-2 rounded-full px-7 py-3 text-sm font-semibold transition-all hover:brightness-110 active:scale-95"
+              style={{
+                background: "linear-gradient(135deg, #7C3AED, #6D28D9)",
+                color: "#fff",
+                borderRadius: "999px",
+                padding: "12px 28px",
+                fontWeight: 700,
+              }}
+              className="transition-all hover:brightness-110 active:scale-95 text-center w-full sm:w-auto"
             >
-              Get in touch
-              <ArrowRight size={14} />
+              Get started
             </Link>
             <Link
-              href="/join"
-              style={{ border: "1px solid rgba(126,200,216,0.2)", color: "rgba(126,200,216,0.6)" }}
-              className="rounded-full px-7 py-3 text-sm font-medium transition-all hover:text-[#7EC8D8]"
+              href="/contact"
+              style={{
+                background: "transparent",
+                border: "1px solid rgba(6,182,212,0.35)",
+                color: "#06B6D4",
+                borderRadius: "999px",
+                padding: "12px 28px",
+                fontWeight: 600,
+              }}
+              className="transition-all hover:border-[#06B6D4]/70 active:scale-95 text-center w-full sm:w-auto"
             >
-              Join our team instead
+              Contact support
             </Link>
           </div>
         </div>
       </section>
 
-    </main>
+      <PublicFooter />
+    </div>
   );
 }

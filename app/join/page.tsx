@@ -1,227 +1,309 @@
-// app/join/page.tsx
-// Join Connexode — landing fork + comparison table + FAQ
-// Colors: Navy #082038 · Teal #188080 · Cyan #7EC8D8
+"use client";
 
 import Link from "next/link";
-import { ArrowRight, Users, BookOpen, Check } from "lucide-react";
-
-const comparison = [
-  {
-    feature: "Time commitment",
-    ambassador: "3–5 hrs/week, flexible",
-    internship: "8 weeks, structured tasks",
-  },
-  {
-    feature: "Core activity",
-    ambassador: "AI sessions, webinars, social growth",
-    internship: "Hands-on projects, graded submissions",
-  },
-  {
-    feature: "Outcome",
-    ambassador: "Leadership & community building",
-    internship: "Technical portfolio & skill depth",
-  },
-  {
-    feature: "Certificate",
-    ambassador: "Ambassador Certificate",
-    internship: "Track-specific Internship Certificate",
-  },
-  {
-    feature: "Dashboard",
-    ambassador: "Reach, sessions & webinar tracker",
-    internship: "Task grades, badges & roadmap",
-  },
-  {
-    feature: "Best for",
-    ambassador: "Students who like organising & speaking",
-    internship: "Students who want deep coding practice",
-  },
-];
-
-const faqs = [
-  {
-    q: "Who can apply?",
-    a: "Any student currently enrolled at a Pakistani university. No prior experience required — we train you.",
-  },
-  {
-    q: "Is it paid?",
-    a: "Both programs are currently unpaid. You earn a verified certificate, mentorship, dashboard access, and real experience you can show on your CV.",
-  },
-  {
-    q: "Can I do both at the same time?",
-    a: "Yes, but we recommend starting with one. Both have different workloads — internship is more intensive.",
-  },
-  {
-    q: "What happens after I apply?",
-    a: "You get an instant confirmation email. Our team reviews within 3–5 days. Your dashboard shows live status — no need to message us asking.",
-  },
-];
+import { Users, BookOpen, Check } from "lucide-react";
+import PublicNav from "@/components/layout/PublicNav";
+import PublicFooter from "@/components/layout/PublicFooter";
 
 export default function JoinPage() {
-  return (
-    <main style={{ backgroundColor: "#040C18" }} className="min-h-screen pt-24 pb-20 antialiased">
+  const comparisonData = [
+    {
+      feature: "Time commitment",
+      ambassador: "3–5 hrs/week, flexible",
+      internship: "8 weeks, structured",
+    },
+    {
+      feature: "Core activity",
+      ambassador: "AI sessions, webinars, community",
+      internship: "Projects, submissions, grading",
+    },
+    {
+      feature: "Outcome",
+      ambassador: "Leadership & community growth",
+      internship: "Technical skills & portfolio",
+    },
+    {
+      feature: "Certificate",
+      ambassador: "Ambassador Certificate",
+      internship: "Track-specific Internship Certificate",
+    },
+    {
+      feature: "Dashboard",
+      ambassador: "Reach, sessions, webinar stats",
+      internship: "Tasks, grades, roadmap, badges",
+    },
+    {
+      feature: "Best for",
+      ambassador: "Organising, speaking, social media",
+      internship: "Deep coding practice",
+    },
+  ];
 
-      {/* ── Hero ── */}
-      <section className="mx-auto max-w-4xl px-6 pt-12 pb-16 text-center">
+  const faqs = [
+    {
+      q: "Can I apply to both programs?",
+      a: "Yes, you can apply to both. However, since the internship is highly structured and requires project submissions, we recommend focusing on one to maximize your learning and participation."
+    },
+    {
+      q: "Who is eligible to join?",
+      a: "The Ambassador and Internship programs are open to university students across Pakistan who are passionate about tech, coding, leadership, and community growth."
+    },
+    {
+      q: "Are these programs paid?",
+      a: "These campus programs are focused on skill development, mentorship, and experience-building. While they are unpaid, they offer official certifications, hands-on portfolio projects, and direct industry network access."
+    },
+    {
+      q: "What is the selection process?",
+      a: "After you submit the application, our team will review it. You can check your application status live. If selected, your role dashboard will unlock within 3–5 days."
+    }
+  ];
+
+  return (
+    <div style={{ backgroundColor: "#050508", color: "#FAFAFA" }} className="min-h-screen flex flex-col font-sans">
+      <PublicNav />
+
+      {/* Hero */}
+      <section
+        style={{
+          background: "radial-gradient(ellipse 80% 50% at 50% 20%, rgba(124,58,237,0.12) 0%, transparent 70%)",
+        }}
+        className="pt-36 pb-16 px-6 text-center"
+      >
         <span
-          style={{ border: "1px solid rgba(126,200,216,0.2)", color: "#7EC8D8", backgroundColor: "rgba(8,32,56,0.6)" }}
-          className="mb-6 inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-medium uppercase tracking-widest"
+          style={{
+            backgroundColor: "rgba(6,182,212,0.1)",
+            border: "1px solid rgba(6,182,212,0.2)",
+            color: "#06B6D4",
+            fontSize: "10px",
+            fontWeight: 600,
+            letterSpacing: "0.15em",
+          }}
+          className="mb-6 px-4 py-1.5 rounded-full uppercase"
         >
           Two ways to grow
         </span>
-        <h1 style={{ color: "#E8F4F8" }} className="mb-4 text-4xl font-bold tracking-tight sm:text-5xl">
-          How do you want to grow<br />with Connexode?
+        <h1
+          style={{
+            fontSize: "clamp(2.2rem, 5vw, 3.5rem)",
+            fontWeight: 800,
+            letterSpacing: "-0.04em",
+            lineHeight: "1.1",
+          }}
+          className="max-w-4xl mx-auto mb-4"
+        >
+          Choose your path
         </h1>
-        <p style={{ color: "rgba(126,200,216,0.5)" }} className="text-base leading-relaxed sm:text-lg">
-          Choose the path that fits your goals. Both come with mentorship,
-          a verified certificate, and a real dashboard to track your progress.
+        <p style={{ color: "#A1A1AA" }} className="max-w-[500px] mx-auto text-sm leading-relaxed">
+          Unlock your potential through real campus leadership or hands-on structured developer tracks.
         </p>
       </section>
 
-      {/* ── Fork cards ── */}
-      <section className="mx-auto max-w-5xl px-6 pb-20">
-        <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-
-          {/* Ambassador */}
+      {/* Fork Cards */}
+      <section className="py-8 px-6 max-w-5xl mx-auto w-full">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-20">
+          {/* Card 1: Ambassador */}
           <div
-            style={{ backgroundColor: "#082038", border: "1px solid rgba(126,200,216,0.12)" }}
-            className="group flex flex-col rounded-2xl p-8 transition-all duration-300 hover:border-[rgba(126,200,216,0.35)] hover:-translate-y-1"
+            style={{
+              backgroundColor: "#0D0D14",
+              border: "1px solid #1A1A2E",
+              borderRadius: "12px",
+            }}
+            className="p-8 flex flex-col justify-between min-h-[400px] transition-all hover:border-[rgba(124,58,237,0.45)] hover:-translate-y-1"
           >
-            <span
-              style={{ backgroundColor: "rgba(24,128,128,0.15)", border: "1px solid rgba(24,128,128,0.3)", color: "#7EC8D8" }}
-              className="mb-6 flex h-11 w-11 items-center justify-center rounded-xl"
-            >
-              <Users size={20} strokeWidth={1.5} />
-            </span>
-            <h2 style={{ color: "#E8F4F8" }} className="mb-3 text-xl font-bold">Ambassador Program</h2>
-            <p style={{ color: "rgba(126,200,216,0.5)" }} className="mb-6 text-sm leading-relaxed flex-1">
-              Lead AI-awareness sessions on your campus, host webinars, grow a
-              student community, and guide peers on social media growth — all
-              tracked on your live dashboard.
-            </p>
-            <ul className="mb-8 space-y-2">
-              {["Flexible weekly schedule", "Webinar hosting access", "Growth dashboard", "Ambassador certificate"].map((item) => (
-                <li key={item} className="flex items-center gap-2 text-sm" style={{ color: "rgba(126,200,216,0.6)" }}>
-                  <Check size={13} style={{ color: "#188080" }} strokeWidth={2.5} />
-                  {item}
+            <div>
+              <div
+                style={{
+                  backgroundColor: "rgba(124,58,237,0.15)",
+                  border: "1px solid rgba(124,58,237,0.25)",
+                }}
+                className="w-12 h-12 rounded-xl flex items-center justify-center text-[#7C3AED] mb-6"
+              >
+                <Users size={24} />
+              </div>
+              <h3 style={{ color: "#FAFAFA" }} className="text-xl font-bold mb-6">
+                Ambassador Program
+              </h3>
+              <ul className="flex flex-col gap-4 mb-8">
+                <li className="flex items-start gap-3 text-sm text-[#A1A1AA]">
+                  <Check size={18} className="text-[#06B6D4] shrink-0 mt-0.5" />
+                  <span>Lead artificial intelligence sessions & webinars on your campus.</span>
                 </li>
-              ))}
-            </ul>
+                <li className="flex items-start gap-3 text-sm text-[#A1A1AA]">
+                  <Check size={18} className="text-[#06B6D4] shrink-0 mt-0.5" />
+                  <span>Grow and manage thriving local campus communities.</span>
+                </li>
+                <li className="flex items-start gap-3 text-sm text-[#A1A1AA]">
+                  <Check size={18} className="text-[#06B6D4] shrink-0 mt-0.5" />
+                  <span>Build public speaking, leadership, and marketing skills.</span>
+                </li>
+              </ul>
+            </div>
             <Link
               href="/join/ambassador"
-              style={{ backgroundColor: "#188080", color: "#E8F4F8" }}
-              className="flex items-center justify-center gap-2 rounded-full py-3 text-sm font-semibold transition-all hover:brightness-110 active:scale-95"
+              style={{
+                background: "linear-gradient(135deg, #7C3AED, #6D28D9)",
+                color: "#fff",
+                borderRadius: "999px",
+                padding: "12px 28px",
+                fontWeight: 700,
+                textAlign: "center",
+              }}
+              className="transition-all hover:brightness-110 active:scale-95 text-sm"
             >
               Apply as ambassador
-              <ArrowRight size={14} className="transition-transform group-hover:translate-x-0.5" />
             </Link>
           </div>
 
-          {/* Internship */}
+          {/* Card 2: Internship */}
           <div
-            style={{ backgroundColor: "#082038", border: "1px solid rgba(126,200,216,0.12)" }}
-            className="group flex flex-col rounded-2xl p-8 transition-all duration-300 hover:border-[rgba(126,200,216,0.35)] hover:-translate-y-1"
+            style={{
+              backgroundColor: "#0D0D14",
+              border: "1px solid #1A1A2E",
+              borderRadius: "12px",
+            }}
+            className="p-8 flex flex-col justify-between min-h-[400px] transition-all hover:border-[rgba(124,58,237,0.45)] hover:-translate-y-1"
           >
-            <span
-              style={{ backgroundColor: "rgba(24,128,128,0.15)", border: "1px solid rgba(24,128,128,0.3)", color: "#7EC8D8" }}
-              className="mb-6 flex h-11 w-11 items-center justify-center rounded-xl"
-            >
-              <BookOpen size={20} strokeWidth={1.5} />
-            </span>
-            <h2 style={{ color: "#E8F4F8" }} className="mb-3 text-xl font-bold">Internship Program</h2>
-            <p style={{ color: "rgba(126,200,216,0.5)" }} className="mb-6 text-sm leading-relaxed flex-1">
-              Pick a tech track, follow a structured 8-week roadmap, submit real
-              GitHub projects, receive mentor feedback, and earn an
-              industry-verified certificate.
-            </p>
-            <ul className="mb-8 space-y-2">
-              {["8-week structured roadmap", "Mentor-graded submissions", "Portfolio projects", "Track certificate"].map((item) => (
-                <li key={item} className="flex items-center gap-2 text-sm" style={{ color: "rgba(126,200,216,0.6)" }}>
-                  <Check size={13} style={{ color: "#188080" }} strokeWidth={2.5} />
-                  {item}
+            <div>
+              <div
+                style={{
+                  backgroundColor: "rgba(124,58,237,0.15)",
+                  border: "1px solid rgba(124,58,237,0.25)",
+                }}
+                className="w-12 h-12 rounded-xl flex items-center justify-center text-[#7C3AED] mb-6"
+              >
+                <BookOpen size={24} />
+              </div>
+              <h3 style={{ color: "#FAFAFA" }} className="text-xl font-bold mb-6">
+                Internship Program
+              </h3>
+              <ul className="flex flex-col gap-4 mb-8">
+                <li className="flex items-start gap-3 text-sm text-[#A1A1AA]">
+                  <Check size={18} className="text-[#06B6D4] shrink-0 mt-0.5" />
+                  <span>Complete structured 8-week development tracks.</span>
                 </li>
-              ))}
-            </ul>
+                <li className="flex items-start gap-3 text-sm text-[#A1A1AA]">
+                  <Check size={18} className="text-[#06B6D4] shrink-0 mt-0.5" />
+                  <span>Submit real assignments and receive detailed mentor reviews.</span>
+                </li>
+                <li className="flex items-start gap-3 text-sm text-[#A1A1AA]">
+                  <Check size={18} className="text-[#06B6D4] shrink-0 mt-0.5" />
+                  <span>Build complete GitHub projects to showcase in your portfolio.</span>
+                </li>
+              </ul>
+            </div>
             <Link
               href="/join/internship"
-              style={{ backgroundColor: "#188080", color: "#E8F4F8" }}
-              className="flex items-center justify-center gap-2 rounded-full py-3 text-sm font-semibold transition-all hover:brightness-110 active:scale-95"
+              style={{
+                background: "linear-gradient(135deg, #7C3AED, #6D28D9)",
+                color: "#fff",
+                borderRadius: "999px",
+                padding: "12px 28px",
+                fontWeight: 700,
+                textAlign: "center",
+              }}
+              className="transition-all hover:brightness-110 active:scale-95 text-sm"
             >
-              View tracks &amp; apply
-              <ArrowRight size={14} className="transition-transform group-hover:translate-x-0.5" />
+              View tracks & apply
             </Link>
           </div>
         </div>
-      </section>
 
-      {/* ── Comparison table ── */}
-      <section
-        style={{ borderTop: "1px solid rgba(126,200,216,0.06)", borderBottom: "1px solid rgba(126,200,216,0.06)", backgroundColor: "#061020" }}
-        className="py-20"
-      >
-        <div className="mx-auto max-w-5xl px-6">
-          <div className="mb-12 text-center">
-            <p style={{ color: "#7EC8D8" }} className="mb-3 text-xs font-medium uppercase tracking-widest">Side by side</p>
-            <h2 style={{ color: "#E8F4F8" }} className="text-2xl font-bold sm:text-3xl">Not sure which to pick?</h2>
+        {/* Comparison Table */}
+        <div className="mb-24">
+          <div className="text-center mb-12">
+            <span
+              style={{
+                color: "#06B6D4",
+                fontSize: "11px",
+                fontWeight: 600,
+                letterSpacing: "0.2em",
+              }}
+              className="uppercase block mb-2"
+            >
+              Compare
+            </span>
+            <h2 style={{ color: "#FAFAFA" }} className="text-2xl font-bold">
+              Program Comparison
+            </h2>
           </div>
 
-          {/* Table */}
-          <div style={{ border: "1px solid rgba(126,200,216,0.1)" }} className="overflow-hidden rounded-2xl">
-            {/* Header */}
-            <div
-              style={{ backgroundColor: "#082038", borderBottom: "1px solid rgba(126,200,216,0.1)" }}
-              className="grid grid-cols-3 px-6 py-4"
-            >
-              <div />
-              <div className="text-center">
-                <span style={{ color: "#7EC8D8" }} className="text-xs font-semibold uppercase tracking-widest">Ambassador</span>
-              </div>
-              <div className="text-center">
-                <span style={{ color: "#7EC8D8" }} className="text-xs font-semibold uppercase tracking-widest">Internship</span>
-              </div>
-            </div>
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse text-left">
+              <thead>
+                <tr style={{ borderBottom: "1px solid #1A1A2E" }}>
+                  <th style={{ color: "#FAFAFA" }} className="py-4 px-6 text-sm font-bold">
+                    Feature
+                  </th>
+                  <th style={{ color: "#FAFAFA" }} className="py-4 px-6 text-sm font-bold">
+                    Ambassador
+                  </th>
+                  <th style={{ color: "#FAFAFA" }} className="py-4 px-6 text-sm font-bold">
+                    Internship
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {comparisonData.map((row, idx) => (
+                  <tr key={idx} style={{ borderBottom: "1px solid #1A1A2E" }} className="hover:bg-[#0D0D14]/50">
+                    <td style={{ color: "#FAFAFA" }} className="py-4 px-6 text-xs font-semibold uppercase tracking-wider">
+                      {row.feature}
+                    </td>
+                    <td style={{ color: "#A1A1AA" }} className="py-4 px-6 text-sm">
+                      {row.ambassador}
+                    </td>
+                    <td style={{ color: "#A1A1AA" }} className="py-4 px-6 text-sm">
+                      {row.internship}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
 
-            {/* Rows */}
-            {comparison.map((row, i) => (
+        {/* FAQ Section */}
+        <div className="max-w-3xl mx-auto mb-12">
+          <div className="text-center mb-12">
+            <span
+              style={{
+                color: "#06B6D4",
+                fontSize: "11px",
+                fontWeight: 600,
+                letterSpacing: "0.2em",
+              }}
+              className="uppercase block mb-2"
+            >
+              FAQ
+            </span>
+            <h2 style={{ color: "#FAFAFA" }} className="text-2xl font-bold">
+              Program FAQs
+            </h2>
+          </div>
+
+          <div className="flex flex-col gap-4">
+            {faqs.map((faq, idx) => (
               <div
-                key={row.feature}
+                key={idx}
                 style={{
-                  backgroundColor: i % 2 === 0 ? "rgba(8,32,56,0.4)" : "rgba(4,12,24,0.4)",
-                  borderBottom: i < comparison.length - 1 ? "1px solid rgba(126,200,216,0.06)" : "none",
+                  backgroundColor: "#0D0D14",
+                  border: "1px solid #1A1A2E",
+                  borderRadius: "12px",
                 }}
-                className="grid grid-cols-3 items-start gap-4 px-6 py-4"
+                className="p-6"
               >
-                <span style={{ color: "rgba(126,200,216,0.45)" }} className="text-xs font-medium uppercase tracking-wide pt-0.5">
-                  {row.feature}
-                </span>
-                <span style={{ color: "#E8F4F8" }} className="text-sm text-center leading-snug">{row.ambassador}</span>
-                <span style={{ color: "#E8F4F8" }} className="text-sm text-center leading-snug">{row.internship}</span>
+                <h4 style={{ color: "#FAFAFA" }} className="font-semibold text-sm mb-2">
+                  {faq.q}
+                </h4>
+                <p style={{ color: "#A1A1AA" }} className="text-xs leading-relaxed">
+                  {faq.a}
+                </p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ── FAQ ── */}
-      <section className="mx-auto max-w-3xl px-6 py-20">
-        <div className="mb-12 text-center">
-          <p style={{ color: "#7EC8D8" }} className="mb-3 text-xs font-medium uppercase tracking-widest">Common questions</p>
-          <h2 style={{ color: "#E8F4F8" }} className="text-2xl font-bold">Before you apply</h2>
-        </div>
-        <div className="space-y-4">
-          {faqs.map((faq) => (
-            <div
-              key={faq.q}
-              style={{ backgroundColor: "#082038", border: "1px solid rgba(126,200,216,0.1)" }}
-              className="rounded-xl px-6 py-5"
-            >
-              <p style={{ color: "#E8F4F8" }} className="mb-2 text-sm font-semibold">{faq.q}</p>
-              <p style={{ color: "rgba(126,200,216,0.5)" }} className="text-sm leading-relaxed">{faq.a}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-    </main>
+      <PublicFooter />
+    </div>
   );
 }

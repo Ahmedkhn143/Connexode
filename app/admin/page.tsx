@@ -18,13 +18,14 @@ import {
   type User,
   type Submission,
 } from "@/lib/mock-data";
-import { BookOpen, Users, GitBranch, ShieldAlert, Plus, LineChart, Code2, Award, Flame, Mail, GraduationCap, History, CheckCircle2, XCircle, Clock, Trash2, Edit2, ArrowLeft, FileText, Star, MessageSquare } from "lucide-react";
+import { BookOpen, Users, GitBranch, ShieldAlert, Plus, LineChart, Code2, Award, Flame, Mail, GraduationCap, History, CheckCircle2, XCircle, Clock, Trash2, Edit2, ArrowLeft, FileText, Star, MessageSquare, Menu, X } from "lucide-react";
 import Link from "next/link";
 
 type Tab = "students" | "mentors" | "tracks" | "audits" | "curriculum" | "payments" | "mentor_applications" | "ambassador_applications" | "announcements" | "ambassadors";
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState<Tab>("students");
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [tracks, setTracks] = useState<Track[]>(TRACKS);
   const [tasksList, setTasksList] = useState<WeeklyTask[]>([]);
   const [logsList, setLogsList] = useState(MOCK_TASK_EDIT_LOGS);
@@ -670,10 +671,18 @@ export default function AdminDashboard() {
       <div className="pointer-events-none fixed top-[-10%] left-[-10%] w-[600px] h-[600px] bg-purple-600/10 rounded-full blur-[150px]" />
       <div className="pointer-events-none fixed top-[20%] right-[-15%] w-[500px] h-[500px] bg-cyan-500/8 rounded-full blur-[130px]" />
 
-      {/* ΓöÇΓöÇ LEFT SIDEBAR ΓöÇΓöÇ */}
-      <aside className="fixed top-0 left-0 h-screen w-[240px] bg-[#080f1e] border-r border-white/5 flex flex-col z-40 shrink-0">
+      {/* Backdrop overlay for mobile */}
+      {isSidebarOpen && (
+        <div 
+          onClick={() => setIsSidebarOpen(false)}
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-30 md:hidden animate-fade-in"
+        />
+      )}
+
+      {/* ── LEFT SIDEBAR ── */}
+      <aside className={`fixed top-0 left-0 h-screen w-[240px] bg-[#080f1e] border-r border-white/5 flex flex-col z-40 shrink-0 transition-transform duration-300 md:translate-x-0 ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"}`}>
         {/* Brand */}
-        <div className="px-5 py-5 border-b border-white/5">
+        <div className="px-5 py-5 border-b border-white/5 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <img src="/logo.png" alt="Logo" className="h-8 w-8 rounded-lg object-cover shadow-[0_0_12px_rgba(0,245,255,0.3)]" />
             <div>
@@ -681,57 +690,77 @@ export default function AdminDashboard() {
               <p className="text-[9px] font-extrabold uppercase tracking-widest text-purple-400">Admin Panel</p>
             </div>
           </div>
-        </div>
-
-        {/* KPI mini stats */}
-        <div className="grid grid-cols-2 gap-2 px-4 py-4 border-b border-white/5">
-          {[
-            { label: "Interns", value: totalStudents, color: "text-purple-400", span: "" },
-            { label: "Ambassadors", value: ambassadorApplications.filter((a) => a.status === "APPROVED").length, color: "text-amber-400", span: "" },
-            { label: "Tracks", value: totalTracks, color: "text-cyan-400", span: "" },
-            { label: "Tasks", value: totalTasks, color: "text-emerald-400", span: "" },
-            { label: "Submissions", value: totalSubmissions, color: "text-yellow-400", span: "col-span-2" },
-          ].map((s) => (
-            <div key={s.label} className={`rounded-xl bg-white/4 border border-white/5 p-2 text-center ${s.span}`}>
-              <p className={`text-sm font-black ${s.color}`}>{s.value}</p>
-              <p className="text-[9px] text-slate-500 font-semibold leading-none mt-0.5">{s.label}</p>
-            </div>
-          ))}
+          <button 
+            onClick={() => setIsSidebarOpen(false)}
+            className="p-1 text-slate-400 hover:text-white md:hidden hover:bg-white/5 rounded transition-colors"
+          >
+            <X size={16} />
+          </button>
         </div>
 
         {/* Nav Items */}
-        <nav className="flex-1 px-3 py-2 space-y-1 overflow-y-auto custom-sidebar-scroll">
-          {([
-            { id: "students", label: "Enrolled Interns", icon: Users, badge: totalStudents },
-            { id: "mentors", label: "Mentor Performance", icon: GraduationCap, badge: mentors.length },
-            { id: "ambassadors", label: "Active Ambassadors", icon: Award, badge: ambassadorApplications.filter((a) => a.status === "APPROVED").length || null },
-            { id: "tracks", label: "Curriculum Tracks", icon: GitBranch, badge: totalTracks },
-            { id: "curriculum", label: "Outline Editor", icon: BookOpen, badge: null },
-            { id: "audits", label: "Audit Feed", icon: History, badge: null },
-            { id: "payments", label: "Approvals Queue", icon: Clock, badge: payments.filter((p) => p.status === "PENDING").length || null, badgeAlert: true },
-            { id: "mentor_applications", label: "Mentor Applications", icon: GraduationCap, badge: mentorApplications.filter((a) => a.status === "PENDING").length || null, badgeAlert: true },
-            { id: "ambassador_applications", label: "Ambassador Apps", icon: Star, badge: ambassadorApplications.filter((a) => a.status === "PENDING").length || null, badgeAlert: true },
-            { id: "announcements", label: "Announcements Board", icon: ShieldAlert, badge: null },
-          ] as any[]).map(({ id, label, icon: Icon, badge, badgeAlert }) => (
-            <button
-              key={id}
-              onClick={() => setActiveTab(id as Tab)}
-              className={`w-full flex items-center gap-2 px-3 py-2 rounded-xl text-[11px] font-semibold transition-all duration-200 group ${
-                activeTab === id
-                  ? "bg-purple-500/15 border border-purple-500/25 text-white shadow-[0_0_12px_rgba(168,85,247,0.15)]"
-                  : "text-slate-400 hover:bg-white/5 hover:text-white border border-transparent"
-              }`}
-            >
-              <Icon size={14} className={activeTab === id ? "text-purple-400" : "text-slate-500 group-hover:text-slate-300"} />
-              <span className="flex-1 text-left truncate">{label}</span>
-              {badge ? (
-                <span className={`rounded-full px-1.5 py-0.5 text-[8px] font-black ${
-                  badgeAlert ? "bg-yellow-500/15 text-yellow-500 animate-pulse" : "bg-white/5 text-slate-500"
-                }`}>
-                  {badge}
-                </span>
-              ) : null}
-            </button>
+        <nav className="flex-1 px-3 py-4 space-y-4 overflow-y-auto custom-sidebar-scroll">
+          {[
+            {
+              title: "Directories",
+              links: [
+                { id: "students", label: "Enrolled Interns", icon: Users, badge: totalStudents },
+                { id: "mentors", label: "Mentor Performance", icon: GraduationCap, badge: mentors.length },
+                { id: "ambassadors", label: "Active Ambassadors", icon: Award, badge: ambassadorApplications.filter((a) => a.status === "APPROVED").length || null },
+              ]
+            },
+            {
+              title: "Curriculum",
+              links: [
+                { id: "tracks", label: "Curriculum Tracks", icon: GitBranch, badge: totalTracks },
+                { id: "curriculum", label: "Outline Editor", icon: BookOpen, badge: null },
+              ]
+            },
+            {
+              title: "Operations & Queues",
+              links: [
+                { id: "payments", label: "Approvals Queue", icon: Clock, badge: payments.filter((p) => p.status === "PENDING").length || null, badgeAlert: true },
+                { id: "mentor_applications", label: "Mentor Applications", icon: GraduationCap, badge: mentorApplications.filter((a) => a.status === "PENDING").length || null, badgeAlert: true },
+                { id: "ambassador_applications", label: "Ambassador Apps", icon: Star, badge: ambassadorApplications.filter((a) => a.status === "PENDING").length || null, badgeAlert: true },
+              ]
+            },
+            {
+              title: "Management",
+              links: [
+                { id: "audits", label: "Audit Feed", icon: History, badge: null },
+                { id: "announcements", label: "Announcements Board", icon: ShieldAlert, badge: null },
+              ]
+            }
+          ].map((section) => (
+            <div key={section.title} className="space-y-1">
+              <span className="text-[9px] text-slate-500 font-extrabold uppercase tracking-wider mb-1.5 px-3 block">
+                {section.title}
+              </span>
+              {(section.links as any[]).map(({ id, label, icon: Icon, badge, badgeAlert }) => (
+                <button
+                  key={id}
+                  onClick={() => {
+                    setActiveTab(id as Tab);
+                    setIsSidebarOpen(false);
+                  }}
+                  className={`w-full flex items-center gap-2 px-3 py-1.5 rounded-lg text-[10.5px] font-semibold transition-all duration-200 group ${
+                    activeTab === id
+                      ? "bg-purple-500/15 border border-purple-500/25 text-white shadow-[0_0_12px_rgba(168,85,247,0.15)]"
+                      : "text-slate-400 hover:bg-white/5 hover:text-white border border-transparent"
+                  }`}
+                >
+                  <Icon size={13} className={activeTab === id ? "text-purple-400" : "text-slate-500 group-hover:text-slate-300"} />
+                  <span className="flex-1 text-left truncate">{label}</span>
+                  {badge ? (
+                    <span className={`rounded-full px-1.5 py-0.5 text-[8px] font-black ${
+                      badgeAlert ? "bg-yellow-500/15 text-yellow-500 animate-pulse" : "bg-white/5 text-slate-500"
+                    }`}>
+                      {badge}
+                    </span>
+                  ) : null}
+                </button>
+              ))}
+            </div>
           ))}
         </nav>
 
@@ -756,18 +785,26 @@ export default function AdminDashboard() {
         </div>
       </aside>
 
-      {/* ΓöÇΓöÇ MAIN CONTENT ΓöÇΓöÇ */}
-      <div className="flex-1 ml-[240px] min-h-screen">
+      {/* ── MAIN CONTENT ── */}
+      <div className="flex-1 ml-0 md:ml-[240px] min-h-screen">
         {/* Top Header bar */}
-        <header className="sticky top-0 z-30 bg-[#080f1e]/80 backdrop-blur-xl border-b border-white/5 px-8 py-4 flex items-center justify-between">
-          <div>
-            <div className="flex items-center gap-2 text-purple-400 mb-0.5">
-              <ShieldAlert size={12} />
-              <span className="text-[9px] font-extrabold uppercase tracking-widest">Administrator Operations</span>
+        <header className="sticky top-0 z-30 bg-[#080f1e]/80 backdrop-blur-xl border-b border-white/5 px-4 md:px-8 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <button 
+              onClick={() => setIsSidebarOpen(true)}
+              className="p-1.5 text-slate-400 hover:text-white md:hidden hover:bg-white/5 rounded-lg transition-colors"
+            >
+              <Menu size={20} />
+            </button>
+            <div>
+              <div className="flex items-center gap-2 text-purple-400 mb-0.5">
+                <ShieldAlert size={12} />
+                <span className="text-[9px] font-extrabold uppercase tracking-widest">Administrator Operations</span>
+              </div>
+              <h1 className="font-display text-xl font-black tracking-tight text-white">
+                Connexode <span className="bg-gradient-to-r from-purple-400 via-pink-400 to-cyan-400 bg-clip-text text-transparent">Management</span>
+              </h1>
             </div>
-            <h1 className="font-display text-xl font-black tracking-tight text-white">
-              Connexode <span className="bg-gradient-to-r from-purple-400 via-pink-400 to-cyan-400 bg-clip-text text-transparent">Management</span>
-            </h1>
           </div>
           <div className="flex items-center gap-2">
           </div>

@@ -1,455 +1,413 @@
-// app/page.tsx
-// Connexode Homepage — colors extracted directly from logo
-// Navy #082038 · Teal #188080 · Cyan #7EC8D8
-// Stack: Next.js 15 · TypeScript · Tailwind CSS · Lucide React
+"use client";
 
 import Link from "next/link";
-import Navbar from "@/components/layout/Navbar";
-import { RootFooter } from "@/components/layout/RootFooter";
-import {
-  ArrowRight,
-  Users,
-  BookOpen,
-  Briefcase,
-  CheckCircle,
-  LayoutDashboard,
-  Award,
-} from "lucide-react";
+import { Briefcase, BookOpen, Users, ArrowRight } from "lucide-react";
+import PublicNav from "@/components/layout/PublicNav";
+import PublicFooter from "@/components/layout/PublicFooter";
 
-// ─── COLOUR TOKENS (from logo) ────────────────────────────────────────────────
-// Navy   #082038  → page bg, card surfaces
-// Teal   #188080  → primary CTA, active states
-// Cyan   #7EC8D8  → glows, accent text, borders
-// ─────────────────────────────────────────────────────────────────────────────
-
-type Pillar = {
-  icon: React.ReactNode;
-  tag: string;
-  title: string;
-  description: string;
-  cta: string;
-  href: string;
-};
-
-type Step = {
-  number: string;
-  title: string;
-  description: string;
-};
-
-const pillars: Pillar[] = [
-  {
-    icon: <Users size={20} strokeWidth={1.5} />,
-    tag: "Community",
-    title: "Campus Ambassador Program",
-    description:
-      "Lead AI-awareness sessions on your campus, host webinars, grow your network, and track your real impact on a live dashboard.",
-    cta: "Apply as ambassador",
-    href: "/join/ambassador",
-  },
-  {
-    icon: <BookOpen size={20} strokeWidth={1.5} />,
-    tag: "Learning",
-    title: "Internship Program",
-    description:
-      "Follow structured 8-week tracks, submit real projects, receive mentor feedback, and earn an industry-verified certificate.",
-    cta: "View tracks",
-    href: "/join/internship",
-  },
-  {
-    icon: <Briefcase size={20} strokeWidth={1.5} />,
-    tag: "Agency",
-    title: "Client Services",
-    description:
-      "Frontend, full-stack, Figma design, video editing, Blender 3D, and social media marketing — delivered by our dedicated team.",
-    cta: "Explore services",
-    href: "/services",
-  },
-];
-
-const steps: Step[] = [
-  {
-    number: "01",
-    title: "Apply",
-    description:
-      "Choose Ambassador or Internship, fill the short form, and get an instant confirmation email.",
-  },
-  {
-    number: "02",
-    title: "Get reviewed",
-    description:
-      "Our team reviews within 3–5 days. Track your status live — no guessing, no waiting in the dark.",
-  },
-  {
-    number: "03",
-    title: "Grow with real tools",
-    description:
-      "Once approved, your role-based dashboard unlocks: tasks, grades, webinars, and your live progress tracker.",
-  },
-];
-
-
-// ─── HERO ─────────────────────────────────────────────────────────────────────
-function Hero() {
+export default function Home() {
   return (
-    <section
-      style={{ backgroundColor: "#040C18" }}
-      className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden px-6 pt-28 pb-20 text-center"
-    >
-      {/* Glow — teal from logo */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 flex items-center justify-center"
-      >
-        <div
-          style={{ backgroundColor: "rgba(24,128,128,0.12)" }}
-          className="h-[560px] w-[900px] rounded-full blur-[130px]"
-        />
-        {/* Secondary navy glow */}
-        <div
-          style={{ backgroundColor: "rgba(8,32,56,0.6)" }}
-          className="absolute h-[400px] w-[600px] rounded-full blur-[100px]"
-        />
-      </div>
+    <div style={{ backgroundColor: "#050508", color: "#FAFAFA" }} className="min-h-screen flex flex-col font-sans">
+      <PublicNav />
 
-      {/* Eyebrow pill */}
-      <span
+      {/* Hero Section */}
+      <section
         style={{
-          border: "1px solid rgba(126,200,216,0.2)",
-          backgroundColor: "rgba(8,32,56,0.6)",
-          color: "#7EC8D8",
+          background: "radial-gradient(ellipse 80% 50% at 50% 20%, rgba(124,58,237,0.12) 0%, transparent 70%)",
         }}
-        className="relative mb-7 inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-medium uppercase tracking-widest"
+        className="relative pt-36 pb-20 px-6 flex flex-col items-center text-center justify-center min-h-[90vh]"
       >
-        <span
-          style={{ backgroundColor: "#7EC8D8" }}
-          className="h-1.5 w-1.5 rounded-full animate-pulse"
-        />
-        Campus talent network · Pakistan
-      </span>
-
-      {/* Headline */}
-      <h1
-        style={{ color: "#E8F4F8" }}
-        className="relative mx-auto max-w-4xl text-4xl font-bold leading-tight tracking-tight sm:text-5xl md:text-6xl"
-      >
-        Build real skills.
-        <br />
-        Build real connections.
-        <br />
+        {/* Eyebrow Pill */}
         <span
           style={{
-            background: "linear-gradient(135deg, #7EC8D8 0%, #188080 60%)",
-            WebkitBackgroundClip: "text",
-            WebkitTextFillColor: "transparent",
-            backgroundClip: "text",
+            backgroundColor: "rgba(6,182,212,0.1)",
+            border: "1px solid rgba(6,182,212,0.2)",
+            color: "#06B6D4",
+            fontSize: "10px",
+            fontWeight: 600,
+            letterSpacing: "0.15em",
           }}
+          className="mb-8 px-4 py-1.5 rounded-full uppercase"
         >
-          Build the future of tech.
+          Campus talent network · Pakistan
         </span>
-      </h1>
 
-      {/* Sub-headline */}
-      <p
-        style={{ color: "rgba(126,200,216,0.55)" }}
-        className="relative mx-auto mt-6 max-w-2xl text-base leading-relaxed sm:text-lg"
-      >
-        Connexode trains campus ambassadors and interns through mentorship,
-        AI-skill workshops, and structured tracks — while delivering
-        development, design, and growth services through a dedicated team.
-      </p>
-
-      {/* CTA row */}
-      <div className="relative mt-10 flex flex-wrap items-center justify-center gap-4">
-        <Link
-          href="/join"
-          style={{ backgroundColor: "#188080", color: "#E8F4F8" }}
-          className="flex items-center gap-2 rounded-full px-7 py-3 text-sm font-semibold transition-all hover:brightness-110 active:scale-95"
-        >
-          Join Connexode
-          <ArrowRight size={15} />
-        </Link>
-        <Link
-          href="#how-it-works"
+        {/* Headline */}
+        <h1
           style={{
-            border: "1px solid rgba(126,200,216,0.2)",
-            backgroundColor: "rgba(8,32,56,0.5)",
-            color: "rgba(126,200,216,0.7)",
+            fontSize: "clamp(2.2rem, 5vw, 3.5rem)",
+            fontWeight: 800,
+            letterSpacing: "-0.04em",
+            lineHeight: "1.1",
           }}
-          className="flex items-center gap-2 rounded-full px-7 py-3 text-sm font-medium transition-all hover:bg-[rgba(8,32,56,0.8)] hover:text-[#7EC8D8]"
+          className="max-w-4xl mx-auto mb-6 flex flex-col gap-2"
         >
-          See how it works
-        </Link>
-      </div>
-
-      {/* Trust line */}
-      <p
-        style={{ color: "rgba(126,200,216,0.25)" }}
-        className="relative mt-8 text-xs"
-      >
-        Active across universities in Pakistan &nbsp;·&nbsp; Mentors, students
-        &amp; ambassadors growing together
-      </p>
-
-      {/* Scroll indicator */}
-      <div
-        style={{ borderColor: "rgba(126,200,216,0.15)" }}
-        className="absolute bottom-10 left-1/2 -translate-x-1/2 flex h-9 w-5 justify-center rounded-full border pt-1.5"
-      >
-        <span
-          style={{ backgroundColor: "#7EC8D8" }}
-          className="h-1.5 w-0.5 rounded-full animate-bounce opacity-60"
-        />
-      </div>
-    </section>
-  );
-}
-
-// ─── PILLAR CARDS ─────────────────────────────────────────────────────────────
-function PillarCards() {
-  return (
-    <section
-      style={{ backgroundColor: "#040C18" }}
-      className="pb-24 pt-4"
-    >
-      <div className="mx-auto max-w-6xl px-6">
-        <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
-          {pillars.map((p, i) => (
-            <div
-              key={p.title}
-              style={{
-                backgroundColor: "#082038",
-                border: "1px solid rgba(126,200,216,0.1)",
-                transition: "border-color 0.25s, transform 0.25s",
-              }}
-              className="group flex flex-col rounded-2xl p-7 hover:border-[rgba(126,200,216,0.35)] hover:-translate-y-1"
-            >
-              {/* Icon + tag row */}
-              <div className="mb-5 flex items-center gap-3">
-                <span
-                  style={{
-                    backgroundColor: "rgba(24,128,128,0.15)",
-                    border: "1px solid rgba(24,128,128,0.3)",
-                    color: "#7EC8D8",
-                  }}
-                  className="flex h-10 w-10 items-center justify-center rounded-xl"
-                >
-                  {p.icon}
-                </span>
-                <span
-                  style={{
-                    border: "1px solid rgba(126,200,216,0.15)",
-                    color: "rgba(126,200,216,0.45)",
-                    backgroundColor: "rgba(8,32,56,0.5)",
-                  }}
-                  className="rounded-full px-2.5 py-0.5 text-[10px] font-medium uppercase tracking-widest"
-                >
-                  {p.tag}
-                </span>
-              </div>
-
-              {/* Title */}
-              <h3
-                style={{ color: "#E8F4F8" }}
-                className="mb-3 text-[16px] font-semibold leading-snug"
-              >
-                {p.title}
-              </h3>
-
-              {/* Description */}
-              <p
-                style={{ color: "rgba(126,200,216,0.45)" }}
-                className="flex-1 text-sm leading-relaxed"
-              >
-                {p.description}
-              </p>
-
-              {/* CTA */}
-              <Link
-                href={p.href}
-                style={{ color: "#7EC8D8" }}
-                className="mt-6 flex items-center gap-1.5 text-sm font-medium transition-all group-hover:gap-2.5 hover:text-[#188080]"
-              >
-                {p.cta}
-                <ArrowRight
-                  size={14}
-                  className="transition-transform group-hover:translate-x-0.5"
-                />
-              </Link>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-// ─── HOW IT WORKS ─────────────────────────────────────────────────────────────
-function HowItWorks() {
-  return (
-    <section
-      id="how-it-works"
-      style={{
-        backgroundColor: "#061020",
-        borderTop: "1px solid rgba(126,200,216,0.06)",
-        borderBottom: "1px solid rgba(126,200,216,0.06)",
-      }}
-      className="py-24"
-    >
-      <div className="mx-auto max-w-6xl px-6">
-        {/* Section header */}
-        <div className="mb-16 text-center">
-          <p
-            style={{ color: "#7EC8D8" }}
-            className="mb-3 text-xs font-medium uppercase tracking-widest"
-          >
-            The process
-          </p>
-          <h2
-            style={{ color: "#E8F4F8" }}
-            className="text-2xl font-bold sm:text-3xl"
-          >
-            Apply, get reviewed, start growing
-          </h2>
-        </div>
-
-        {/* Steps */}
-        <div className="relative grid grid-cols-1 gap-12 md:grid-cols-3">
-          {/* Connector line — desktop */}
-          <div
-            aria-hidden
+          <span style={{ color: "#FAFAFA" }}>Build real skills.</span>
+          <span
             style={{
-              background:
-                "linear-gradient(90deg, transparent, rgba(126,200,216,0.15), transparent)",
+              background: "linear-gradient(135deg, #7C3AED, #06B6D4)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
             }}
-            className="absolute top-7 left-[calc(16.66%+1rem)] right-[calc(16.66%+1rem)] hidden h-px md:block"
-          />
+          >
+            Connect with opportunity.
+          </span>
+          <span style={{ color: "#FAFAFA" }}>Grow your tech career.</span>
+        </h1>
 
-          {steps.map((step) => (
-            <div
-              key={step.number}
-              className="flex flex-col items-center text-center md:items-start md:text-left"
-            >
-              {/* Number badge */}
-              <span
-                style={{
-                  border: "1px solid rgba(24,128,128,0.4)",
-                  backgroundColor: "rgba(8,32,56,0.7)",
-                  color: "#7EC8D8",
-                }}
-                className="mb-5 inline-flex h-14 w-14 items-center justify-center rounded-full text-lg font-bold"
-              >
-                {step.number}
-              </span>
-              <h3
-                style={{ color: "#E8F4F8" }}
-                className="mb-2 text-[16px] font-semibold"
-              >
-                {step.title}
-              </h3>
-              <p
-                style={{ color: "rgba(126,200,216,0.45)" }}
-                className="text-sm leading-relaxed"
-              >
-                {step.description}
-              </p>
-            </div>
-          ))}
+        {/* Subheadline */}
+        <p
+          style={{
+            color: "#A1A1AA",
+            fontSize: "1.1rem",
+            lineHeight: "1.7",
+          }}
+          className="max-w-[640px] mx-auto mb-10"
+        >
+          Connexode trains campus ambassadors and interns through mentorship and structured tracks — and delivers full-stack development, AI automation, SEO, and social media services to global clients.
+        </p>
+
+        {/* CTA buttons */}
+        <div className="flex flex-col sm:flex-row gap-4 items-center justify-center mb-16">
+          <Link
+            href="/join"
+            style={{
+              background: "linear-gradient(135deg, #7C3AED, #6D28D9)",
+              color: "#fff",
+              borderRadius: "999px",
+              padding: "12px 28px",
+              fontWeight: 700,
+            }}
+            className="transition-all hover:brightness-110 active:scale-95 text-center w-full sm:w-auto"
+          >
+            Join Connexode
+          </Link>
+          <a
+            href="#process"
+            style={{
+              background: "transparent",
+              border: "1px solid rgba(6,182,212,0.35)",
+              color: "#06B6D4",
+              borderRadius: "999px",
+              padding: "12px 28px",
+              fontWeight: 600,
+            }}
+            className="transition-all hover:border-[#06B6D4]/70 active:scale-95 text-center w-full sm:w-auto"
+          >
+            See how it works
+          </a>
         </div>
 
-        {/* Feature pills */}
-        <div className="mt-16 flex flex-wrap justify-center gap-3">
-          {[
-            { icon: <CheckCircle size={12} />, label: "Auto email on apply" },
-            { icon: <LayoutDashboard size={12} />, label: "Role-based dashboard" },
-            { icon: <Award size={12} />, label: "Verified certificate" },
-          ].map(({ icon, label }) => (
+        {/* Stats Row */}
+        <div className="flex flex-wrap items-center justify-center gap-3">
+          {["50+ Students", "4 Tracks", "8 Weeks", "Global Services"].map((stat, i) => (
             <span
-              key={label}
+              key={i}
               style={{
-                border: "1px solid rgba(126,200,216,0.12)",
-                backgroundColor: "rgba(8,32,56,0.5)",
-                color: "rgba(126,200,216,0.5)",
+                background: "rgba(13,13,20,0.8)",
+                border: "1px solid #1A1A2E",
+                color: "#A1A1AA",
               }}
-              className="flex items-center gap-1.5 rounded-full px-4 py-1.5 text-xs"
+              className="px-4 py-2 rounded-full text-xs font-semibold"
             >
-              <span style={{ color: "#188080" }}>{icon}</span>
-              {label}
+              {stat}
             </span>
           ))}
         </div>
-      </div>
-    </section>
-  );
-}
+      </section>
 
-// ─── CTA BAND ─────────────────────────────────────────────────────────────────
-function CTABand() {
-  return (
-    <section
-      style={{ backgroundColor: "#040C18" }}
-      className="py-24"
-    >
-      <div className="mx-auto max-w-3xl px-6 text-center">
-        {/* Teal accent line above headline */}
+      {/* Divider */}
+      <div
+        style={{
+          height: "1px",
+          background: "linear-gradient(90deg, transparent, #1A1A2E, transparent)",
+        }}
+      />
+
+      {/* Three Pillars Section */}
+      <section className="py-24 px-6 max-w-7xl mx-auto w-full">
+        <div className="text-center mb-16">
+          <span
+            style={{
+              color: "#06B6D4",
+              fontSize: "11px",
+              fontWeight: 600,
+              letterSpacing: "0.2em",
+            }}
+            className="uppercase block mb-2"
+          >
+            What we offer
+          </span>
+          <h2 style={{ color: "#FAFAFA" }} className="text-3xl font-bold tracking-tight">
+            Our Primary Offerings
+          </h2>
+        </div>
+
+        {/* Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* Card 1 */}
+          <div
+            style={{
+              backgroundColor: "#0D0D14",
+              border: "1px solid #1A1A2E",
+              borderRadius: "12px",
+            }}
+            className="group p-8 transition-all hover:border-[rgba(124,58,237,0.45)] hover:-translate-y-1 flex flex-col justify-between min-h-[300px]"
+          >
+            <div>
+              <div
+                style={{
+                  backgroundColor: "rgba(124,58,237,0.15)",
+                  border: "1px solid rgba(124,58,237,0.25)",
+                }}
+                className="w-12 h-12 rounded-xl flex items-center justify-center mb-6 text-[#7C3AED]"
+              >
+                <Briefcase size={22} />
+              </div>
+              <h3 style={{ color: "#FAFAFA" }} className="text-lg font-bold mb-3">
+                Client Services
+              </h3>
+              <p style={{ color: "#A1A1AA" }} className="text-sm leading-relaxed mb-6">
+                Full-stack development, AI automation, SEO, and social media — for global clients.
+              </p>
+            </div>
+            <Link
+              href="/services"
+              style={{ color: "#06B6D4" }}
+              className="text-xs font-semibold uppercase tracking-wider flex items-center gap-1 hover:underline"
+            >
+              Explore services <ArrowRight size={14} />
+            </Link>
+          </div>
+
+          {/* Card 2 */}
+          <div
+            style={{
+              backgroundColor: "#0D0D14",
+              border: "1px solid #1A1A2E",
+              borderRadius: "12px",
+            }}
+            className="group p-8 transition-all hover:border-[rgba(124,58,237,0.45)] hover:-translate-y-1 flex flex-col justify-between min-h-[300px]"
+          >
+            <div>
+              <div
+                style={{
+                  backgroundColor: "rgba(124,58,237,0.15)",
+                  border: "1px solid rgba(124,58,237,0.25)",
+                }}
+                className="w-12 h-12 rounded-xl flex items-center justify-center mb-6 text-[#7C3AED]"
+              >
+                <BookOpen size={22} />
+              </div>
+              <h3 style={{ color: "#FAFAFA" }} className="text-lg font-bold mb-3">
+                Internship Program
+              </h3>
+              <p style={{ color: "#A1A1AA" }} className="text-sm leading-relaxed mb-6">
+                8-week structured tracks, mentor grading, GitHub projects, verified certificates.
+              </p>
+            </div>
+            <Link
+              href="/join/internship"
+              style={{ color: "#06B6D4" }}
+              className="text-xs font-semibold uppercase tracking-wider flex items-center gap-1 hover:underline"
+            >
+              View tracks <ArrowRight size={14} />
+            </Link>
+          </div>
+
+          {/* Card 3 */}
+          <div
+            style={{
+              backgroundColor: "#0D0D14",
+              border: "1px solid #1A1A2E",
+              borderRadius: "12px",
+            }}
+            className="group p-8 transition-all hover:border-[rgba(124,58,237,0.45)] hover:-translate-y-1 flex flex-col justify-between min-h-[300px]"
+          >
+            <div>
+              <div
+                style={{
+                  backgroundColor: "rgba(124,58,237,0.15)",
+                  border: "1px solid rgba(124,58,237,0.25)",
+                }}
+                className="w-12 h-12 rounded-xl flex items-center justify-center mb-6 text-[#7C3AED]"
+              >
+                <Users size={22} />
+              </div>
+              <h3 style={{ color: "#FAFAFA" }} className="text-lg font-bold mb-3">
+                Ambassador Program
+              </h3>
+              <p style={{ color: "#A1A1AA" }} className="text-sm leading-relaxed mb-6">
+                Lead AI sessions, host webinars, grow campus communities, track real impact.
+              </p>
+            </div>
+            <Link
+              href="/join/ambassador"
+              style={{ color: "#06B6D4" }}
+              className="text-xs font-semibold uppercase tracking-wider flex items-center gap-1 hover:underline"
+            >
+              Apply now <ArrowRight size={14} />
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* How It Works Section */}
+      <section
+        id="process"
+        style={{
+          backgroundColor: "#0D0D14",
+          borderTop: "1px solid #1A1A2E",
+          borderBottom: "1px solid #1A1A2E",
+        }}
+        className="py-24 px-6 w-full"
+      >
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16">
+            <span
+              style={{
+                color: "#06B6D4",
+                fontSize: "11px",
+                fontWeight: 600,
+                letterSpacing: "0.2em",
+              }}
+              className="uppercase block mb-2"
+            >
+              The process
+            </span>
+            <h2 style={{ color: "#FAFAFA" }} className="text-3xl font-bold tracking-tight">
+              Three steps to get started
+            </h2>
+          </div>
+
+          <div className="relative grid grid-cols-1 md:grid-cols-3 gap-8">
+            {/* Desktop Connecting Line */}
+            <div
+              style={{
+                height: "1px",
+                borderTop: "1px dashed rgba(124,58,237,0.2)",
+              }}
+              className="hidden md:block absolute top-[52px] left-[15%] right-[15%] z-0"
+            />
+
+            {/* Step 1 */}
+            <div className="relative z-10 flex flex-col items-center text-center px-4">
+              <span
+                style={{
+                  background: "linear-gradient(135deg, #7C3AED, #06B6D4)",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                  fontSize: "2.5rem",
+                  fontWeight: 800,
+                }}
+                className="mb-4 block"
+              >
+                01
+              </span>
+              <h3 style={{ color: "#FAFAFA" }} className="text-lg font-bold mb-2">
+                Apply
+              </h3>
+              <p style={{ color: "#A1A1AA" }} className="text-sm leading-relaxed max-w-[280px]">
+                Choose your program, fill form, instant email confirmation.
+              </p>
+            </div>
+
+            {/* Step 2 */}
+            <div className="relative z-10 flex flex-col items-center text-center px-4">
+              <span
+                style={{
+                  background: "linear-gradient(135deg, #7C3AED, #06B6D4)",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                  fontSize: "2.5rem",
+                  fontWeight: 800,
+                }}
+                className="mb-4 block"
+              >
+                02
+              </span>
+              <h3 style={{ color: "#FAFAFA" }} className="text-lg font-bold mb-2">
+                Get reviewed
+              </h3>
+              <p style={{ color: "#A1A1AA" }} className="text-sm leading-relaxed max-w-[280px]">
+                Team reviews in 3–5 days, track status live on your panel.
+              </p>
+            </div>
+
+            {/* Step 3 */}
+            <div className="relative z-10 flex flex-col items-center text-center px-4">
+              <span
+                style={{
+                  background: "linear-gradient(135deg, #7C3AED, #06B6D4)",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                  fontSize: "2.5rem",
+                  fontWeight: 800,
+                }}
+                className="mb-4 block"
+              >
+                03
+              </span>
+              <h3 style={{ color: "#FAFAFA" }} className="text-lg font-bold mb-2">
+                Grow
+              </h3>
+              <p style={{ color: "#A1A1AA" }} className="text-sm leading-relaxed max-w-[280px]">
+                Dashboard unlocks with tasks, grades, webinars, progress tracker.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="py-24 px-6 max-w-5xl mx-auto w-full">
         <div
           style={{
-            background: "linear-gradient(90deg, transparent, #188080, transparent)",
+            border: "1px solid transparent",
+            background: "linear-gradient(#0D0D14, #0D0D14) padding-box, linear-gradient(135deg, #7C3AED, #06B6D4) border-box",
+            borderRadius: "16px",
           }}
-          className="mx-auto mb-10 h-px w-24"
-        />
-
-        <h2
-          style={{ color: "#E8F4F8" }}
-          className="mb-4 text-3xl font-bold sm:text-4xl"
+          className="p-12 text-center"
         >
-          Ready to be part of Connexode?
-        </h2>
-        <p
-          style={{ color: "rgba(126,200,216,0.45)" }}
-          className="mb-10 text-base"
-        >
-          Apply as an ambassador, enroll in an internship track, or get in
-          touch about our services. Your next step takes two minutes.
-        </p>
-        <div className="flex flex-wrap items-center justify-center gap-4">
-          <Link
-            href="/join"
-            style={{ backgroundColor: "#188080", color: "#E8F4F8" }}
-            className="flex items-center gap-2 rounded-full px-8 py-3.5 text-sm font-semibold transition-all hover:brightness-110 active:scale-95"
-          >
-            Join Connexode
-            <ArrowRight size={15} />
-          </Link>
-          <Link
-            href="/contact"
-            style={{
-              border: "1px solid rgba(126,200,216,0.2)",
-              backgroundColor: "rgba(8,32,56,0.5)",
-              color: "rgba(126,200,216,0.65)",
-            }}
-            className="rounded-full px-8 py-3.5 text-sm font-medium transition-all hover:text-[#7EC8D8] hover:border-[rgba(126,200,216,0.4)]"
-          >
-            Contact us
-          </Link>
+          <h2 style={{ color: "#FAFAFA" }} className="text-3xl font-extrabold mb-4 tracking-tight">
+            Ready to be part of Connexode?
+          </h2>
+          <p style={{ color: "#A1A1AA" }} className="max-w-lg mx-auto mb-8 text-sm leading-relaxed">
+            Join our growing network of developers, designers, and campus leaders.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 items-center justify-center">
+            <Link
+              href="/join"
+              style={{
+                background: "linear-gradient(135deg, #7C3AED, #6D28D9)",
+                color: "#fff",
+                borderRadius: "999px",
+                padding: "12px 28px",
+                fontWeight: 700,
+              }}
+              className="transition-all hover:brightness-110 active:scale-95 text-center w-full sm:w-auto"
+            >
+              Join Connexode
+            </Link>
+            <Link
+              href="/contact"
+              style={{
+                background: "transparent",
+                border: "1px solid rgba(6,182,212,0.35)",
+                color: "#06B6D4",
+                borderRadius: "999px",
+                padding: "12px 28px",
+                fontWeight: 600,
+              }}
+              className="transition-all hover:border-[#06B6D4]/70 active:scale-95 text-center w-full sm:w-auto"
+            >
+              Contact us
+            </Link>
+          </div>
         </div>
-      </div>
-    </section>
-  );
-}
+      </section>
 
-// ─── PAGE ─────────────────────────────────────────────────────────────────────
-export default function HomePage() {
-  return (
-    <>
-      <Navbar />
-      <main style={{ backgroundColor: "#040C18" }} className="min-h-screen antialiased">
-        <Hero />
-        <PillarCards />
-        <HowItWorks />
-        <CTABand />
-      </main>
-      <RootFooter />
-    </>
+      <PublicFooter />
+    </div>
   );
 }
