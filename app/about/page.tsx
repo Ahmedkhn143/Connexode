@@ -30,7 +30,7 @@ export default function AboutPage() {
   ];
 
   return (
-    <div style={{ backgroundColor: "#050508", color: "#FAFAFA" }} className="min-h-screen flex flex-col font-sans">
+    <div style={{ backgroundColor: "var(--theme-bg)", color: "var(--theme-text-primary)" }} className="min-h-screen flex flex-col font-sans transition-colors duration-300">
       <PublicNav />
 
       {/* Hero */}
@@ -73,7 +73,7 @@ export default function AboutPage() {
             Connexode
           </span>
         </h1>
-        <p style={{ color: "#A1A1AA" }} className="max-w-[500px] mx-auto text-sm leading-relaxed">
+        <p style={{ color: "var(--theme-text-secondary)" }} className="max-w-[500px] mx-auto text-sm leading-relaxed">
           Bridging the gap between university campuses and the global tech market.
         </p>
       </section>
@@ -82,24 +82,24 @@ export default function AboutPage() {
       <section className="py-8 px-6 max-w-3xl mx-auto w-full">
         <div
           style={{
-            backgroundColor: "#0D0D14",
-            border: "1px solid #1A1A2E",
+            backgroundColor: "var(--theme-surface)",
+            border: "1px solid var(--theme-border)",
             borderLeft: "4px solid #7C3AED",
             borderRadius: "12px",
           }}
-          className="p-8 sm:p-10 transition-all hover:border-color-[rgba(124,58,237,0.45)]"
+          className="p-8 sm:p-10 transition-all hover:border-[var(--theme-border-hover)]"
         >
-          <blockquote style={{ color: "#A1A1AA" }} className="text-sm italic leading-relaxed mb-6">
+          <blockquote style={{ color: "var(--theme-text-secondary)" }} className="text-sm italic leading-relaxed mb-6">
             "Most students in Pakistan do not lack ability — they lack structured access. Access to mentors who have actually built things. Access to real projects they can show employers. Access to a community that pushes them forward instead of leaving them to figure it out alone.
             <br /><br />
             Connexode started as a simple idea to fix that — one campus ambassador, one intern, one real project at a time. The agency arm came next, because the talent we were training deserved real client work to put that training to use."
           </blockquote>
           <div className="flex flex-col gap-1">
-            <span style={{ color: "#FAFAFA" }} className="text-sm font-bold">
+            <span style={{ color: "var(--theme-text-primary)" }} className="text-sm font-bold">
               Ahmad Khan
             </span>
             <span style={{ color: "#06B6D4" }} className="text-xs">
-              Founder, Connexode
+              Founder & CEO, Connexode
             </span>
           </div>
         </div>
@@ -119,7 +119,7 @@ export default function AboutPage() {
           >
             Pillars
           </span>
-          <h2 style={{ color: "#FAFAFA" }} className="text-2xl font-bold">
+          <h2 style={{ color: "var(--theme-text-primary)" }} className="text-2xl font-bold">
             Our Core Pillars
           </h2>
         </div>
@@ -128,11 +128,11 @@ export default function AboutPage() {
           {/* Card 1 */}
           <div
             style={{
-              backgroundColor: "#0D0D14",
-              border: "1px solid #1A1A2E",
+              backgroundColor: "var(--theme-surface)",
+              border: "1px solid var(--theme-border)",
               borderRadius: "12px",
             }}
-            className="p-6 transition-all hover:border-[rgba(124,58,237,0.45)] hover:-translate-y-1 flex flex-col justify-between"
+            className="p-6 transition-all hover:border-[var(--theme-border-hover)] hover:-translate-y-1 flex flex-col justify-between"
           >
             <div>
               <div
@@ -144,10 +144,10 @@ export default function AboutPage() {
               >
                 <Briefcase size={20} />
               </div>
-              <h3 style={{ color: "#FAFAFA" }} className="text-base font-bold mb-2">
+              <h3 style={{ color: "var(--theme-text-primary)" }} className="text-base font-bold mb-2">
                 Client Services
               </h3>
-              <p style={{ color: "#A1A1AA" }} className="text-xs leading-relaxed">
+              <p style={{ color: "var(--theme-text-secondary)" }} className="text-xs leading-relaxed">
                 Full-stack development, AI automation, SEO, and social media — built for global clients.
               </p>
             </div>
@@ -156,11 +156,11 @@ export default function AboutPage() {
           {/* Card 2 */}
           <div
             style={{
-              backgroundColor: "#0D0D14",
-              border: "1px solid #1A1A2E",
+              backgroundColor: "var(--theme-surface)",
+              border: "1px solid var(--theme-border)",
               borderRadius: "12px",
             }}
-            className="p-6 transition-all hover:border-[rgba(124,58,237,0.45)] hover:-translate-y-1 flex flex-col justify-between"
+            className="p-6 transition-all hover:border-[var(--theme-border-hover)] hover:-translate-y-1 flex flex-col justify-between"
           >
             <div>
               <div
@@ -172,10 +172,10 @@ export default function AboutPage() {
               >
                 <BookOpen size={20} />
               </div>
-              <h3 style={{ color: "#FAFAFA" }} className="text-base font-bold mb-2">
+              <h3 style={{ color: "var(--theme-text-primary)" }} className="text-base font-bold mb-2">
                 Internship Program
               </h3>
-              <p style={{ color: "#A1A1AA" }} className="text-xs leading-relaxed">
+              <p style={{ color: "var(--theme-text-secondary)" }} className="text-xs leading-relaxed">
                 8-week structured tracks, mentor feedback, GitHub projects, verified certificates.
               </p>
             </div>
@@ -184,11 +184,11 @@ export default function AboutPage() {
           {/* Card 3 */}
           <div
             style={{
-              backgroundColor: "#0D0D14",
-              border: "1px solid #1A1A2E",
+              backgroundColor: "var(--theme-surface)",
+              border: "1px solid var(--theme-border)",
               borderRadius: "12px",
             }}
-            className="p-6 transition-all hover:border-[rgba(124,58,237,0.45)] hover:-translate-y-1 flex flex-col justify-between"
+            className="p-6 transition-all hover:border-[var(--theme-border-hover)] hover:-translate-y-1 flex flex-col justify-between"
           >
             <div>
               <div
@@ -200,10 +200,10 @@ export default function AboutPage() {
               >
                 <Users size={20} />
               </div>
-              <h3 style={{ color: "#FAFAFA" }} className="text-base font-bold mb-2">
+              <h3 style={{ color: "var(--theme-text-primary)" }} className="text-base font-bold mb-2">
                 Ambassador Program
               </h3>
-              <p style={{ color: "#A1A1AA" }} className="text-xs leading-relaxed">
+              <p style={{ color: "var(--theme-text-secondary)" }} className="text-xs leading-relaxed">
                 Lead AI sessions, host webinars, grow campus communities, track real impact.
               </p>
             </div>
@@ -225,7 +225,7 @@ export default function AboutPage() {
           >
             Values
           </span>
-          <h2 style={{ color: "#FAFAFA" }} className="text-2xl font-bold">
+          <h2 style={{ color: "var(--theme-text-primary)" }} className="text-2xl font-bold">
             What We Believe In
           </h2>
         </div>
@@ -235,11 +235,11 @@ export default function AboutPage() {
             <div
               key={index}
               style={{
-                backgroundColor: "#0D0D14",
-                border: "1px solid #1A1A2E",
+                backgroundColor: "var(--theme-surface)",
+                border: "1px solid var(--theme-border)",
                 borderRadius: "12px",
               }}
-              className="p-6 flex gap-4 transition-all hover:border-[rgba(124,58,237,0.45)]"
+              className="p-6 flex gap-4 transition-all hover:border-[var(--theme-border-hover)]"
             >
               <div
                 style={{
@@ -251,10 +251,10 @@ export default function AboutPage() {
                 {v.icon}
               </div>
               <div>
-                <h3 style={{ color: "#FAFAFA" }} className="text-sm font-bold mb-2">
+                <h3 style={{ color: "var(--theme-text-primary)" }} className="text-sm font-bold mb-2">
                   {v.title}
                 </h3>
-                <p style={{ color: "#A1A1AA" }} className="text-xs leading-relaxed">
+                <p style={{ color: "var(--theme-text-secondary)" }} className="text-xs leading-relaxed">
                   {v.desc}
                 </p>
               </div>
@@ -263,7 +263,7 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* Team Section */}
+      {/* Team Section (Centering Founder & CEO card only) */}
       <section className="py-16 px-6 max-w-5xl mx-auto w-full">
         <div className="text-center mb-12">
           <span
@@ -277,57 +277,34 @@ export default function AboutPage() {
           >
             Team
           </span>
-          <h2 style={{ color: "#FAFAFA" }} className="text-2xl font-bold">
+          <h2 style={{ color: "var(--theme-text-primary)" }} className="text-2xl font-bold">
             Meet the Builders
           </h2>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="flex justify-center">
           {/* Founder Card */}
           <div
             style={{
-              backgroundColor: "#0D0D14",
-              border: "1px solid #1A1A2E",
+              backgroundColor: "var(--theme-surface)",
+              border: "1px solid var(--theme-border)",
               borderRadius: "12px",
             }}
-            className="p-6 text-center"
+            className="p-8 text-center max-w-[320px] w-full transition-all hover:border-[var(--theme-border-hover)] hover:-translate-y-0.5"
           >
-            <div className="w-20 h-20 rounded-full bg-[#1A1A2E] mx-auto mb-4 flex items-center justify-center text-[#FAFAFA] font-bold text-lg">
+            <div className="w-24 h-24 rounded-full bg-[#1A1A2E] mx-auto mb-4 flex items-center justify-center text-[#FAFAFA] font-bold text-xl border border-cyan-500/20">
               AK
             </div>
-            <h3 style={{ color: "#FAFAFA" }} className="text-sm font-bold mb-1">
+            <h3 style={{ color: "var(--theme-text-primary)" }} className="text-base font-bold mb-1">
               Ahmad Khan
             </h3>
             <p style={{ color: "#06B6D4" }} className="text-xs font-semibold mb-3">
-              Founder & Builder
+              Founder & CEO
             </p>
-            <p style={{ color: "#A1A1AA" }} className="text-xs leading-relaxed">
+            <p style={{ color: "var(--theme-text-secondary)" }} className="text-xs leading-relaxed">
               Full-Stack Developer, AI Automation Consultant.
             </p>
           </div>
-
-          {/* Placeholder Slots */}
-          {[1, 2, 3].map((slot) => (
-            <div
-              key={slot}
-              style={{
-                backgroundColor: "#0D0D14",
-                border: "1px dashed #1A1A2E",
-                borderRadius: "12px",
-              }}
-              className="p-6 text-center flex flex-col items-center justify-center min-h-[220px]"
-            >
-              <div className="w-12 h-12 rounded-full border border-dashed border-[#52525B] flex items-center justify-center text-[#52525B] text-xl font-bold mb-4">
-                ?
-              </div>
-              <h3 style={{ color: "#52525B" }} className="text-sm font-bold mb-1">
-                Open Role
-              </h3>
-              <p style={{ color: "#52525B" }} className="text-xs">
-                To be announced
-              </p>
-            </div>
-          ))}
         </div>
       </section>
 
@@ -336,15 +313,15 @@ export default function AboutPage() {
         <div
           style={{
             border: "1px solid transparent",
-            background: "linear-gradient(#0D0D14, #0D0D14) padding-box, linear-gradient(135deg, #7C3AED, #06B6D4) border-box",
+            background: "linear-gradient(var(--theme-surface), var(--theme-surface)) padding-box, linear-gradient(135deg, #7C3AED, #06B6D4) border-box",
             borderRadius: "16px",
           }}
           className="p-12 text-center"
         >
-          <h2 style={{ color: "#FAFAFA" }} className="text-2xl font-extrabold mb-4 tracking-tight">
+          <h2 style={{ color: "var(--theme-text-primary)" }} className="text-2xl font-extrabold mb-4 tracking-tight">
             Want to help us bridge the gap?
           </h2>
-          <p style={{ color: "#A1A1AA" }} className="max-w-lg mx-auto mb-8 text-xs leading-relaxed">
+          <p style={{ color: "var(--theme-text-secondary)" }} className="max-w-lg mx-auto mb-8 text-xs leading-relaxed">
             Get in touch with us to collaborate, volunteer, or hire our talented alumni.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 items-center justify-center">

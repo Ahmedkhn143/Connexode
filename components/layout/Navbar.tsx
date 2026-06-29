@@ -55,7 +55,7 @@ export default function Navbar() {
   const role: string = activeUser?.role || "";
 
   // Role-specific dashboard link
-  const dashboardLink = role === "ADMIN" ? "/admin" : role === "MENTOR" ? "/mentor" : "/dashboard";
+  const dashboardLink = role === "ADMIN" ? "/admin" : role === "MENTOR" ? "/dashboard/mentor" : "/dashboard";
   const dashboardLabel = role === "ADMIN" ? "Admin Panel" : role === "MENTOR" ? "Mentor Panel" : "Dashboard";
 
   return (

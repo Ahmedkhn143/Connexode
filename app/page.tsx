@@ -7,7 +7,7 @@ import PublicFooter from "@/components/layout/PublicFooter";
 
 export default function Home() {
   return (
-    <div style={{ backgroundColor: "#050508", color: "#FAFAFA" }} className="min-h-screen flex flex-col font-sans">
+    <div style={{ backgroundColor: "var(--theme-bg)", color: "var(--theme-text-primary)" }} className="min-h-screen flex flex-col font-sans transition-colors duration-300">
       <PublicNav />
 
       {/* Hero Section */}
@@ -42,7 +42,7 @@ export default function Home() {
           }}
           className="max-w-4xl mx-auto mb-6 flex flex-col gap-2"
         >
-          <span style={{ color: "#FAFAFA" }}>Build real skills.</span>
+          <span style={{ color: "var(--theme-text-primary)" }}>Build real skills.</span>
           <span
             style={{
               background: "linear-gradient(135deg, #7C3AED, #06B6D4)",
@@ -52,13 +52,13 @@ export default function Home() {
           >
             Connect with opportunity.
           </span>
-          <span style={{ color: "#FAFAFA" }}>Grow your tech career.</span>
+          <span style={{ color: "var(--theme-text-primary)" }}>Grow your tech career.</span>
         </h1>
 
         {/* Subheadline */}
         <p
           style={{
-            color: "#A1A1AA",
+            color: "var(--theme-text-secondary)",
             fontSize: "1.1rem",
             lineHeight: "1.7",
           }}
@@ -104,9 +104,9 @@ export default function Home() {
             <span
               key={i}
               style={{
-                background: "rgba(13,13,20,0.8)",
-                border: "1px solid #1A1A2E",
-                color: "#A1A1AA",
+                background: "var(--theme-surface)",
+                border: "1px solid var(--theme-border)",
+                color: "var(--theme-text-secondary)",
               }}
               className="px-4 py-2 rounded-full text-xs font-semibold"
             >
@@ -120,7 +120,7 @@ export default function Home() {
       <div
         style={{
           height: "1px",
-          background: "linear-gradient(90deg, transparent, #1A1A2E, transparent)",
+          background: "linear-gradient(90deg, transparent, var(--theme-border), transparent)",
         }}
       />
 
@@ -138,7 +138,7 @@ export default function Home() {
           >
             What we offer
           </span>
-          <h2 style={{ color: "#FAFAFA" }} className="text-3xl font-bold tracking-tight">
+          <h2 style={{ color: "var(--theme-text-primary)" }} className="text-3xl font-bold tracking-tight">
             Our Primary Offerings
           </h2>
         </div>
@@ -148,11 +148,11 @@ export default function Home() {
           {/* Card 1 */}
           <div
             style={{
-              backgroundColor: "#0D0D14",
-              border: "1px solid #1A1A2E",
+              backgroundColor: "var(--theme-surface)",
+              border: "1px solid var(--theme-border)",
               borderRadius: "12px",
             }}
-            className="group p-8 transition-all hover:border-[rgba(124,58,237,0.45)] hover:-translate-y-1 flex flex-col justify-between min-h-[300px]"
+            className="group p-8 transition-all hover:border-[var(--theme-border-hover)] hover:-translate-y-1 flex flex-col justify-between min-h-[300px]"
           >
             <div>
               <div
@@ -164,10 +164,10 @@ export default function Home() {
               >
                 <Briefcase size={22} />
               </div>
-              <h3 style={{ color: "#FAFAFA" }} className="text-lg font-bold mb-3">
+              <h3 style={{ color: "var(--theme-text-primary)" }} className="text-lg font-bold mb-3">
                 Client Services
               </h3>
-              <p style={{ color: "#A1A1AA" }} className="text-sm leading-relaxed mb-6">
+              <p style={{ color: "var(--theme-text-secondary)" }} className="text-sm leading-relaxed mb-6">
                 Full-stack development, AI automation, SEO, and social media — for global clients.
               </p>
             </div>
@@ -183,11 +183,11 @@ export default function Home() {
           {/* Card 2 */}
           <div
             style={{
-              backgroundColor: "#0D0D14",
-              border: "1px solid #1A1A2E",
+              backgroundColor: "var(--theme-surface)",
+              border: "1px solid var(--theme-border)",
               borderRadius: "12px",
             }}
-            className="group p-8 transition-all hover:border-[rgba(124,58,237,0.45)] hover:-translate-y-1 flex flex-col justify-between min-h-[300px]"
+            className="group p-8 transition-all hover:border-[var(--theme-border-hover)] hover:-translate-y-1 flex flex-col justify-between min-h-[300px]"
           >
             <div>
               <div
@@ -199,10 +199,10 @@ export default function Home() {
               >
                 <BookOpen size={22} />
               </div>
-              <h3 style={{ color: "#FAFAFA" }} className="text-lg font-bold mb-3">
+              <h3 style={{ color: "var(--theme-text-primary)" }} className="text-lg font-bold mb-3">
                 Internship Program
               </h3>
-              <p style={{ color: "#A1A1AA" }} className="text-sm leading-relaxed mb-6">
+              <p style={{ color: "var(--theme-text-secondary)" }} className="text-sm leading-relaxed mb-6">
                 8-week structured tracks, mentor grading, GitHub projects, verified certificates.
               </p>
             </div>
@@ -218,11 +218,11 @@ export default function Home() {
           {/* Card 3 */}
           <div
             style={{
-              backgroundColor: "#0D0D14",
-              border: "1px solid #1A1A2E",
+              backgroundColor: "var(--theme-surface)",
+              border: "1px solid var(--theme-border)",
               borderRadius: "12px",
             }}
-            className="group p-8 transition-all hover:border-[rgba(124,58,237,0.45)] hover:-translate-y-1 flex flex-col justify-between min-h-[300px]"
+            className="group p-8 transition-all hover:border-[var(--theme-border-hover)] hover:-translate-y-1 flex flex-col justify-between min-h-[300px]"
           >
             <div>
               <div
@@ -234,10 +234,10 @@ export default function Home() {
               >
                 <Users size={22} />
               </div>
-              <h3 style={{ color: "#FAFAFA" }} className="text-lg font-bold mb-3">
+              <h3 style={{ color: "var(--theme-text-primary)" }} className="text-lg font-bold mb-3">
                 Ambassador Program
               </h3>
-              <p style={{ color: "#A1A1AA" }} className="text-sm leading-relaxed mb-6">
+              <p style={{ color: "var(--theme-text-secondary)" }} className="text-sm leading-relaxed mb-6">
                 Lead AI sessions, host webinars, grow campus communities, track real impact.
               </p>
             </div>
@@ -256,9 +256,9 @@ export default function Home() {
       <section
         id="process"
         style={{
-          backgroundColor: "#0D0D14",
-          borderTop: "1px solid #1A1A2E",
-          borderBottom: "1px solid #1A1A2E",
+          backgroundColor: "var(--theme-surface)",
+          borderTop: "1px solid var(--theme-border)",
+          borderBottom: "1px solid var(--theme-border)",
         }}
         className="py-24 px-6 w-full"
       >
@@ -275,7 +275,7 @@ export default function Home() {
             >
               The process
             </span>
-            <h2 style={{ color: "#FAFAFA" }} className="text-3xl font-bold tracking-tight">
+            <h2 style={{ color: "var(--theme-text-primary)" }} className="text-3xl font-bold tracking-tight">
               Three steps to get started
             </h2>
           </div>
@@ -304,10 +304,10 @@ export default function Home() {
               >
                 01
               </span>
-              <h3 style={{ color: "#FAFAFA" }} className="text-lg font-bold mb-2">
+              <h3 style={{ color: "var(--theme-text-primary)" }} className="text-lg font-bold mb-2">
                 Apply
               </h3>
-              <p style={{ color: "#A1A1AA" }} className="text-sm leading-relaxed max-w-[280px]">
+              <p style={{ color: "var(--theme-text-secondary)" }} className="text-sm leading-relaxed max-w-[280px]">
                 Choose your program, fill form, instant email confirmation.
               </p>
             </div>
@@ -326,10 +326,10 @@ export default function Home() {
               >
                 02
               </span>
-              <h3 style={{ color: "#FAFAFA" }} className="text-lg font-bold mb-2">
+              <h3 style={{ color: "var(--theme-text-primary)" }} className="text-lg font-bold mb-2">
                 Get reviewed
               </h3>
-              <p style={{ color: "#A1A1AA" }} className="text-sm leading-relaxed max-w-[280px]">
+              <p style={{ color: "var(--theme-text-secondary)" }} className="text-sm leading-relaxed max-w-[280px]">
                 Team reviews in 3–5 days, track status live on your panel.
               </p>
             </div>
@@ -348,10 +348,10 @@ export default function Home() {
               >
                 03
               </span>
-              <h3 style={{ color: "#FAFAFA" }} className="text-lg font-bold mb-2">
+              <h3 style={{ color: "var(--theme-text-primary)" }} className="text-lg font-bold mb-2">
                 Grow
               </h3>
-              <p style={{ color: "#A1A1AA" }} className="text-sm leading-relaxed max-w-[280px]">
+              <p style={{ color: "var(--theme-text-secondary)" }} className="text-sm leading-relaxed max-w-[280px]">
                 Dashboard unlocks with tasks, grades, webinars, progress tracker.
               </p>
             </div>
@@ -364,15 +364,15 @@ export default function Home() {
         <div
           style={{
             border: "1px solid transparent",
-            background: "linear-gradient(#0D0D14, #0D0D14) padding-box, linear-gradient(135deg, #7C3AED, #06B6D4) border-box",
+            background: "linear-gradient(var(--theme-surface), var(--theme-surface)) padding-box, linear-gradient(135deg, #7C3AED, #06B6D4) border-box",
             borderRadius: "16px",
           }}
           className="p-12 text-center"
         >
-          <h2 style={{ color: "#FAFAFA" }} className="text-3xl font-extrabold mb-4 tracking-tight">
+          <h2 style={{ color: "var(--theme-text-primary)" }} className="text-3xl font-extrabold mb-4 tracking-tight">
             Ready to be part of Connexode?
           </h2>
-          <p style={{ color: "#A1A1AA" }} className="max-w-lg mx-auto mb-8 text-sm leading-relaxed">
+          <p style={{ color: "var(--theme-text-secondary)" }} className="max-w-lg mx-auto mb-8 text-sm leading-relaxed">
             Join our growing network of developers, designers, and campus leaders.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 items-center justify-center">

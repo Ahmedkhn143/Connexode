@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 
+import ThemeToggle from "@/components/ui/ThemeToggle";
+
 const inter = Inter({
   subsets: ["latin"],
   variable: "--font-inter",
@@ -17,8 +19,9 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" className={`${inter.variable} h-full`}>
-      <body className="min-h-full antialiased" style={{ backgroundColor: "#050508", fontFamily: "var(--font-inter), sans-serif" }}>
+      <body className="min-h-full antialiased" style={{ backgroundColor: "var(--theme-bg)", fontFamily: "var(--font-inter), sans-serif" }}>
         {children}
+        <ThemeToggle />
       </body>
     </html>
   );

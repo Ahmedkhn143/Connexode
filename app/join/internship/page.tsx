@@ -89,14 +89,12 @@ export default function InternshipApplicationPage() {
     setLoading(true);
 
     try {
-      // 1. Submit to API (keep original behaviour)
       await fetch("/api/applications/internship", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
       });
 
-      // 2. Submit to localStorage
       const existing = JSON.parse(localStorage.getItem("connexode_internship_applications") || "[]");
       existing.push({
         ...form,
@@ -109,7 +107,6 @@ export default function InternshipApplicationPage() {
       setSubmitted(true);
     } catch (err: any) {
       console.error(err);
-      // Fallback: save to localStorage anyway
       const existing = JSON.parse(localStorage.getItem("connexode_internship_applications") || "[]");
       existing.push({
         ...form,
@@ -126,7 +123,7 @@ export default function InternshipApplicationPage() {
 
   if (submitted) {
     return (
-      <div style={{ backgroundColor: "#050508", color: "#FAFAFA" }} className="min-h-screen flex flex-col font-sans">
+      <div style={{ backgroundColor: "var(--theme-bg)", color: "var(--theme-text-primary)" }} className="min-h-screen flex flex-col font-sans transition-colors duration-300">
         <PublicNav />
         <main className="flex-grow flex items-center justify-center px-6 pt-32 pb-20">
           <div className="mx-auto max-w-lg text-center">
@@ -139,11 +136,11 @@ export default function InternshipApplicationPage() {
             >
               <CheckCircle size={28} className="text-[#10B981]" />
             </div>
-            <h1 style={{ color: "#FAFAFA" }} className="mb-3 text-2xl font-bold tracking-tight">
+            <h1 style={{ color: "var(--theme-text-primary)" }} className="mb-3 text-2xl font-bold tracking-tight">
               Application Received!
             </h1>
-            <p style={{ color: "#A1A1AA" }} className="mb-8 text-sm leading-relaxed">
-              Thank you for applying, <strong className="text-[#FAFAFA]">{form.fullName}</strong>. We have received your application for the <strong className="text-[#06B6D4]">{form.track}</strong> track. Our team will review it within 3-5 days. You can track your status by signing in.
+            <p style={{ color: "var(--theme-text-secondary)" }} className="mb-8 text-sm leading-relaxed">
+              Thank you for applying, <strong className="text-[var(--theme-text-primary)]">{form.fullName}</strong>. We have received your application for the <strong className="text-[#06B6D4]">{form.track}</strong> track. Our team will review it within 3-5 days. You can track your status by signing in.
             </p>
             <div className="flex flex-col sm:flex-row justify-center gap-4">
               <Link
@@ -184,10 +181,10 @@ export default function InternshipApplicationPage() {
   }
 
   return (
-    <div style={{ backgroundColor: "#050508", color: "#FAFAFA" }} className="min-h-screen flex flex-col font-sans">
+    <div style={{ backgroundColor: "var(--theme-bg)", color: "var(--theme-text-primary)" }} className="min-h-screen flex flex-col font-sans transition-colors duration-300">
       <PublicNav />
 
-      <main className="flex-grow pt-32 pb-20 px-6 max-w-5xl mx-auto w-full">
+      <main className="flex-grow pt-32 pb-20 px-6 max-w-5xl mx-auto w-full animate-fadeIn">
         {/* Back Link */}
         <div className="mb-8">
           <Link
@@ -225,13 +222,13 @@ export default function InternshipApplicationPage() {
           >
             Choose your learning track
           </h1>
-          <p style={{ color: "#A1A1AA" }} className="max-w-xl mx-auto text-sm leading-relaxed">
+          <p style={{ color: "var(--theme-text-secondary)" }} className="max-w-xl mx-auto text-sm leading-relaxed">
             Select one of the 8-week structured tracks below to get started. Click a card to auto-fill the application form.
           </p>
         </section>
 
         {/* Tracks Grid */}
-        <section className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-16 animate-fadeIn">
+        <section className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-16">
           {tracks.map((track, index) => {
             const isSelected = form.track === track.name;
             return (
@@ -239,12 +236,12 @@ export default function InternshipApplicationPage() {
                 key={index}
                 onClick={() => selectTrack(track.name)}
                 style={{
-                  backgroundColor: isSelected ? "rgba(124, 58, 237, 0.08)" : "#0D0D14",
-                  border: isSelected ? "1px solid rgba(124, 58, 237, 0.6)" : "1px solid #1A1A2E",
+                  backgroundColor: isSelected ? "rgba(124, 58, 237, 0.08)" : "var(--theme-surface)",
+                  border: isSelected ? "1px solid rgba(124, 58, 237, 0.6)" : "1px solid var(--theme-border)",
                   borderRadius: "12px",
                   cursor: "pointer",
                 }}
-                className="p-6 transition-all hover:border-[rgba(124,58,237,0.45)] hover:-translate-y-0.5"
+                className="p-6 transition-all hover:border-[var(--theme-border-hover)] hover:-translate-y-0.5"
               >
                 <div className="flex items-start justify-between gap-4 mb-4">
                   <div
@@ -264,18 +261,18 @@ export default function InternshipApplicationPage() {
                       fontSize: "10px",
                       fontWeight: 600,
                     }}
-                    className="px-2.5 py-1 rounded-full text-xs uppercase"
+                    className="px-2.5 py-1 rounded-full text-xs uppercase animate-fadeIn"
                   >
                     {track.weeks}
                   </span>
                 </div>
-                <h3 style={{ color: "#FAFAFA" }} className="text-base font-bold mb-2">
+                <h3 style={{ color: "var(--theme-text-primary)" }} className="text-base font-bold mb-2">
                   {track.name}
                 </h3>
                 <p style={{ color: "#06B6D4" }} className="text-xs font-semibold mb-3">
                   {track.stack}
                 </p>
-                <p style={{ color: "#A1A1AA" }} className="text-xs leading-relaxed">
+                <p style={{ color: "var(--theme-text-secondary)" }} className="text-xs leading-relaxed">
                   {track.desc}
                 </p>
               </div>
@@ -286,17 +283,17 @@ export default function InternshipApplicationPage() {
         {/* Application Form Card */}
         <section
           style={{
-            backgroundColor: "#0D0D14",
-            border: "1px solid #1A1A2E",
+            backgroundColor: "var(--theme-surface)",
+            border: "1px solid var(--theme-border)",
             borderRadius: "12px",
           }}
           className="max-w-2xl mx-auto p-8"
         >
           <div className="mb-8">
-            <h2 style={{ color: "#FAFAFA" }} className="text-xl font-bold tracking-tight mb-2">
+            <h2 style={{ color: "var(--theme-text-primary)" }} className="text-xl font-bold tracking-tight mb-2">
               Apply Now
             </h2>
-            <p style={{ color: "#A1A1AA" }} className="text-xs">
+            <p style={{ color: "var(--theme-text-secondary)" }} className="text-xs">
               Fill in your details below. Choose a track from the options above.
             </p>
           </div>
@@ -304,7 +301,7 @@ export default function InternshipApplicationPage() {
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label style={{ color: "#A1A1AA" }} className="text-xs font-semibold block mb-2">
+                <label style={{ color: "var(--theme-text-secondary)" }} className="text-xs font-semibold block mb-2">
                   Full Name *
                 </label>
                 <input
@@ -314,16 +311,16 @@ export default function InternshipApplicationPage() {
                   value={form.fullName}
                   onChange={(e) => update("fullName", e.target.value)}
                   style={{
-                    backgroundColor: "#050508",
-                    border: "1px solid #1A1A2E",
-                    color: "#FAFAFA",
+                    backgroundColor: "var(--theme-bg)",
+                    border: "1px solid var(--theme-border)",
+                    color: "var(--theme-text-primary)",
                   }}
-                  className="w-full px-4 py-3 rounded-lg text-sm outline-none focus:border-[rgba(124,58,237,0.45)] transition-colors"
+                  className="w-full px-4 py-3 rounded-lg text-sm outline-none focus:border-[var(--theme-border-hover)] transition-colors"
                 />
               </div>
 
               <div>
-                <label style={{ color: "#A1A1AA" }} className="text-xs font-semibold block mb-2">
+                <label style={{ color: "var(--theme-text-secondary)" }} className="text-xs font-semibold block mb-2">
                   Email *
                 </label>
                 <input
@@ -333,18 +330,18 @@ export default function InternshipApplicationPage() {
                   value={form.email}
                   onChange={(e) => update("email", e.target.value)}
                   style={{
-                    backgroundColor: "#050508",
-                    border: "1px solid #1A1A2E",
-                    color: "#FAFAFA",
+                    backgroundColor: "var(--theme-bg)",
+                    border: "1px solid var(--theme-border)",
+                    color: "var(--theme-text-primary)",
                   }}
-                  className="w-full px-4 py-3 rounded-lg text-sm outline-none focus:border-[rgba(124,58,237,0.45)] transition-colors"
+                  className="w-full px-4 py-3 rounded-lg text-sm outline-none focus:border-[var(--theme-border-hover)] transition-colors"
                 />
               </div>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label style={{ color: "#A1A1AA" }} className="text-xs font-semibold block mb-2">
+                <label style={{ color: "var(--theme-text-secondary)" }} className="text-xs font-semibold block mb-2">
                   University *
                 </label>
                 <input
@@ -354,16 +351,16 @@ export default function InternshipApplicationPage() {
                   value={form.university}
                   onChange={(e) => update("university", e.target.value)}
                   style={{
-                    backgroundColor: "#050508",
-                    border: "1px solid #1A1A2E",
-                    color: "#FAFAFA",
+                    backgroundColor: "var(--theme-bg)",
+                    border: "1px solid var(--theme-border)",
+                    color: "var(--theme-text-primary)",
                   }}
-                  className="w-full px-4 py-3 rounded-lg text-sm outline-none focus:border-[rgba(124,58,237,0.45)] transition-colors"
+                  className="w-full px-4 py-3 rounded-lg text-sm outline-none focus:border-[var(--theme-border-hover)] transition-colors"
                 />
               </div>
 
               <div>
-                <label style={{ color: "#A1A1AA" }} className="text-xs font-semibold block mb-2">
+                <label style={{ color: "var(--theme-text-secondary)" }} className="text-xs font-semibold block mb-2">
                   Current Semester *
                 </label>
                 <select
@@ -371,15 +368,15 @@ export default function InternshipApplicationPage() {
                   value={form.semester}
                   onChange={(e) => update("semester", e.target.value)}
                   style={{
-                    backgroundColor: "#050508",
-                    border: "1px solid #1A1A2E",
-                    color: "#FAFAFA",
+                    backgroundColor: "var(--theme-bg)",
+                    border: "1px solid var(--theme-border)",
+                    color: "var(--theme-text-primary)",
                   }}
-                  className="w-full px-4 py-3 rounded-lg text-sm outline-none focus:border-[rgba(124,58,237,0.45)] transition-colors"
+                  className="w-full px-4 py-3 rounded-lg text-sm outline-none focus:border-[var(--theme-border-hover)] transition-colors"
                 >
-                  <option value="" disabled style={{ backgroundColor: "#0D0D14" }}>Select Semester</option>
+                  <option value="" disabled style={{ backgroundColor: "var(--theme-surface)" }}>Select Semester</option>
                   {["1st", "2nd", "3rd", "4th", "5th", "6th", "7th", "8th"].map((sem) => (
-                    <option key={sem} value={sem} style={{ backgroundColor: "#0D0D14" }}>
+                    <option key={sem} value={sem} style={{ backgroundColor: "var(--theme-surface)" }}>
                       {sem} Semester
                     </option>
                   ))}
@@ -389,7 +386,7 @@ export default function InternshipApplicationPage() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label style={{ color: "#A1A1AA" }} className="text-xs font-semibold block mb-2">
+                <label style={{ color: "var(--theme-text-secondary)" }} className="text-xs font-semibold block mb-2">
                   City *
                 </label>
                 <input
@@ -399,16 +396,16 @@ export default function InternshipApplicationPage() {
                   value={form.city}
                   onChange={(e) => update("city", e.target.value)}
                   style={{
-                    backgroundColor: "#050508",
-                    border: "1px solid #1A1A2E",
-                    color: "#FAFAFA",
+                    backgroundColor: "var(--theme-bg)",
+                    border: "1px solid var(--theme-border)",
+                    color: "var(--theme-text-primary)",
                   }}
-                  className="w-full px-4 py-3 rounded-lg text-sm outline-none focus:border-[rgba(124,58,237,0.45)] transition-colors"
+                  className="w-full px-4 py-3 rounded-lg text-sm outline-none focus:border-[var(--theme-border-hover)] transition-colors"
                 />
               </div>
 
               <div>
-                <label style={{ color: "#A1A1AA" }} className="text-xs font-semibold block mb-2">
+                <label style={{ color: "var(--theme-text-secondary)" }} className="text-xs font-semibold block mb-2">
                   Selected Track *
                 </label>
                 <input
@@ -418,8 +415,8 @@ export default function InternshipApplicationPage() {
                   placeholder="Click a track card above to select"
                   value={form.track}
                   style={{
-                    backgroundColor: "#050508",
-                    border: "1px solid #1A1A2E",
+                    backgroundColor: "var(--theme-bg)",
+                    border: "1px solid var(--theme-border)",
                     color: "#06B6D4",
                     fontWeight: 600,
                   }}
@@ -430,7 +427,7 @@ export default function InternshipApplicationPage() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label style={{ color: "#A1A1AA" }} className="text-xs font-semibold block mb-2">
+                <label style={{ color: "var(--theme-text-secondary)" }} className="text-xs font-semibold block mb-2">
                   GitHub Profile URL
                 </label>
                 <input
@@ -439,16 +436,16 @@ export default function InternshipApplicationPage() {
                   value={form.github}
                   onChange={(e) => update("github", e.target.value)}
                   style={{
-                    backgroundColor: "#050508",
-                    border: "1px solid #1A1A2E",
-                    color: "#FAFAFA",
+                    backgroundColor: "var(--theme-bg)",
+                    border: "1px solid var(--theme-border)",
+                    color: "var(--theme-text-primary)",
                   }}
-                  className="w-full px-4 py-3 rounded-lg text-sm outline-none focus:border-[rgba(124,58,237,0.45)] transition-colors"
+                  className="w-full px-4 py-3 rounded-lg text-sm outline-none focus:border-[var(--theme-border-hover)] transition-colors"
                 />
               </div>
 
               <div>
-                <label style={{ color: "#A1A1AA" }} className="text-xs font-semibold block mb-2">
+                <label style={{ color: "var(--theme-text-secondary)" }} className="text-xs font-semibold block mb-2">
                   Portfolio Website
                 </label>
                 <input
@@ -457,17 +454,17 @@ export default function InternshipApplicationPage() {
                   value={form.portfolio}
                   onChange={(e) => update("portfolio", e.target.value)}
                   style={{
-                    backgroundColor: "#050508",
-                    border: "1px solid #1A1A2E",
-                    color: "#FAFAFA",
+                    backgroundColor: "var(--theme-bg)",
+                    border: "1px solid var(--theme-border)",
+                    color: "var(--theme-text-primary)",
                   }}
-                  className="w-full px-4 py-3 rounded-lg text-sm outline-none focus:border-[rgba(124,58,237,0.45)] transition-colors"
+                  className="w-full px-4 py-3 rounded-lg text-sm outline-none focus:border-[var(--theme-border-hover)] transition-colors"
                 />
               </div>
             </div>
 
             <div>
-              <label style={{ color: "#A1A1AA" }} className="text-xs font-semibold block mb-2">
+              <label style={{ color: "var(--theme-text-secondary)" }} className="text-xs font-semibold block mb-2">
                 Prior Experience / Projects
               </label>
               <textarea
@@ -476,16 +473,16 @@ export default function InternshipApplicationPage() {
                 value={form.experience}
                 onChange={(e) => update("experience", e.target.value)}
                 style={{
-                  backgroundColor: "#050508",
-                  border: "1px solid #1A1A2E",
-                  color: "#FAFAFA",
+                  backgroundColor: "var(--theme-bg)",
+                  border: "1px solid var(--theme-border)",
+                  color: "var(--theme-text-primary)",
                 }}
-                className="w-full px-4 py-3 rounded-lg text-sm outline-none focus:border-[rgba(124,58,237,0.45)] transition-colors resize-none"
+                className="w-full px-4 py-3 rounded-lg text-sm outline-none focus:border-[var(--theme-border-hover)] transition-colors resize-none"
               />
             </div>
 
             <div>
-              <label style={{ color: "#A1A1AA" }} className="text-xs font-semibold block mb-2">
+              <label style={{ color: "var(--theme-text-secondary)" }} className="text-xs font-semibold block mb-2">
                 Why do you want to join Connexode's internship program? *
               </label>
               <textarea
@@ -495,15 +492,15 @@ export default function InternshipApplicationPage() {
                 value={form.whyJoin}
                 onChange={(e) => update("whyJoin", e.target.value)}
                 style={{
-                  backgroundColor: "#050508",
-                  border: "1px solid #1A1A2E",
-                  color: "#FAFAFA",
+                  backgroundColor: "var(--theme-bg)",
+                  border: "1px solid var(--theme-border)",
+                  color: "var(--theme-text-primary)",
                 }}
-                className="w-full px-4 py-3 rounded-lg text-sm outline-none focus:border-[rgba(124,58,237,0.45)] transition-colors resize-none"
+                className="w-full px-4 py-3 rounded-lg text-sm outline-none focus:border-[var(--theme-border-hover)] transition-colors resize-none"
               />
             </div>
 
-            <p style={{ color: "#52525B" }} className="text-xs leading-relaxed">
+            <p style={{ color: "var(--theme-text-muted)" }} className="text-xs leading-relaxed">
               Once submitted, you'll get an instant confirmation email. Track your application status (pending → approved → dashboard) by signing in.
             </p>
 

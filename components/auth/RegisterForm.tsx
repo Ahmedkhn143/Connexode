@@ -249,7 +249,7 @@ export default function RegisterForm({ initialSignUp = false }: { initialSignUp?
           setTimeout(() => { router.push("/admin"); }, 900);
         } else if (role === "MENTOR") {
           setSuccess("Welcome Mentor! Redirecting to Mentor Dashboard...");
-          setTimeout(() => { router.push("/mentor"); }, 900);
+          setTimeout(() => { router.push("/dashboard/mentor"); }, 900);
         } else {
           // Student — check if enrolled
           const enrolledTrackId = (staticUser as any).enrolledTrackId;

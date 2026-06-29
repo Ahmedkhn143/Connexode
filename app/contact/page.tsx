@@ -97,14 +97,12 @@ export default function ContactPage() {
     setLoading(true);
 
     try {
-      // 1. Submit to API (keep original behaviour)
       await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
       });
 
-      // 2. Save to localStorage
       const existing = JSON.parse(localStorage.getItem("connexode_contact_submissions") || "[]");
       existing.push({
         ...form,
@@ -116,7 +114,6 @@ export default function ContactPage() {
       setSubmitted(true);
     } catch (err: any) {
       console.error(err);
-      // Fallback
       const existing = JSON.parse(localStorage.getItem("connexode_contact_submissions") || "[]");
       existing.push({
         ...form,
@@ -131,10 +128,10 @@ export default function ContactPage() {
   };
 
   return (
-    <div style={{ backgroundColor: "#050508", color: "#FAFAFA" }} className="min-h-screen flex flex-col font-sans">
+    <div style={{ backgroundColor: "var(--theme-bg)", color: "var(--theme-text-primary)" }} className="min-h-screen flex flex-col font-sans transition-colors duration-300">
       <PublicNav />
 
-      <main className="flex-grow pt-32 pb-20 px-6 max-w-7xl mx-auto w-full">
+      <main className="flex-grow pt-32 pb-20 px-6 max-w-7xl mx-auto w-full animate-fadeIn">
         {/* Hero */}
         <section className="text-center mb-16 animate-fadeIn">
           <span
@@ -161,20 +158,20 @@ export default function ContactPage() {
           >
             Let's build something together
           </h1>
-          <p style={{ color: "#A1A1AA" }} className="max-w-xl mx-auto text-sm leading-relaxed">
+          <p style={{ color: "var(--theme-text-secondary)" }} className="max-w-xl mx-auto text-sm leading-relaxed">
             Drop us a message for general enquiries, program info, or client services.
           </p>
         </section>
 
         {/* Two-Column Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Left Column (Wider, takes 2/3 cols on desktop) */}
+          {/* Left Column (Wider) */}
           <div className="lg:col-span-2">
             {submitted ? (
               <div
                 style={{
-                  backgroundColor: "#0D0D14",
-                  border: "1px solid #1A1A2E",
+                  backgroundColor: "var(--theme-surface)",
+                  border: "1px solid var(--theme-border)",
                   borderRadius: "12px",
                 }}
                 className="p-12 text-center h-full flex flex-col items-center justify-center min-h-[400px]"
@@ -188,11 +185,11 @@ export default function ContactPage() {
                 >
                   <CheckCircle size={28} className="text-[#10B981]" />
                 </div>
-                <h2 style={{ color: "#FAFAFA" }} className="text-xl font-bold mb-3 tracking-tight">
+                <h2 style={{ color: "var(--theme-text-primary)" }} className="text-xl font-bold mb-3 tracking-tight">
                   Message Sent Successfully!
                 </h2>
-                <p style={{ color: "#A1A1AA" }} className="max-w-sm mx-auto mb-8 text-xs leading-relaxed">
-                  Thank you for reaching out, <strong className="text-[#FAFAFA]">{form.name}</strong>. We have received your inquiry. Our team will get back to you within 24–48 hours.
+                <p style={{ color: "var(--theme-text-secondary)" }} className="max-w-sm mx-auto mb-8 text-xs leading-relaxed">
+                  Thank you for reaching out, <strong className="text-[var(--theme-text-primary)]">{form.name}</strong>. We have received your inquiry. Our team will get back to you within 24–48 hours.
                 </p>
                 <button
                   onClick={() => {
@@ -216,16 +213,16 @@ export default function ContactPage() {
             ) : (
               <div
                 style={{
-                  backgroundColor: "#0D0D14",
-                  border: "1px solid #1A1A2E",
+                  backgroundColor: "var(--theme-surface)",
+                  border: "1px solid var(--theme-border)",
                   borderRadius: "12px",
                 }}
-                className="p-8"
+                className="p-8 animate-fadeIn"
               >
                 <form onSubmit={handleSubmit} className="space-y-6">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <label style={{ color: "#A1A1AA" }} className="text-xs font-semibold block mb-2">
+                      <label style={{ color: "var(--theme-text-secondary)" }} className="text-xs font-semibold block mb-2">
                         Full Name *
                       </label>
                       <input
@@ -235,16 +232,16 @@ export default function ContactPage() {
                         value={form.name}
                         onChange={(e) => update("name", e.target.value)}
                         style={{
-                          backgroundColor: "#050508",
-                          border: "1px solid #1A1A2E",
-                          color: "#FAFAFA",
+                          backgroundColor: "var(--theme-bg)",
+                          border: "1px solid var(--theme-border)",
+                          color: "var(--theme-text-primary)",
                         }}
-                        className="w-full px-4 py-3 rounded-lg text-sm outline-none focus:border-[rgba(124,58,237,0.45)] transition-colors"
+                        className="w-full px-4 py-3 rounded-lg text-sm outline-none focus:border-[var(--theme-border-hover)] transition-colors"
                       />
                     </div>
 
                     <div>
-                      <label style={{ color: "#A1A1AA" }} className="text-xs font-semibold block mb-2">
+                      <label style={{ color: "var(--theme-text-secondary)" }} className="text-xs font-semibold block mb-2">
                         Email Address *
                       </label>
                       <input
@@ -254,17 +251,17 @@ export default function ContactPage() {
                         value={form.email}
                         onChange={(e) => update("email", e.target.value)}
                         style={{
-                          backgroundColor: "#050508",
-                          border: "1px solid #1A1A2E",
-                          color: "#FAFAFA",
+                          backgroundColor: "var(--theme-bg)",
+                          border: "1px solid var(--theme-border)",
+                          color: "var(--theme-text-primary)",
                         }}
-                        className="w-full px-4 py-3 rounded-lg text-sm outline-none focus:border-[rgba(124,58,237,0.45)] transition-colors"
+                        className="w-full px-4 py-3 rounded-lg text-sm outline-none focus:border-[var(--theme-border-hover)] transition-colors"
                       />
                     </div>
                   </div>
 
                   <div>
-                    <label style={{ color: "#A1A1AA" }} className="text-xs font-semibold block mb-2">
+                    <label style={{ color: "var(--theme-text-secondary)" }} className="text-xs font-semibold block mb-2">
                       Subject / Inquiry Type *
                     </label>
                     <select
@@ -272,15 +269,15 @@ export default function ContactPage() {
                       value={form.subject}
                       onChange={(e) => update("subject", e.target.value)}
                       style={{
-                        backgroundColor: "#050508",
-                        border: "1px solid #1A1A2E",
-                        color: "#FAFAFA",
+                        backgroundColor: "var(--theme-bg)",
+                        border: "1px solid var(--theme-border)",
+                        color: "var(--theme-text-primary)",
                       }}
-                      className="w-full px-4 py-3 rounded-lg text-sm outline-none focus:border-[rgba(124,58,237,0.45)] transition-colors"
+                      className="w-full px-4 py-3 rounded-lg text-sm outline-none focus:border-[var(--theme-border-hover)] transition-colors"
                     >
-                      <option value="" disabled style={{ backgroundColor: "#0D0D14" }}>Select a subject</option>
+                      <option value="" disabled style={{ backgroundColor: "var(--theme-surface)" }}>Select a subject</option>
                       {subjects.map((sub) => (
-                        <option key={sub} value={sub} style={{ backgroundColor: "#0D0D14" }}>
+                        <option key={sub} value={sub} style={{ backgroundColor: "var(--theme-surface)" }}>
                           {sub}
                         </option>
                       ))}
@@ -288,7 +285,7 @@ export default function ContactPage() {
                   </div>
 
                   <div>
-                    <label style={{ color: "#A1A1AA" }} className="text-xs font-semibold block mb-2">
+                    <label style={{ color: "var(--theme-text-secondary)" }} className="text-xs font-semibold block mb-2">
                       Message *
                     </label>
                     <textarea
@@ -298,11 +295,11 @@ export default function ContactPage() {
                       value={form.message}
                       onChange={(e) => update("message", e.target.value)}
                       style={{
-                        backgroundColor: "#050508",
-                        border: "1px solid #1A1A2E",
-                        color: "#FAFAFA",
+                        backgroundColor: "var(--theme-bg)",
+                        border: "1px solid var(--theme-border)",
+                        color: "var(--theme-text-primary)",
                       }}
-                      className="w-full px-4 py-3 rounded-lg text-sm outline-none focus:border-[rgba(124,58,237,0.45)] transition-colors resize-none"
+                      className="w-full px-4 py-3 rounded-lg text-sm outline-none focus:border-[var(--theme-border-hover)] transition-colors resize-none"
                     />
                   </div>
 
@@ -325,13 +322,13 @@ export default function ContactPage() {
             )}
           </div>
 
-          {/* Right Column (Info Cards, takes 1/3 col on desktop) */}
-          <div className="flex flex-col gap-6">
+          {/* Right Column (Info Cards) */}
+          <div className="flex flex-col gap-6 animate-fadeIn">
             {/* Direct Email Card */}
             <div
               style={{
-                backgroundColor: "#0D0D14",
-                border: "1px solid #1A1A2E",
+                backgroundColor: "var(--theme-surface)",
+                border: "1px solid var(--theme-border)",
                 borderRadius: "12px",
               }}
               className="p-6"
@@ -345,10 +342,10 @@ export default function ContactPage() {
               >
                 <Mail size={18} />
               </div>
-              <h3 style={{ color: "#FAFAFA" }} className="text-sm font-bold mb-1">
+              <h3 style={{ color: "var(--theme-text-primary)" }} className="text-sm font-bold mb-1">
                 Direct Email
               </h3>
-              <p style={{ color: "#A1A1AA" }} className="text-xs mb-3">
+              <p style={{ color: "var(--theme-text-secondary)" }} className="text-xs mb-3">
                 Reach us directly for official partnerships or client inquiries.
               </p>
               <a href="mailto:info@connexode.com" className="text-[#06B6D4] text-xs font-semibold hover:underline block">
@@ -359,13 +356,13 @@ export default function ContactPage() {
             {/* Social Links Card */}
             <div
               style={{
-                backgroundColor: "#0D0D14",
-                border: "1px solid #1A1A2E",
+                backgroundColor: "var(--theme-surface)",
+                border: "1px solid var(--theme-border)",
                 borderRadius: "12px",
               }}
               className="p-6"
             >
-              <h3 style={{ color: "#FAFAFA" }} className="text-sm font-bold mb-4">
+              <h3 style={{ color: "var(--theme-text-primary)" }} className="text-sm font-bold mb-4">
                 Follow Us
               </h3>
               <div className="flex flex-col gap-4">
@@ -373,7 +370,7 @@ export default function ContactPage() {
                   href="https://instagram.com/connexode"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-3 text-xs text-[#A1A1AA] hover:text-[#FAFAFA] transition-colors"
+                  className="flex items-center gap-3 text-xs text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] transition-colors"
                 >
                   <InstagramIcon size={18} className="text-[#06B6D4]" />
                   <span>@connexode</span>
@@ -382,7 +379,7 @@ export default function ContactPage() {
                   href="https://linkedin.com/company/connexode"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-3 text-xs text-[#A1A1AA] hover:text-[#FAFAFA] transition-colors"
+                  className="flex items-center gap-3 text-xs text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] transition-colors"
                 >
                   <LinkedinIcon size={18} className="text-[#06B6D4]" />
                   <span>Connexode</span>
@@ -391,7 +388,7 @@ export default function ContactPage() {
                   href="https://facebook.com/connexode"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-3 text-xs text-[#A1A1AA] hover:text-[#FAFAFA] transition-colors"
+                  className="flex items-center gap-3 text-xs text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] transition-colors"
                 >
                   <FacebookIcon size={18} className="text-[#06B6D4]" />
                   <span>Connexode</span>
@@ -402,33 +399,33 @@ export default function ContactPage() {
             {/* Quick Links Card */}
             <div
               style={{
-                backgroundColor: "#0D0D14",
-                border: "1px solid #1A1A2E",
+                backgroundColor: "var(--theme-surface)",
+                border: "1px solid var(--theme-border)",
                 borderRadius: "12px",
               }}
               className="p-6"
             >
-              <h3 style={{ color: "#FAFAFA" }} className="text-sm font-bold mb-4">
+              <h3 style={{ color: "var(--theme-text-primary)" }} className="text-sm font-bold mb-4">
                 Quick Action Links
               </h3>
               <div className="flex flex-col gap-3">
                 <Link
                   href="/join/ambassador"
-                  className="text-xs text-[#A1A1AA] hover:text-[#06B6D4] transition-colors flex items-center justify-between"
+                  className="text-xs text-[var(--theme-text-secondary)] hover:text-[#06B6D4] transition-colors flex items-center justify-between"
                 >
                   <span>Apply as Ambassador</span>
                   <ArrowRight size={12} />
                 </Link>
                 <Link
                   href="/join/internship"
-                  className="text-xs text-[#A1A1AA] hover:text-[#06B6D4] transition-colors flex items-center justify-between"
+                  className="text-xs text-[var(--theme-text-secondary)] hover:text-[#06B6D4] transition-colors flex items-center justify-between"
                 >
                   <span>Apply for Internship</span>
                   <ArrowRight size={12} />
                 </Link>
                 <Link
                   href="/services"
-                  className="text-xs text-[#A1A1AA] hover:text-[#06B6D4] transition-colors flex items-center justify-between"
+                  className="text-xs text-[var(--theme-text-secondary)] hover:text-[#06B6D4] transition-colors flex items-center justify-between"
                 >
                   <span>Explore Client Services</span>
                   <ArrowRight size={12} />

@@ -7,7 +7,6 @@ import PublicNav from "@/components/layout/PublicNav";
 import PublicFooter from "@/components/layout/PublicFooter";
 
 export default function ServicesPage() {
-  // FAQ state
   const [openFaq, setOpenFaq] = useState<number | null>(null);
 
   const toggleFaq = (index: number) => {
@@ -143,7 +142,7 @@ export default function ServicesPage() {
   ];
 
   return (
-    <div style={{ backgroundColor: "#050508", color: "#FAFAFA" }} className="min-h-screen flex flex-col font-sans">
+    <div style={{ backgroundColor: "var(--theme-bg)", color: "var(--theme-text-primary)" }} className="min-h-screen flex flex-col font-sans transition-colors duration-300">
       <PublicNav />
 
       {/* Hero Section */}
@@ -162,7 +161,7 @@ export default function ServicesPage() {
             fontWeight: 600,
             letterSpacing: "0.15em",
           }}
-          className="mb-6 px-4 py-1.5 rounded-full uppercase"
+          className="mb-6 px-4 py-1.5 rounded-full uppercase inline-block"
         >
           Global services · Pakistan-built
         </span>
@@ -188,7 +187,7 @@ export default function ServicesPage() {
           </span>
         </h1>
 
-        <p style={{ color: "#A1A1AA" }} className="max-w-[600px] mx-auto text-base leading-relaxed">
+        <p style={{ color: "var(--theme-text-secondary)" }} className="max-w-[600px] mx-auto text-base leading-relaxed">
           From full-stack web apps to AI chatbots, SEO, and social media — our dedicated team delivers real work for clients anywhere.
         </p>
       </section>
@@ -199,11 +198,11 @@ export default function ServicesPage() {
           <div
             key={index}
             style={{
-              backgroundColor: "#0D0D14",
-              border: "1px solid #1A1A2E",
+              backgroundColor: "var(--theme-surface)",
+              border: "1px solid var(--theme-border)",
               borderRadius: "12px",
             }}
-            className="p-8 md:p-12 transition-all hover:border-[rgba(124,58,237,0.45)] hover:-translate-y-1 flex flex-col md:flex-row justify-between gap-8 md:gap-12"
+            className="p-8 md:p-12 transition-all hover:border-[var(--theme-border-hover)] hover:-translate-y-1 flex flex-col md:flex-row justify-between gap-8 md:gap-12"
           >
             {/* Left Column */}
             <div className="flex-1 flex flex-col justify-between">
@@ -233,10 +232,10 @@ export default function ServicesPage() {
                   </span>
                 </div>
 
-                <h3 style={{ color: "#FAFAFA" }} className="text-xl font-bold mb-3 tracking-tight">
+                <h3 style={{ color: "var(--theme-text-primary)" }} className="text-xl font-bold mb-3 tracking-tight">
                   {service.title}
                 </h3>
-                <p style={{ color: "#A1A1AA" }} className="text-sm leading-relaxed mb-6">
+                <p style={{ color: "var(--theme-text-secondary)" }} className="text-sm leading-relaxed mb-6">
                   {service.desc}
                 </p>
               </div>
@@ -247,11 +246,11 @@ export default function ServicesPage() {
                   <span
                     key={idx}
                     style={{
-                      backgroundColor: "#050508",
-                      border: "1px solid #1A1A2E",
-                      color: "#A1A1AA",
+                      backgroundColor: "var(--theme-bg)",
+                      border: "1px solid var(--theme-border)",
+                      color: "var(--theme-text-secondary)",
                     }}
-                    className="px-3 py-1 rounded-full text-xs"
+                    className="px-3 py-1 rounded-full text-xs animate-fadeIn"
                   >
                     {tech}
                   </span>
@@ -262,13 +261,13 @@ export default function ServicesPage() {
             {/* Right Column */}
             <div
               style={{
-                borderLeft: "1px solid #1A1A2E",
+                borderLeft: "1px solid var(--theme-border)",
               }}
               className="md:pl-12 flex-1 flex flex-col justify-between"
             >
               <ul className="flex flex-col gap-3 mb-8">
                 {service.checklist.map((item, idx) => (
-                  <li key={idx} className="flex items-start gap-2.5 text-sm text-[#A1A1AA]">
+                  <li key={idx} className="flex items-start gap-2.5 text-sm text-[var(--theme-text-secondary)]">
                     <Check size={16} className="text-[#06B6D4] shrink-0 mt-0.5" />
                     <span>{item}</span>
                   </li>
@@ -297,9 +296,9 @@ export default function ServicesPage() {
       {/* 4-Step Process Section */}
       <section
         style={{
-          backgroundColor: "#0D0D14",
-          borderTop: "1px solid #1A1A2E",
-          borderBottom: "1px solid #1A1A2E",
+          backgroundColor: "var(--theme-surface)",
+          borderTop: "1px solid var(--theme-border)",
+          borderBottom: "1px solid var(--theme-border)",
         }}
         className="py-24 px-6 w-full"
       >
@@ -316,7 +315,7 @@ export default function ServicesPage() {
             >
               How we work
             </span>
-            <h2 style={{ color: "#FAFAFA" }} className="text-3xl font-bold tracking-tight">
+            <h2 style={{ color: "var(--theme-text-primary)" }} className="text-3xl font-bold tracking-tight">
               Our 4-step process
             </h2>
           </div>
@@ -326,8 +325,8 @@ export default function ServicesPage() {
               <div
                 key={idx}
                 style={{
-                  backgroundColor: "#050508",
-                  border: "1px solid #1A1A2E",
+                  backgroundColor: "var(--theme-bg)",
+                  border: "1px solid var(--theme-border)",
                   borderRadius: "12px",
                 }}
                 className="p-6 relative"
@@ -344,10 +343,10 @@ export default function ServicesPage() {
                 >
                   {step.step}
                 </span>
-                <h3 style={{ color: "#FAFAFA" }} className="text-base font-bold mb-2">
+                <h3 style={{ color: "var(--theme-text-primary)" }} className="text-base font-bold mb-2">
                   {step.title}
                 </h3>
-                <p style={{ color: "#A1A1AA" }} className="text-xs leading-relaxed">
+                <p style={{ color: "var(--theme-text-secondary)" }} className="text-xs leading-relaxed">
                   {step.desc}
                 </p>
               </div>
@@ -370,7 +369,7 @@ export default function ServicesPage() {
           >
             Questions
           </span>
-          <h2 style={{ color: "#FAFAFA" }} className="text-3xl font-bold tracking-tight">
+          <h2 style={{ color: "var(--theme-text-primary)" }} className="text-3xl font-bold tracking-tight">
             Frequently Asked Questions
           </h2>
         </div>
@@ -382,24 +381,24 @@ export default function ServicesPage() {
               <div
                 key={index}
                 style={{
-                  backgroundColor: "#0D0D14",
-                  border: "1px solid #1A1A2E",
+                  backgroundColor: "var(--theme-surface)",
+                  border: "1px solid var(--theme-border)",
                   borderRadius: "12px",
                 }}
                 className="overflow-hidden"
               >
                 <button
                   onClick={() => toggleFaq(index)}
-                  className="w-full p-6 text-left flex items-center justify-between gap-4 font-semibold text-sm hover:text-[#FAFAFA] transition-colors"
+                  className="w-full p-6 text-left flex items-center justify-between gap-4 font-semibold text-sm hover:text-[var(--theme-text-primary)] transition-colors"
                 >
-                  <span style={{ color: "#FAFAFA" }}>{faq.q}</span>
-                  {isOpen ? <ChevronUp size={18} className="text-[#A1A1AA]" /> : <ChevronDown size={18} className="text-[#A1A1AA]" />}
+                  <span style={{ color: "var(--theme-text-primary)" }}>{faq.q}</span>
+                  {isOpen ? <ChevronUp size={18} className="text-[var(--theme-text-secondary)]" /> : <ChevronDown size={18} className="text-[var(--theme-text-secondary)]" />}
                 </button>
                 {isOpen && (
                   <div
                     style={{
-                      borderTop: "1px solid #1A1A2E",
-                      color: "#A1A1AA",
+                      borderTop: "1px solid var(--theme-border)",
+                      color: "var(--theme-text-secondary)",
                     }}
                     className="p-6 text-xs leading-relaxed"
                   >
@@ -417,15 +416,15 @@ export default function ServicesPage() {
         <div
           style={{
             border: "1px solid transparent",
-            background: "linear-gradient(#0D0D14, #0D0D14) padding-box, linear-gradient(135deg, #7C3AED, #06B6D4) border-box",
+            background: "linear-gradient(var(--theme-surface), var(--theme-surface)) padding-box, linear-gradient(135deg, #7C3AED, #06B6D4) border-box",
             borderRadius: "16px",
           }}
           className="p-12 text-center"
         >
-          <h2 style={{ color: "#FAFAFA" }} className="text-3xl font-extrabold mb-4 tracking-tight">
+          <h2 style={{ color: "var(--theme-text-primary)" }} className="text-3xl font-extrabold mb-4 tracking-tight">
             Have a custom requirement?
           </h2>
-          <p style={{ color: "#A1A1AA" }} className="max-w-lg mx-auto mb-8 text-sm leading-relaxed">
+          <p style={{ color: "var(--theme-text-secondary)" }} className="max-w-lg mx-auto mb-8 text-sm leading-relaxed">
             Get in touch with us and let's craft the perfect technical solution tailored to your goals.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 items-center justify-center">

@@ -53,8 +53,8 @@ export default function PublicFooter() {
   return (
     <footer
       style={{
-        backgroundColor: "#0D0D14",
-        borderTop: "1px solid #1A1A2E",
+        backgroundColor: "var(--theme-surface)",
+        borderTop: "1px solid var(--theme-border)",
       }}
       className="py-16 px-6 font-sans"
     >
@@ -68,12 +68,12 @@ export default function PublicFooter() {
                 fontWeight: 800,
                 fontSize: "18px",
                 letterSpacing: "-0.5px",
-                color: "#FAFAFA",
+                color: "var(--theme-logo-text)",
               }}
             >
               Conne<span style={{ color: "#06B6D4" }}>x</span>ode
             </span>
-            <p style={{ color: "#A1A1AA" }} className="text-sm">
+            <p style={{ color: "var(--theme-text-secondary)" }} className="text-sm">
               Build. Connect. Grow.
             </p>
             <div className="flex items-center gap-4 mt-2">
@@ -81,8 +81,8 @@ export default function PublicFooter() {
                 href="https://instagram.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                style={{ color: "#52525B" }}
-                className="hover:text-[#FAFAFA] transition-colors"
+                style={{ color: "var(--theme-text-muted)" }}
+                className="hover:text-[var(--theme-text-primary)] transition-colors"
               >
                 <InstagramIcon size={18} />
               </a>
@@ -90,8 +90,8 @@ export default function PublicFooter() {
                 href="https://linkedin.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                style={{ color: "#52525B" }}
-                className="hover:text-[#FAFAFA] transition-colors"
+                style={{ color: "var(--theme-text-muted)" }}
+                className="hover:text-[var(--theme-text-primary)] transition-colors"
               >
                 <LinkedinIcon size={18} />
               </a>
@@ -99,8 +99,8 @@ export default function PublicFooter() {
                 href="https://facebook.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                style={{ color: "#52525B" }}
-                className="hover:text-[#FAFAFA] transition-colors"
+                style={{ color: "var(--theme-text-muted)" }}
+                className="hover:text-[var(--theme-text-primary)] transition-colors"
               >
                 <FacebookIcon size={18} />
               </a>
@@ -114,36 +114,36 @@ export default function PublicFooter() {
             </span>
             <Link
               href="/join/ambassador"
-              style={{ color: "#A1A1AA" }}
-              className="text-sm hover:text-[#FAFAFA] transition-colors"
+              style={{ color: "var(--theme-text-secondary)" }}
+              className="text-sm hover:text-[var(--theme-text-primary)] transition-colors"
             >
               Ambassador Program
             </Link>
             <Link
               href="/join/internship"
-              style={{ color: "#A1A1AA" }}
-              className="text-sm hover:text-[#FAFAFA] transition-colors"
+              style={{ color: "var(--theme-text-secondary)" }}
+              className="text-sm hover:text-[var(--theme-text-primary)] transition-colors"
             >
               Internship Program
             </Link>
             <Link
               href="/services"
-              style={{ color: "#A1A1AA" }}
-              className="text-sm hover:text-[#FAFAFA] transition-colors"
+              style={{ color: "var(--theme-text-secondary)" }}
+              className="text-sm hover:text-[var(--theme-text-primary)] transition-colors"
             >
               Services
             </Link>
             <Link
               href="/leaderboard"
-              style={{ color: "#A1A1AA" }}
-              className="text-sm hover:text-[#FAFAFA] transition-colors"
+              style={{ color: "var(--theme-text-secondary)" }}
+              className="text-sm hover:text-[var(--theme-text-primary)] transition-colors"
             >
               Leaderboard
             </Link>
             <Link
               href="/verify"
-              style={{ color: "#A1A1AA" }}
-              className="text-sm hover:text-[#FAFAFA] transition-colors"
+              style={{ color: "var(--theme-text-secondary)" }}
+              className="text-sm hover:text-[var(--theme-text-primary)] transition-colors"
             >
               Verify Certificate
             </Link>
@@ -156,15 +156,15 @@ export default function PublicFooter() {
             </span>
             <Link
               href="/about"
-              style={{ color: "#A1A1AA" }}
-              className="text-sm hover:text-[#FAFAFA] transition-colors"
+              style={{ color: "var(--theme-text-secondary)" }}
+              className="text-sm hover:text-[var(--theme-text-primary)] transition-colors"
             >
               About
             </Link>
             <Link
               href="/contact"
-              style={{ color: "#A1A1AA" }}
-              className="text-sm hover:text-[#FAFAFA] transition-colors"
+              style={{ color: "var(--theme-text-secondary)" }}
+              className="text-sm hover:text-[var(--theme-text-primary)] transition-colors"
             >
               Contact
             </Link>
@@ -175,10 +175,10 @@ export default function PublicFooter() {
             <span style={{ color: "#06B6D4" }} className="text-[11px] font-semibold tracking-[0.2em] uppercase mb-1">
               Connect
             </span>
-            <span style={{ color: "#A1A1AA" }} className="text-sm">
+            <span style={{ color: "var(--theme-text-secondary)" }} className="text-sm">
               info@connexode.com
             </span>
-            <span style={{ color: "#A1A1AA" }} className="text-sm">
+            <span style={{ color: "var(--theme-text-secondary)" }} className="text-sm">
               +92 (300) 000-0000
             </span>
           </div>
@@ -188,21 +188,21 @@ export default function PublicFooter() {
         <div
           style={{
             height: "1px",
-            background: "linear-gradient(90deg, transparent, #1A1A2E, transparent)",
+            background: "linear-gradient(90deg, transparent, var(--theme-border), transparent)",
           }}
           className="mb-8"
         />
 
         {/* Bottom Bar */}
         <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-          <p style={{ color: "#52525B" }} className="text-xs">
+          <p style={{ color: "var(--theme-text-muted)" }} className="text-xs">
             &copy; 2026 Connexode &middot; Build. Connect. Grow.
           </p>
           <div className="flex items-center gap-6">
-            <Link href="/privacy" style={{ color: "#52525B" }} className="text-xs hover:text-[#A1A1AA] transition-colors">
+            <Link href="/privacy" style={{ color: "var(--theme-text-muted)" }} className="text-xs hover:text-[var(--theme-text-secondary)] transition-colors">
               Privacy Policy
             </Link>
-            <Link href="/terms" style={{ color: "#52525B" }} className="text-xs hover:text-[#A1A1AA] transition-colors">
+            <Link href="/terms" style={{ color: "var(--theme-text-muted)" }} className="text-xs hover:text-[var(--theme-text-secondary)] transition-colors">
               Terms of Service
             </Link>
           </div>

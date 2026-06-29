@@ -59,7 +59,7 @@ export default function JoinPage() {
   ];
 
   return (
-    <div style={{ backgroundColor: "#050508", color: "#FAFAFA" }} className="min-h-screen flex flex-col font-sans">
+    <div style={{ backgroundColor: "var(--theme-bg)", color: "var(--theme-text-primary)" }} className="min-h-screen flex flex-col font-sans transition-colors duration-300">
       <PublicNav />
 
       {/* Hero */}
@@ -78,7 +78,7 @@ export default function JoinPage() {
             fontWeight: 600,
             letterSpacing: "0.15em",
           }}
-          className="mb-6 px-4 py-1.5 rounded-full uppercase"
+          className="mb-6 px-4 py-1.5 rounded-full uppercase inline-block"
         >
           Two ways to grow
         </span>
@@ -93,7 +93,7 @@ export default function JoinPage() {
         >
           Choose your path
         </h1>
-        <p style={{ color: "#A1A1AA" }} className="max-w-[500px] mx-auto text-sm leading-relaxed">
+        <p style={{ color: "var(--theme-text-secondary)" }} className="max-w-[500px] mx-auto text-sm leading-relaxed">
           Unlock your potential through real campus leadership or hands-on structured developer tracks.
         </p>
       </section>
@@ -104,11 +104,11 @@ export default function JoinPage() {
           {/* Card 1: Ambassador */}
           <div
             style={{
-              backgroundColor: "#0D0D14",
-              border: "1px solid #1A1A2E",
+              backgroundColor: "var(--theme-surface)",
+              border: "1px solid var(--theme-border)",
               borderRadius: "12px",
             }}
-            className="p-8 flex flex-col justify-between min-h-[400px] transition-all hover:border-[rgba(124,58,237,0.45)] hover:-translate-y-1"
+            className="p-8 flex flex-col justify-between min-h-[400px] transition-all hover:border-[var(--theme-border-hover)] hover:-translate-y-1"
           >
             <div>
               <div
@@ -120,19 +120,19 @@ export default function JoinPage() {
               >
                 <Users size={24} />
               </div>
-              <h3 style={{ color: "#FAFAFA" }} className="text-xl font-bold mb-6">
+              <h3 style={{ color: "var(--theme-text-primary)" }} className="text-xl font-bold mb-6">
                 Ambassador Program
               </h3>
               <ul className="flex flex-col gap-4 mb-8">
-                <li className="flex items-start gap-3 text-sm text-[#A1A1AA]">
+                <li className="flex items-start gap-3 text-sm text-[var(--theme-text-secondary)]">
                   <Check size={18} className="text-[#06B6D4] shrink-0 mt-0.5" />
                   <span>Lead artificial intelligence sessions & webinars on your campus.</span>
                 </li>
-                <li className="flex items-start gap-3 text-sm text-[#A1A1AA]">
+                <li className="flex items-start gap-3 text-sm text-[var(--theme-text-secondary)]">
                   <Check size={18} className="text-[#06B6D4] shrink-0 mt-0.5" />
                   <span>Grow and manage thriving local campus communities.</span>
                 </li>
-                <li className="flex items-start gap-3 text-sm text-[#A1A1AA]">
+                <li className="flex items-start gap-3 text-sm text-[var(--theme-text-secondary)]">
                   <Check size={18} className="text-[#06B6D4] shrink-0 mt-0.5" />
                   <span>Build public speaking, leadership, and marketing skills.</span>
                 </li>
@@ -157,11 +157,11 @@ export default function JoinPage() {
           {/* Card 2: Internship */}
           <div
             style={{
-              backgroundColor: "#0D0D14",
-              border: "1px solid #1A1A2E",
+              backgroundColor: "var(--theme-surface)",
+              border: "1px solid var(--theme-border)",
               borderRadius: "12px",
             }}
-            className="p-8 flex flex-col justify-between min-h-[400px] transition-all hover:border-[rgba(124,58,237,0.45)] hover:-translate-y-1"
+            className="p-8 flex flex-col justify-between min-h-[400px] transition-all hover:border-[var(--theme-border-hover)] hover:-translate-y-1"
           >
             <div>
               <div
@@ -173,19 +173,19 @@ export default function JoinPage() {
               >
                 <BookOpen size={24} />
               </div>
-              <h3 style={{ color: "#FAFAFA" }} className="text-xl font-bold mb-6">
+              <h3 style={{ color: "var(--theme-text-primary)" }} className="text-xl font-bold mb-6">
                 Internship Program
               </h3>
               <ul className="flex flex-col gap-4 mb-8">
-                <li className="flex items-start gap-3 text-sm text-[#A1A1AA]">
+                <li className="flex items-start gap-3 text-sm text-[var(--theme-text-secondary)]">
                   <Check size={18} className="text-[#06B6D4] shrink-0 mt-0.5" />
                   <span>Complete structured 8-week development tracks.</span>
                 </li>
-                <li className="flex items-start gap-3 text-sm text-[#A1A1AA]">
+                <li className="flex items-start gap-3 text-sm text-[var(--theme-text-secondary)]">
                   <Check size={18} className="text-[#06B6D4] shrink-0 mt-0.5" />
                   <span>Submit real assignments and receive detailed mentor reviews.</span>
                 </li>
-                <li className="flex items-start gap-3 text-sm text-[#A1A1AA]">
+                <li className="flex items-start gap-3 text-sm text-[var(--theme-text-secondary)]">
                   <Check size={18} className="text-[#06B6D4] shrink-0 mt-0.5" />
                   <span>Build complete GitHub projects to showcase in your portfolio.</span>
                 </li>
@@ -222,7 +222,7 @@ export default function JoinPage() {
             >
               Compare
             </span>
-            <h2 style={{ color: "#FAFAFA" }} className="text-2xl font-bold">
+            <h2 style={{ color: "var(--theme-text-primary)" }} className="text-2xl font-bold">
               Program Comparison
             </h2>
           </div>
@@ -230,28 +230,28 @@ export default function JoinPage() {
           <div className="overflow-x-auto">
             <table className="w-full border-collapse text-left">
               <thead>
-                <tr style={{ borderBottom: "1px solid #1A1A2E" }}>
-                  <th style={{ color: "#FAFAFA" }} className="py-4 px-6 text-sm font-bold">
+                <tr style={{ borderBottom: "1px solid var(--theme-border)" }}>
+                  <th style={{ color: "var(--theme-text-primary)" }} className="py-4 px-6 text-sm font-bold">
                     Feature
                   </th>
-                  <th style={{ color: "#FAFAFA" }} className="py-4 px-6 text-sm font-bold">
+                  <th style={{ color: "var(--theme-text-primary)" }} className="py-4 px-6 text-sm font-bold">
                     Ambassador
                   </th>
-                  <th style={{ color: "#FAFAFA" }} className="py-4 px-6 text-sm font-bold">
+                  <th style={{ color: "var(--theme-text-primary)" }} className="py-4 px-6 text-sm font-bold">
                     Internship
                   </th>
                 </tr>
               </thead>
               <tbody>
                 {comparisonData.map((row, idx) => (
-                  <tr key={idx} style={{ borderBottom: "1px solid #1A1A2E" }} className="hover:bg-[#0D0D14]/50">
-                    <td style={{ color: "#FAFAFA" }} className="py-4 px-6 text-xs font-semibold uppercase tracking-wider">
+                  <tr key={idx} style={{ borderBottom: "1px solid var(--theme-border)" }} className="hover:bg-[var(--theme-hover)]">
+                    <td style={{ color: "var(--theme-text-primary)" }} className="py-4 px-6 text-xs font-semibold uppercase tracking-wider">
                       {row.feature}
                     </td>
-                    <td style={{ color: "#A1A1AA" }} className="py-4 px-6 text-sm">
+                    <td style={{ color: "var(--theme-text-secondary)" }} className="py-4 px-6 text-sm">
                       {row.ambassador}
                     </td>
-                    <td style={{ color: "#A1A1AA" }} className="py-4 px-6 text-sm">
+                    <td style={{ color: "var(--theme-text-secondary)" }} className="py-4 px-6 text-sm">
                       {row.internship}
                     </td>
                   </tr>
@@ -275,7 +275,7 @@ export default function JoinPage() {
             >
               FAQ
             </span>
-            <h2 style={{ color: "#FAFAFA" }} className="text-2xl font-bold">
+            <h2 style={{ color: "var(--theme-text-primary)" }} className="text-2xl font-bold">
               Program FAQs
             </h2>
           </div>
@@ -285,16 +285,16 @@ export default function JoinPage() {
               <div
                 key={idx}
                 style={{
-                  backgroundColor: "#0D0D14",
-                  border: "1px solid #1A1A2E",
+                  backgroundColor: "var(--theme-surface)",
+                  border: "1px solid var(--theme-border)",
                   borderRadius: "12px",
                 }}
-                className="p-6"
+                className="p-6 animate-fadeIn"
               >
-                <h4 style={{ color: "#FAFAFA" }} className="font-semibold text-sm mb-2">
+                <h4 style={{ color: "var(--theme-text-primary)" }} className="font-semibold text-sm mb-2">
                   {faq.q}
                 </h4>
-                <p style={{ color: "#A1A1AA" }} className="text-xs leading-relaxed">
+                <p style={{ color: "var(--theme-text-secondary)" }} className="text-xs leading-relaxed">
                   {faq.a}
                 </p>
               </div>

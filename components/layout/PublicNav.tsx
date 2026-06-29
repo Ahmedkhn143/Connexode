@@ -24,9 +24,9 @@ export default function PublicNav() {
   return (
     <nav
       style={{
-        background: "rgba(5, 5, 8, 0.85)",
+        background: "var(--theme-nav-bg)",
         backdropFilter: "blur(12px)",
-        borderBottom: scrolled ? "1px solid rgba(26, 26, 46, 0.8)" : "1px solid transparent",
+        borderBottom: scrolled ? "1px solid var(--theme-border)" : "1px solid transparent",
       }}
       className="fixed top-0 left-0 right-0 z-50 transition-all duration-300"
     >
@@ -39,7 +39,7 @@ export default function PublicNav() {
               fontWeight: 800,
               fontSize: "18px",
               letterSpacing: "-0.5px",
-              color: "#FAFAFA",
+              color: "var(--theme-logo-text)",
             }}
           >
             Conne<span style={{ color: "#06B6D4" }}>x</span>ode
@@ -50,15 +50,15 @@ export default function PublicNav() {
         <div className="hidden md:flex items-center gap-8">
           <Link
             href="/about"
-            style={{ color: "#A1A1AA" }}
-            className="text-sm font-medium hover:text-[#FAFAFA] transition-colors"
+            style={{ color: "var(--theme-text-secondary)" }}
+            className="text-sm font-medium hover:text-[var(--theme-text-primary)] transition-colors"
           >
             About
           </Link>
           <Link
             href="/services"
-            style={{ color: "#A1A1AA" }}
-            className="text-sm font-medium hover:text-[#FAFAFA] transition-colors"
+            style={{ color: "var(--theme-text-secondary)" }}
+            className="text-sm font-medium hover:text-[var(--theme-text-primary)] transition-colors"
           >
             Services
           </Link>
@@ -68,29 +68,29 @@ export default function PublicNav() {
             <button
               onClick={() => setDropdownOpen(!dropdownOpen)}
               onBlur={() => setTimeout(() => setDropdownOpen(false), 200)}
-              style={{ color: "#A1A1AA" }}
-              className="flex items-center gap-1 text-sm font-medium hover:text-[#FAFAFA] transition-colors focus:outline-none"
+              style={{ color: "var(--theme-text-secondary)" }}
+              className="flex items-center gap-1 text-sm font-medium hover:text-[var(--theme-text-primary)] transition-colors focus:outline-none"
             >
               Join <ChevronDown size={14} className={`transition-transform duration-200 ${dropdownOpen ? "rotate-180" : ""}`} />
             </button>
             {dropdownOpen && (
               <div
                 style={{
-                  backgroundColor: "#0D0D14",
-                  border: "1px solid #1A1A2E",
+                  backgroundColor: "var(--theme-surface)",
+                  border: "1px solid var(--theme-border)",
                   borderRadius: "12px",
                 }}
-                className="absolute top-full left-0 mt-2 w-48 py-2 shadow-xl z-50"
+                className="absolute top-full left-0 mt-2 w-48 py-2 shadow-xl z-50 animate-fadeIn"
               >
                 <Link
                   href="/join/ambassador"
-                  className="block px-4 py-2 text-xs uppercase tracking-wider font-semibold text-[#06B6D4] hover:bg-[#1A1A2E] transition-colors"
+                  className="block px-4 py-2 text-xs uppercase tracking-wider font-semibold text-[#06B6D4] hover:bg-[var(--theme-hover)] transition-colors"
                 >
                   Ambassador Program
                 </Link>
                 <Link
                   href="/join/internship"
-                  className="block px-4 py-2 text-xs uppercase tracking-wider font-semibold text-[#06B6D4] hover:bg-[#1A1A2E] transition-colors"
+                  className="block px-4 py-2 text-xs uppercase tracking-wider font-semibold text-[#06B6D4] hover:bg-[var(--theme-hover)] transition-colors"
                 >
                   Internship Program
                 </Link>
@@ -100,15 +100,15 @@ export default function PublicNav() {
 
           <Link
             href="/community"
-            style={{ color: "#A1A1AA" }}
-            className="text-sm font-medium hover:text-[#FAFAFA] transition-colors"
+            style={{ color: "var(--theme-text-secondary)" }}
+            className="text-sm font-medium hover:text-[var(--theme-text-primary)] transition-colors"
           >
             Community
           </Link>
           <Link
             href="/contact"
-            style={{ color: "#A1A1AA" }}
-            className="text-sm font-medium hover:text-[#FAFAFA] transition-colors"
+            style={{ color: "var(--theme-text-secondary)" }}
+            className="text-sm font-medium hover:text-[var(--theme-text-primary)] transition-colors"
           >
             Contact
           </Link>
@@ -118,8 +118,8 @@ export default function PublicNav() {
         <div className="hidden md:flex items-center gap-4">
           <Link
             href="/register"
-            style={{ color: "#A1A1AA" }}
-            className="text-sm font-medium hover:text-[#FAFAFA] transition-colors"
+            style={{ color: "var(--theme-text-secondary)" }}
+            className="text-sm font-medium hover:text-[var(--theme-text-primary)] transition-colors"
           >
             Sign in
           </Link>
@@ -142,7 +142,7 @@ export default function PublicNav() {
         {/* Mobile menu button */}
         <button
           onClick={() => setMobileOpen(!mobileOpen)}
-          style={{ color: "#FAFAFA" }}
+          style={{ color: "var(--theme-text-primary)" }}
           className="md:hidden focus:outline-none"
         >
           {mobileOpen ? <X size={24} /> : <Menu size={24} />}
@@ -153,29 +153,29 @@ export default function PublicNav() {
       {mobileOpen && (
         <div
           style={{
-            backgroundColor: "#050508",
-            borderBottom: "1px solid #1A1A2E",
+            backgroundColor: "var(--theme-bg)",
+            borderBottom: "1px solid var(--theme-border)",
           }}
           className="md:hidden px-6 py-6 flex flex-col gap-4 animate-fadeIn"
         >
           <Link
             href="/about"
             onClick={() => setMobileOpen(false)}
-            style={{ color: "#A1A1AA" }}
-            className="text-sm font-medium hover:text-[#FAFAFA] py-1 border-b border-[#1A1A2E]"
+            style={{ color: "var(--theme-text-secondary)" }}
+            className="text-sm font-medium hover:text-[var(--theme-text-primary)] py-1 border-b border-[var(--theme-border)]"
           >
             About
           </Link>
           <Link
             href="/services"
             onClick={() => setMobileOpen(false)}
-            style={{ color: "#A1A1AA" }}
-            className="text-sm font-medium hover:text-[#FAFAFA] py-1 border-b border-[#1A1A2E]"
+            style={{ color: "var(--theme-text-secondary)" }}
+            className="text-sm font-medium hover:text-[var(--theme-text-primary)] py-1 border-b border-[var(--theme-border)]"
           >
             Services
           </Link>
           <div className="flex flex-col gap-2 pl-2">
-            <span style={{ color: "#52525B" }} className="text-xs uppercase tracking-wider font-semibold">Join Programs</span>
+            <span style={{ color: "var(--theme-text-muted)" }} className="text-xs uppercase tracking-wider font-semibold">Join Programs</span>
             <Link
               href="/join/ambassador"
               onClick={() => setMobileOpen(false)}
@@ -194,16 +194,16 @@ export default function PublicNav() {
           <Link
             href="/community"
             onClick={() => setMobileOpen(false)}
-            style={{ color: "#A1A1AA" }}
-            className="text-sm font-medium hover:text-[#FAFAFA] py-1 border-b border-[#1A1A2E]"
+            style={{ color: "var(--theme-text-secondary)" }}
+            className="text-sm font-medium hover:text-[var(--theme-text-primary)] py-1 border-b border-[var(--theme-border)]"
           >
             Community
           </Link>
           <Link
             href="/contact"
             onClick={() => setMobileOpen(false)}
-            style={{ color: "#A1A1AA" }}
-            className="text-sm font-medium hover:text-[#FAFAFA] py-1 border-b border-[#1A1A2E]"
+            style={{ color: "var(--theme-text-secondary)" }}
+            className="text-sm font-medium hover:text-[var(--theme-text-primary)] py-1 border-b border-[var(--theme-border)]"
           >
             Contact
           </Link>
@@ -211,8 +211,8 @@ export default function PublicNav() {
             <Link
               href="/register"
               onClick={() => setMobileOpen(false)}
-              style={{ color: "#A1A1AA" }}
-              className="text-sm font-medium hover:text-[#FAFAFA]"
+              style={{ color: "var(--theme-text-secondary)" }}
+              className="text-sm font-medium hover:text-[var(--theme-text-primary)]"
             >
               Sign in
             </Link>
