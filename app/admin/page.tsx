@@ -21,7 +21,7 @@ import {
 import { BookOpen, Users, GitBranch, ShieldAlert, Plus, LineChart, Code2, Award, Flame, Mail, GraduationCap, History, CheckCircle2, XCircle, Clock, Trash2, Edit2, ArrowLeft, FileText, Star, MessageSquare } from "lucide-react";
 import Link from "next/link";
 
-type Tab = "students" | "mentors" | "tracks" | "audits" | "curriculum" | "payments" | "mentor_applications" | "ambassador_applications" | "announcements";
+type Tab = "students" | "mentors" | "tracks" | "audits" | "curriculum" | "payments" | "mentor_applications" | "ambassador_applications" | "announcements" | "ambassadors";
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState<Tab>("students");
@@ -38,6 +38,7 @@ export default function AdminDashboard() {
   // Detailed Modal/View States
   const [selectedStudentDetailId, setSelectedStudentDetailId] = useState<string | null>(null);
   const [selectedMentorDetailId, setSelectedMentorDetailId] = useState<string | null>(null);
+  const [selectedAmbassadorDetailId, setSelectedAmbassadorDetailId] = useState<string | null>(null);
   const [adminReviewText, setAdminReviewText] = useState("");
   const [adminReviewBonusPoints, setAdminReviewBonusPoints] = useState(50);
   const [adminReviewsList, setAdminReviewsList] = useState<any[]>([]);
@@ -685,23 +686,25 @@ export default function AdminDashboard() {
         {/* KPI mini stats */}
         <div className="grid grid-cols-2 gap-2 px-4 py-4 border-b border-white/5">
           {[
-            { label: "Interns", value: totalStudents, color: "text-purple-400" },
-            { label: "Tracks", value: totalTracks, color: "text-cyan-400" },
-            { label: "Tasks", value: totalTasks, color: "text-emerald-400" },
-            { label: "Submissions", value: totalSubmissions, color: "text-yellow-400" },
+            { label: "Interns", value: totalStudents, color: "text-purple-400", span: "" },
+            { label: "Ambassadors", value: ambassadorApplications.filter((a) => a.status === "APPROVED").length, color: "text-amber-400", span: "" },
+            { label: "Tracks", value: totalTracks, color: "text-cyan-400", span: "" },
+            { label: "Tasks", value: totalTasks, color: "text-emerald-400", span: "" },
+            { label: "Submissions", value: totalSubmissions, color: "text-yellow-400", span: "col-span-2" },
           ].map((s) => (
-            <div key={s.label} className="rounded-xl bg-white/4 border border-white/5 p-2.5 text-center">
-              <p className={`text-base font-black ${s.color}`}>{s.value}</p>
+            <div key={s.label} className={`rounded-xl bg-white/4 border border-white/5 p-2 text-center ${s.span}`}>
+              <p className={`text-sm font-black ${s.color}`}>{s.value}</p>
               <p className="text-[9px] text-slate-500 font-semibold leading-none mt-0.5">{s.label}</p>
             </div>
           ))}
         </div>
 
         {/* Nav Items */}
-        <nav className="flex-1 px-3 py-3 space-y-1 overflow-y-auto">
+        <nav className="flex-1 px-3 py-2 space-y-1 overflow-y-auto custom-sidebar-scroll">
           {([
             { id: "students", label: "Enrolled Interns", icon: Users, badge: totalStudents },
             { id: "mentors", label: "Mentor Performance", icon: GraduationCap, badge: mentors.length },
+            { id: "ambassadors", label: "Active Ambassadors", icon: Award, badge: ambassadorApplications.filter((a) => a.status === "APPROVED").length || null },
             { id: "tracks", label: "Curriculum Tracks", icon: GitBranch, badge: totalTracks },
             { id: "curriculum", label: "Outline Editor", icon: BookOpen, badge: null },
             { id: "audits", label: "Audit Feed", icon: History, badge: null },
@@ -713,16 +716,16 @@ export default function AdminDashboard() {
             <button
               key={id}
               onClick={() => setActiveTab(id as Tab)}
-              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition-all duration-200 group ${
+              className={`w-full flex items-center gap-2 px-3 py-2 rounded-xl text-[11px] font-semibold transition-all duration-200 group ${
                 activeTab === id
                   ? "bg-purple-500/15 border border-purple-500/25 text-white shadow-[0_0_12px_rgba(168,85,247,0.15)]"
                   : "text-slate-400 hover:bg-white/5 hover:text-white border border-transparent"
               }`}
             >
-              <Icon size={15} className={activeTab === id ? "text-purple-400" : "text-slate-500 group-hover:text-slate-300"} />
-              <span className="flex-1 text-left">{label}</span>
+              <Icon size={14} className={activeTab === id ? "text-purple-400" : "text-slate-500 group-hover:text-slate-300"} />
+              <span className="flex-1 text-left truncate">{label}</span>
               {badge ? (
-                <span className={`rounded-full px-1.5 py-0.5 text-[9px] font-black ${
+                <span className={`rounded-full px-1.5 py-0.5 text-[8px] font-black ${
                   badgeAlert ? "bg-yellow-500/15 text-yellow-500 animate-pulse" : "bg-white/5 text-slate-500"
                 }`}>
                   {badge}
@@ -1046,6 +1049,269 @@ export default function AdminDashboard() {
                           </tr>
                         );
                       })}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )
+          )}
+
+          {activeTab === "ambassadors" && (
+            selectedAmbassadorDetailId ? (() => {
+              const ambassador = ambassadorApplications.find((a) => a.id === selectedAmbassadorDetailId);
+              if (!ambassador) return null;
+              
+              const ambassadorSubs = outreachSubmissions.filter((s) => s.email.toLowerCase() === ambassador.email.toLowerCase());
+              const approvedSubs = ambassadorSubs.filter((s) => s.status === "APPROVED");
+              
+              const totalOutreachPoints = approvedSubs.reduce((sum, s) => {
+                let pts = 100;
+                if (s.taskLabel.includes("Task B")) pts = 300;
+                else if (s.taskLabel.includes("Task C")) pts = 200;
+                return sum + pts;
+              }, 0);
+              
+              const totalPeersReached = approvedSubs.reduce((sum, s) => sum + (Number(s.peersReached) || 0), 0);
+              const totalWebinars = approvedSubs.filter((s) => s.taskLabel.includes("Webinar") || s.title.toLowerCase().includes("webinar")).length;
+
+              return (
+                <div className="space-y-6 animate-fade-in text-xs">
+                  <div className="flex items-center justify-between">
+                    <button
+                      onClick={() => setSelectedAmbassadorDetailId(null)}
+                      className="flex items-center gap-1.5 text-xs text-slate-400 hover:text-white transition-colors"
+                    >
+                      <ArrowLeft size={14} /> Back to Directory
+                    </button>
+                    <span className="rounded bg-amber-500/10 border border-amber-500/25 px-2.5 py-1 text-[10px] font-extrabold text-amber-400 uppercase">
+                      Admin Ambassador Inspector
+                    </span>
+                  </div>
+
+                  <div className="grid gap-6 md:grid-cols-3">
+                    <div className="md:col-span-2 rounded-xl border border-white/8 bg-[#080f1e]/60 p-6 space-y-4">
+                      <div className="flex items-center gap-4">
+                        {ambassador.avatarImage ? (
+                          <img src={ambassador.avatarImage} alt={ambassador.fullName} className="h-16 w-16 rounded-full object-cover border border-white/10 shrink-0" />
+                        ) : (
+                          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-amber-500 to-yellow-500 text-lg font-extrabold text-[#020B18] shrink-0">
+                            {ambassador.fullName?.substring(0, 2).toUpperCase()}
+                          </div>
+                        )}
+                        <div>
+                          <p className="text-[10px] font-bold text-amber-400 uppercase tracking-wider">Ambassador Profile</p>
+                          <h3 className="font-display text-2xl font-black text-white mt-1">{ambassador.fullName}</h3>
+                          <p className="text-xs text-slate-400">@{ambassador.fullName.toLowerCase().replace(/\s+/g, "-")} · {ambassador.email}</p>
+                        </div>
+                      </div>
+
+                      <div className="grid gap-4 sm:grid-cols-3 text-xs border-t border-white/5 pt-4">
+                        <div>
+                          <span className="text-slate-500 font-bold block">University & City:</span>
+                          <span className="text-slate-200 font-semibold">{ambassador.university} ({ambassador.city})</span>
+                        </div>
+                        <div>
+                          <span className="text-slate-500 font-bold block">Degree & Semester:</span>
+                          <span className="text-slate-200 font-semibold">{ambassador.degree} · Sem {ambassador.semester}</span>
+                        </div>
+                        <div>
+                          <span className="text-slate-500 font-bold block">Contact Phone:</span>
+                          <span className="text-slate-200 font-semibold">{ambassador.phone}</span>
+                        </div>
+                      </div>
+
+                      <div className="border-t border-white/5 pt-4">
+                        <span className="text-slate-500 font-bold block text-xs mb-2">Motivation Statement</span>
+                        <p className="text-xs text-slate-300 bg-white/4 p-3 rounded-lg border border-white/5 leading-relaxed italic">
+                          "{ambassador.whyAmbassador}"
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="rounded-xl border border-white/8 bg-[#080f1e]/60 p-6 flex flex-col justify-between">
+                      <div className="space-y-3">
+                        <p className="text-[10px] font-bold text-amber-400 uppercase tracking-wider">Outreach Performance</p>
+                        <div className="flex justify-between items-baseline">
+                          <span className="text-xs text-slate-400">Total Reach:</span>
+                          <span className="text-base font-extrabold text-cyan-400">{totalPeersReached.toLocaleString()} peers</span>
+                        </div>
+                        <div className="flex justify-between items-baseline">
+                          <span className="text-xs text-slate-400">Outreach Points:</span>
+                          <span className="text-lg font-black text-amber-400">{totalOutreachPoints.toLocaleString()} pts</span>
+                        </div>
+                        <div className="flex justify-between items-baseline">
+                          <span className="text-xs text-slate-400">Webinars Hosted:</span>
+                          <span className="text-xs font-bold text-slate-300">{totalWebinars} sessions</span>
+                        </div>
+                        <div className="flex justify-between items-baseline">
+                          <span className="text-xs text-slate-400">Availability:</span>
+                          <span className="text-xs font-bold text-slate-300">{ambassador.availability} hrs/week</span>
+                        </div>
+                      </div>
+
+                      <div className="flex gap-2 border-t border-white/5 pt-4 mt-4">
+                        {ambassador.linkedin && (
+                          <a href={ambassador.linkedin} target="_blank" rel="noopener noreferrer" className="flex-1 py-1.5 rounded-lg bg-cyan-500/10 border border-cyan-500/25 text-center text-[10px] font-bold text-cyan-400 hover:bg-cyan-500/20 transition-all">
+                            LinkedIn
+                          </a>
+                        )}
+                        {ambassador.instagram && (
+                          <a href={ambassador.instagram} target="_blank" rel="noopener noreferrer" className="flex-1 py-1.5 rounded-lg bg-pink-500/10 border border-pink-500/25 text-center text-[10px] font-bold text-pink-400 hover:bg-pink-500/20 transition-all">
+                            Instagram
+                          </a>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="rounded-xl border border-white/8 bg-[#080f1e]/60 p-6 space-y-4">
+                    <h4 className="font-display text-sm font-bold text-white flex items-center gap-2">
+                      <CheckCircle2 className="text-cyan-400" size={16} />
+                      Outreach Verification History
+                    </h4>
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-left text-xs text-slate-300">
+                        <thead className="bg-white/4 font-semibold uppercase tracking-wider text-slate-400 border-b border-white/8">
+                          <tr>
+                            <th className="px-4 py-3">Task Label</th>
+                            <th className="px-4 py-3">Activity</th>
+                            <th className="px-4 py-3">Proof</th>
+                            <th className="px-4 py-3 text-center">Reach</th>
+                            <th className="px-4 py-3">Status</th>
+                            <th className="px-4 py-3 text-right">Actions</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-white/8">
+                          {ambassadorSubs.map((sub) => (
+                            <tr key={sub.id} className="hover:bg-white/4 transition-colors">
+                              <td className="px-4 py-3 font-mono text-[10px] text-slate-400">{sub.taskLabel}</td>
+                              <td className="px-4 py-3 font-semibold text-white">{sub.title}</td>
+                              <td className="px-4 py-3">
+                                <a href={sub.proofUrl} target="_blank" rel="noopener noreferrer" className="text-cyan-400 hover:underline">
+                                  View Proof
+                                </a>
+                              </td>
+                              <td className="px-4 py-3 text-center font-mono">{sub.peersReached}</td>
+                              <td className="px-4 py-3">
+                                <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold ${
+                                  sub.status === "APPROVED"
+                                    ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                                    : sub.status === "REJECTED"
+                                    ? "bg-red-500/10 text-red-400 border border-red-500/20"
+                                    : "bg-yellow-500/10 text-yellow-500 border border-yellow-500/20"
+                                }`}>
+                                  {sub.status}
+                                </span>
+                              </td>
+                              <td className="px-4 py-3 text-right">
+                                {sub.status === "PENDING" && (
+                                  <div className="flex justify-end gap-1.5">
+                                    <button
+                                      onClick={() => handleApproveOutreach(sub.id)}
+                                      className="rounded bg-emerald-500/10 border border-emerald-500/20 px-2 py-1 text-[10px] font-bold text-emerald-400 hover:bg-emerald-500/20 transition-all"
+                                    >
+                                      Verify
+                                    </button>
+                                    <button
+                                      onClick={() => handleRejectOutreach(sub.id)}
+                                      className="rounded bg-red-500/10 border border-red-500/20 px-2 py-1 text-[10px] font-bold text-red-400 hover:bg-red-500/20 transition-all"
+                                    >
+                                      Reject
+                                    </button>
+                                  </div>
+                                )}
+                              </td>
+                            </tr>
+                          ))}
+                          {ambassadorSubs.length === 0 && (
+                            <tr>
+                              <td colSpan={6} className="text-center text-slate-500 py-8 italic">
+                                No outreach submission records found.
+                              </td>
+                            </tr>
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              );
+            })() : (
+              <div className="space-y-4">
+                <h3 className="font-display text-lg font-bold text-white flex items-center gap-2">
+                  <Award className="text-amber-400" size={20} />
+                  Campus Ambassadors Directory
+                </h3>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-sm text-slate-300">
+                    <thead className="bg-white/4 text-xs font-semibold uppercase tracking-wider text-slate-400 border-b border-white/8">
+                      <tr>
+                        <th className="px-6 py-4">Ambassador</th>
+                        <th className="px-6 py-4">University & Semester</th>
+                        <th className="px-6 py-4">Social Links</th>
+                        <th className="px-6 py-4">Reach & Availability</th>
+                        <th className="px-6 py-4 text-right">Outreach Points</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-white/8">
+                      {ambassadorApplications.filter((a) => a.status === "APPROVED").map((amb) => {
+                        const ambSubs = outreachSubmissions.filter((s) => s.email.toLowerCase() === amb.email.toLowerCase() && s.status === "APPROVED");
+                        const totalPoints = ambSubs.reduce((sum, s) => {
+                          let pts = 100;
+                          if (s.taskLabel.includes("Task B")) pts = 300;
+                          else if (s.taskLabel.includes("Task C")) pts = 200;
+                          return sum + pts;
+                        }, 0);
+                        return (
+                          <tr key={amb.id} onClick={() => setSelectedAmbassadorDetailId(amb.id)} className="hover:bg-white/4 transition-colors cursor-pointer">
+                            <td className="px-6 py-4 font-semibold text-white">
+                              <div className="flex items-center gap-3">
+                                {amb.avatarImage ? (
+                                  <img src={amb.avatarImage} alt={amb.fullName} className="h-9 w-9 rounded-full object-cover border border-white/10 shrink-0" />
+                                ) : (
+                                  <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-amber-500 to-yellow-500 text-xs font-extrabold text-[#020B18] shrink-0">
+                                    {amb.fullName?.substring(0, 2).toUpperCase()}
+                                  </div>
+                                )}
+                                <div>
+                                  <p>{amb.fullName}</p>
+                                  <p className="text-[10px] text-slate-500 font-medium">{amb.email}</p>
+                                </div>
+                              </div>
+                            </td>
+                            <td className="px-6 py-4">
+                              <div>
+                                <p className="text-white font-medium">{amb.university} ({amb.city})</p>
+                                <p className="text-[10px] text-slate-400">{amb.degree} · Sem {amb.semester}</p>
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 space-y-0.5">
+                              {amb.linkedin && (
+                                <a href={amb.linkedin} onClick={(e) => e.stopPropagation()} target="_blank" rel="noopener noreferrer" className="text-xs text-cyan-400 hover:underline block">LinkedIn</a>
+                              )}
+                              {amb.instagram && (
+                                <a href={amb.instagram} onClick={(e) => e.stopPropagation()} target="_blank" rel="noopener noreferrer" className="text-xs text-purple-400 hover:underline block">Instagram</a>
+                              )}
+                            </td>
+                            <td className="px-6 py-4 text-slate-400">
+                              <div>
+                                <p className="text-white">Est. Reach: {amb.reachEstimate}</p>
+                                <p className="text-[10px] text-slate-400">{amb.availability} hrs/week</p>
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 text-right font-bold text-amber-400">
+                              {totalPoints.toLocaleString()} pts
+                            </td>
+                          </tr>
+                        );
+                      })}
+                      {ambassadorApplications.filter((a) => a.status === "APPROVED").length === 0 && (
+                        <tr>
+                          <td colSpan={5} className="text-center text-xs text-slate-500 py-12">
+                            No approved Campus Ambassadors found. Go to Ambassador Apps to approve them.
+                          </td>
+                        </tr>
+                      )}
                     </tbody>
                   </table>
                 </div>
