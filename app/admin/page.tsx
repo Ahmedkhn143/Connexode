@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect } from "react";
 import {
@@ -24,7 +24,7 @@ import Link from "next/link";
 type Tab = "students" | "mentors" | "tracks" | "audits" | "curriculum" | "payments" | "mentor_applications" | "ambassador_applications" | "announcements";
 
 export default function AdminDashboard() {
-  const [activeTab, setActiveTab] = useState<Tab>("ambassador_applications");
+  const [activeTab, setActiveTab] = useState<Tab>("students");
   const [tracks, setTracks] = useState<Track[]>(TRACKS);
   const [tasksList, setTasksList] = useState<WeeklyTask[]>([]);
   const [logsList, setLogsList] = useState(MOCK_TASK_EDIT_LOGS);
@@ -700,7 +700,6 @@ export default function AdminDashboard() {
         {/* Nav Items */}
         <nav className="flex-1 px-3 py-3 space-y-1 overflow-y-auto">
           {([
-            /*
             { id: "students", label: "Enrolled Interns", icon: Users, badge: totalStudents },
             { id: "mentors", label: "Mentor Performance", icon: GraduationCap, badge: mentors.length },
             { id: "tracks", label: "Curriculum Tracks", icon: GitBranch, badge: totalTracks },
@@ -708,7 +707,6 @@ export default function AdminDashboard() {
             { id: "audits", label: "Audit Feed", icon: History, badge: null },
             { id: "payments", label: "Approvals Queue", icon: Clock, badge: payments.filter((p) => p.status === "PENDING").length || null, badgeAlert: true },
             { id: "mentor_applications", label: "Mentor Applications", icon: GraduationCap, badge: mentorApplications.filter((a) => a.status === "PENDING").length || null, badgeAlert: true },
-            */
             { id: "ambassador_applications", label: "Ambassador Apps", icon: Star, badge: ambassadorApplications.filter((a) => a.status === "PENDING").length || null, badgeAlert: true },
             { id: "announcements", label: "Announcements Board", icon: ShieldAlert, badge: null },
           ] as any[]).map(({ id, label, icon: Icon, badge, badgeAlert }) => (
