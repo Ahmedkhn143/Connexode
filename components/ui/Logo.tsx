@@ -26,9 +26,9 @@ export function Logo({ size = "default", showTagline = false }: LogoProps) {
   };
 
   const sizes = {
-    sm: { icon: 24, font: "text-sm" },
-    default: { icon: 32, font: "text-lg" },
-    lg: { icon: 48, font: "text-2xl" },
+    sm: { icon: 32, font: "text-sm" },
+    default: { icon: 42, font: "text-lg" },
+    lg: { icon: 56, font: "text-2xl" },
   };
 
   const current = sizes[size] || sizes.default;
@@ -36,65 +36,15 @@ export function Logo({ size = "default", showTagline = false }: LogoProps) {
   return (
     <div
       onClick={handleClick}
-      className="inline-flex items-center gap-2 select-none cursor-pointer"
+      className="inline-flex items-center gap-1 select-none cursor-pointer"
     >
-      <svg
+      <img
+        src="/logo.png"
+        alt="Connexode Logo"
         width={current.icon}
         height={current.icon}
-        viewBox="0 0 100 100"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-        className="flex-shrink-0 animate-fadeIn"
-      >
-        {/* Outer C-shaped Hexagon */}
-        <path
-          d="M 80,32 L 65,18 L 35,18 L 20,50 L 35,82 L 65,82 L 80,68"
-          fill="none"
-          stroke="var(--theme-logo-text)"
-          strokeWidth="12"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-        {/* Inner Left Bracket (Violet Gradient) */}
-        <path
-          d="M 48,38 L 38,50 L 48,62"
-          fill="none"
-          stroke="url(#violetGradient)"
-          strokeWidth="8"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-        {/* Inner Right Bracket (Cyan Gradient) */}
-        <path
-          d="M 68,38 L 78,50 L 68,62"
-          fill="none"
-          stroke="url(#cyanGradient)"
-          strokeWidth="8"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-        {/* Center Dot */}
-        <circle
-          cx="58"
-          cy="50"
-          r="6"
-          fill="url(#dotGradient)"
-        />
-        <defs>
-          <linearGradient id="violetGradient" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stopColor="#7C3AED" />
-            <stop offset="100%" stopColor="#A855F7" />
-          </linearGradient>
-          <linearGradient id="cyanGradient" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stopColor="#06B6D4" />
-            <stop offset="100%" stopColor="#0891B2" />
-          </linearGradient>
-          <linearGradient id="dotGradient" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stopColor="#7C3AED" />
-            <stop offset="100%" stopColor="#06B6D4" />
-          </linearGradient>
-        </defs>
-      </svg>
+        className="flex-shrink-0 object-contain animate-fadeIn"
+      />
 
       {/* Show name if clicked */}
       {mounted && clicked && (
