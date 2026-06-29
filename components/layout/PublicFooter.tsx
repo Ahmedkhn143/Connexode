@@ -49,6 +49,8 @@ const FacebookIcon = ({ size = 18 }: { size?: number }) => (
   </svg>
 );
 
+import Logo from "@/components/ui/Logo";
+
 export default function PublicFooter() {
   return (
     <footer
@@ -62,17 +64,7 @@ export default function PublicFooter() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-10 mb-12">
           {/* Brand */}
           <div className="flex flex-col gap-4">
-            <span
-              style={{
-                fontFamily: "Inter, sans-serif",
-                fontWeight: 800,
-                fontSize: "18px",
-                letterSpacing: "-0.5px",
-                color: "var(--theme-logo-text)",
-              }}
-            >
-              Conne<span style={{ color: "#06B6D4" }}>x</span>ode
-            </span>
+            <Logo size="default" />
             <p style={{ color: "var(--theme-text-secondary)" }} className="text-sm">
               Build. Connect. Grow.
             </p>

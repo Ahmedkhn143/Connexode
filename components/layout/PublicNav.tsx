@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Menu, X, ChevronDown } from "lucide-react";
+import Logo from "@/components/ui/Logo";
 
 export default function PublicNav() {
   const [scrolled, setScrolled] = useState(false);
@@ -32,18 +33,8 @@ export default function PublicNav() {
     >
       <div className="mx-auto max-w-7xl px-6 h-20 flex items-center justify-between">
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-1 select-none">
-          <span
-            style={{
-              fontFamily: "Inter, sans-serif",
-              fontWeight: 800,
-              fontSize: "18px",
-              letterSpacing: "-0.5px",
-              color: "var(--theme-logo-text)",
-            }}
-          >
-            Conne<span style={{ color: "#06B6D4" }}>x</span>ode
-          </span>
+        <Link href="/" className="flex items-center select-none">
+          <Logo size="default" />
         </Link>
 
         {/* Desktop Links */}
