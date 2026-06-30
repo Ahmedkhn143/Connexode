@@ -6,9 +6,10 @@ import { useTheme } from "next-themes";
 interface LogoProps {
   size?: "sm" | "default" | "lg";
   showTagline?: boolean;
+  alwaysShowText?: boolean;
 }
 
-export function Logo({ size = "default", showTagline = false }: LogoProps) {
+export function Logo({ size = "default", showTagline = false, alwaysShowText = false }: LogoProps) {
   const [isHovered, setIsHovered] = useState(false);
   const { resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
@@ -103,7 +104,7 @@ export function Logo({ size = "default", showTagline = false }: LogoProps) {
       {/* Text Container with smooth expand transition on hover */}
       <div
         className={`flex items-center overflow-hidden transition-all duration-500 ease-in-out ${
-          isHovered ? `${current.textWidth} opacity-100` : "w-0 opacity-0"
+          alwaysShowText || isHovered ? `${current.textWidth} opacity-100` : "w-0 opacity-0"
         }`}
       >
         <span

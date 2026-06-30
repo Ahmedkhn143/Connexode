@@ -20,6 +20,7 @@ import {
 } from "@/lib/mock-data";
 import { BookOpen, Users, GitBranch, ShieldAlert, Plus, LineChart, Code2, Award, Flame, Mail, GraduationCap, History, CheckCircle2, XCircle, Clock, Trash2, Edit2, ArrowLeft, FileText, Star, MessageSquare, Menu, X } from "lucide-react";
 import Link from "next/link";
+import Logo from "@/components/ui/Logo";
 
 type Tab = "students" | "mentors" | "tracks" | "audits" | "curriculum" | "payments" | "mentor_applications" | "ambassador_applications" | "announcements" | "ambassadors";
 
@@ -32,6 +33,7 @@ export default function AdminDashboard() {
   const [payments, setPayments] = useState<any[]>([]);
   const [selectedReceipt, setSelectedReceipt] = useState<string | null>(null);
   const [selectedApplication, setSelectedApplication] = useState<any | null>(null);
+  const [selectedAmbassadorApplication, setSelectedAmbassadorApplication] = useState<any | null>(null);
   const [mentorApplications, setMentorApplications] = useState<any[]>([]);
   const [ambassadorApplications, setAmbassadorApplications] = useState<any[]>([]);
   const [outreachSubmissions, setOutreachSubmissions] = useState<any[]>([]);
@@ -320,9 +322,9 @@ export default function AdminDashboard() {
 
     // Simulated email notification
     alert(
-      `Γ£à Payment APPROVED!\n\n` +
-      `≡ƒôº Email sent to: ${payment?.userName || "student"}\n` +
-      `Subject: "Your Connexode Payment is Verified ΓÇö Start Your Internship!"\n\n` +
+      `✅ Payment APPROVED!\n\n` +
+      `📧 Email sent to: ${payment?.userName || "student"}\n` +
+      `Subject: "Your Connexode Payment is Verified — Start Your Internship!"\n\n` +
       `Message: "Hi ${payment?.userName || "student"}, your payment of Rs. 500 for ${payment?.trackTitle || "your internship"} has been verified. Your LMS workspace is now fully active. Visit your dashboard to begin."\n\n` +
       `The student's dashboard will show a confirmation banner on their next login.`
     );
@@ -393,7 +395,7 @@ export default function AdminDashboard() {
     setAmbassadorApplications(apps);
     localStorage.setItem("connexode_ambassador_applications", JSON.stringify(apps));
 
-    alert(`Γ£à Campus Ambassador Application for ${app.fullName} APPROVED!`);
+    alert(`✅ Campus Ambassador Application for ${app.fullName} APPROVED!`);
   };
 
   const handleRejectAmbassador = (appId: string) => {
@@ -406,7 +408,7 @@ export default function AdminDashboard() {
     setAmbassadorApplications(apps);
     localStorage.setItem("connexode_ambassador_applications", JSON.stringify(apps));
 
-    alert(`Γ¥î Campus Ambassador Application for ${app.fullName} REJECTED.`);
+    alert(`❌ Campus Ambassador Application for ${app.fullName} REJECTED.`);
   };
 
   const handleApproveOutreach = (subId: string) => {
@@ -435,7 +437,7 @@ export default function AdminDashboard() {
       localStorage.setItem("connexode_dynamic_users", JSON.stringify(dynamicUsers));
     }
 
-    alert(`Γ£à Verified outreach log for ${sub.fullName}! Ambassador rewarded with +${rewardPoints} PTS.`);
+    alert(`✅ Verified outreach log for ${sub.fullName}! Ambassador rewarded with +${rewardPoints} PTS.`);
   };
 
   const handleRejectOutreach = (subId: string) => {
@@ -447,7 +449,7 @@ export default function AdminDashboard() {
     setOutreachSubmissions(subs);
     localStorage.setItem("connexode_outreach_submissions", JSON.stringify(subs));
 
-    alert(`Γ¥î Rejected outreach activity log for ${subs[subIndex].fullName}.`);
+    alert(`❌ Rejected outreach activity log for ${subs[subIndex].fullName}.`);
   };
 
   const handleAssignTask = (e: React.FormEvent) => {
@@ -682,13 +684,10 @@ export default function AdminDashboard() {
       {/* ── LEFT SIDEBAR ── */}
       <aside className={`fixed top-0 left-0 h-screen w-[240px] bg-[#080f1e] border-r border-white/5 flex flex-col z-40 shrink-0 transition-transform duration-300 md:translate-x-0 ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"}`}>
         {/* Brand */}
-        <div className="px-5 py-5 border-b border-white/5 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <img src="/logo.png" alt="Logo" className="h-8 w-8 rounded-lg object-cover shadow-[0_0_12px_rgba(0,245,255,0.3)]" />
-            <div>
-              <p className="font-display text-sm font-bold text-white">Connex<span className="text-cyan-400">ode</span></p>
-              <p className="text-[9px] font-extrabold uppercase tracking-widest text-purple-400">Admin Panel</p>
-            </div>
+        <div className="px-5 py-4 border-b border-white/5 flex items-center justify-between">
+          <div className="flex flex-col">
+            <Logo size="sm" alwaysShowText />
+            <p className="text-[9px] font-extrabold uppercase tracking-widest text-purple-400 pl-14 -mt-2">Admin Panel</p>
           </div>
           <button 
             onClick={() => setIsSidebarOpen(false)}
@@ -844,7 +843,7 @@ export default function AdminDashboard() {
                       <div>
                         <p className="text-[10px] font-bold text-purple-400 uppercase tracking-wider">Intern Details</p>
                         <h3 className="font-display text-2xl font-black text-white mt-1">{student.name}</h3>
-                        <p className="text-xs text-slate-400">@{student.username} ┬╖ {student.email}</p>
+                        <p className="text-xs text-slate-400">@{student.username} · {student.email}</p>
                       </div>
 
                       <div className="grid gap-4 sm:grid-cols-3 text-xs border-t border-white/5 pt-4">
@@ -854,7 +853,7 @@ export default function AdminDashboard() {
                         </div>
                         <div>
                           <span className="text-slate-500 font-bold block">Current Week / Day:</span>
-                          <span className="text-slate-200 font-semibold">Week {student.currentWeek} ┬╖ Day {student.currentDay}</span>
+                          <span className="text-slate-200 font-semibold">Week {student.currentWeek} · Day {student.currentDay}</span>
                         </div>
                         <div>
                           <span className="text-slate-500 font-bold block">Join Date:</span>
@@ -914,7 +913,7 @@ export default function AdminDashboard() {
                           return (
                             <div key={task.id} className="p-3 rounded-lg border border-white/5 bg-[#020B18]/40 flex justify-between items-start text-xs">
                               <div>
-                                <span className="text-[9px] font-bold text-slate-500 uppercase">Week {task.weekNo} ┬╖ Day {task.dayNo}</span>
+                                <span className="text-[9px] font-bold text-slate-500 uppercase">Week {task.weekNo} · Day {task.dayNo}</span>
                                 <h5 className="font-bold text-slate-200">{task.title}</h5>
                               </div>
                               <span className={`text-[9px] font-extrabold px-1.5 py-0.5 rounded ${
@@ -1072,7 +1071,7 @@ export default function AdminDashboard() {
                               </span>
                             </td>
                             <td className="px-6 py-4 text-slate-400">
-                              Week {student.currentWeek} ┬╖ Day {student.currentDay}
+                              Week {student.currentWeek} · Day {student.currentDay}
                             </td>
                             <td className="px-6 py-4 font-semibold text-orange-400">
                               <span className="flex items-center gap-1">
@@ -1417,7 +1416,7 @@ export default function AdminDashboard() {
                           <span className="text-slate-500 font-bold block">Assigned Tracks:</span>
                           <div className="text-slate-200 font-semibold space-y-0.5">
                             {assignments.map((a, i) => (
-                              <div key={i}>ΓÇó {a.trackTitle}</div>
+                              <div key={i}>• {a.trackTitle}</div>
                             ))}
                             {assignments.length === 0 && <div>None</div>}
                           </div>
@@ -1496,7 +1495,7 @@ export default function AdminDashboard() {
                           <div key={s.id} className="p-3 rounded-lg border border-white/5 bg-[#020B18]/40 flex justify-between items-center text-xs">
                             <div>
                               <h5 className="font-bold text-white">{s.name}</h5>
-                              <p className="text-[10px] text-slate-500">Week {s.currentWeek} ┬╖ Day {s.currentDay}</p>
+                              <p className="text-[10px] text-slate-500">Week {s.currentWeek} · Day {s.currentDay}</p>
                             </div>
                             <span className="text-cyan-400 font-bold">{s.points} pts</span>
                           </div>
@@ -1570,7 +1569,7 @@ export default function AdminDashboard() {
                               <div className="flex flex-col gap-1">
                                 {assignments.map((asg, i) => (
                                   <span key={i} className="text-xs text-slate-300 font-medium">
-                                    ΓÇó {asg.trackTitle}
+                                    • {asg.trackTitle}
                                   </span>
                                 ))}
                               </div>
@@ -2077,7 +2076,7 @@ export default function AdminDashboard() {
                         >
                           <div className="space-y-2">
                             <span className="rounded-full bg-purple-500/10 border border-purple-500/20 px-2 py-0.5 text-[9px] font-bold text-purple-400">
-                              Week {task.weekNo} ┬╖ Day {task.dayNo}
+                              Week {task.weekNo} · Day {task.dayNo}
                             </span>
                             <h4 className="text-sm font-bold text-white mt-1.5">{task.title}</h4>
                             <p className="text-xs text-slate-400 leading-relaxed max-w-xl">{task.taskDetails}</p>
@@ -2361,7 +2360,6 @@ export default function AdminDashboard() {
                       <th className="px-6 py-4">Name / Contact</th>
                       <th className="px-6 py-4">University & Semester</th>
                       <th className="px-6 py-4">LinkedIn / Socials</th>
-                      <th className="px-6 py-4">Motivation / Why</th>
                       <th className="px-6 py-4">Reach & Availability</th>
                       <th className="px-6 py-4">Status</th>
                       <th className="px-6 py-4 text-right">Actions</th>
@@ -2370,7 +2368,11 @@ export default function AdminDashboard() {
                   <tbody className="divide-y divide-white/8">
                     {ambassadorApplications.map((app) => (
                       <tr key={app.id} className="hover:bg-white/4 transition-colors">
-                        <td className="px-6 py-4 font-semibold text-white animate-fade-in">
+                        <td 
+                          onClick={() => setSelectedAmbassadorApplication(app)}
+                          className="px-6 py-4 font-semibold text-white animate-fade-in cursor-pointer hover:text-cyan-400 transition-colors"
+                          title="Click to view full profile details"
+                        >
                           <div className="flex items-center gap-3">
                             {app.avatarImage ? (
                               <img src={app.avatarImage} alt={app.fullName} className="h-10 w-10 rounded-full object-cover border border-white/10 shrink-0" />
@@ -2380,7 +2382,7 @@ export default function AdminDashboard() {
                               </div>
                             )}
                             <div>
-                              <p>{app.fullName}</p>
+                              <p className="font-bold">{app.fullName}</p>
                               <p className="text-[10px] text-slate-500 font-mono mt-0.5">{app.email}</p>
                               <p className="text-[10px] text-slate-500 font-mono">{app.phone}</p>
                             </div>
@@ -2403,9 +2405,6 @@ export default function AdminDashboard() {
                               <a href={app.instagram} target="_blank" rel="noopener noreferrer" className="text-xs text-purple-400 hover:underline hover:text-purple-300">Instagram</a>
                             </div>
                           )}
-                        </td>
-                        <td className="px-6 py-4 max-w-[200px] text-xs text-slate-400 truncate" title={app.whyAmbassador}>
-                          {app.whyAmbassador}
                         </td>
                         <td className="px-6 py-4">
                           <div>
@@ -2823,6 +2822,191 @@ export default function AdminDashboard() {
                     >
                       Download Resume
                     </a>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Lightbox / Modal for Campus Ambassador Application Details */}
+        {selectedAmbassadorApplication && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 p-4 backdrop-blur-sm overflow-y-auto">
+            <div className="relative max-w-2xl w-full bg-slate-900 border border-white/10 rounded-2xl overflow-hidden shadow-2xl flex flex-col my-8">
+              <div className="flex items-center justify-between px-6 py-4 border-b border-white/5 bg-slate-950">
+                <div>
+                  <h3 className="text-sm font-bold text-white">Campus Ambassador Application Details</h3>
+                  <p className="text-[10px] text-slate-500">Status: {selectedAmbassadorApplication.status}</p>
+                </div>
+                <button
+                  onClick={() => setSelectedAmbassadorApplication(null)}
+                  className="rounded-lg bg-white/5 px-3 py-1.5 text-xs text-slate-400 hover:text-white hover:bg-white/10 transition-all"
+                >
+                  Close
+                </button>
+              </div>
+              
+              <div className="p-6 space-y-5 text-xs text-slate-300 overflow-y-auto max-h-[70vh]">
+                {/* Personal Info */}
+                <div className="space-y-2">
+                  <h4 className="font-bold text-cyan-400 uppercase tracking-wider text-[10px] border-b border-white/5 pb-1">
+                    Personal Details
+                  </h4>
+                  <div className="flex gap-4 items-start">
+                    {selectedAmbassadorApplication.avatarImage ? (
+                      <img
+                        src={selectedAmbassadorApplication.avatarImage}
+                        alt="Applicant Avatar"
+                        className="h-16 w-16 rounded-full object-cover border border-white/10 shadow"
+                      />
+                    ) : (
+                      <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-cyan-500 to-teal-500 text-sm font-extrabold text-[#020B18] shrink-0 shadow">
+                        {selectedAmbassadorApplication.fullName?.substring(0, 2).toUpperCase()}
+                      </div>
+                    )}
+                    <div className="flex-1 grid grid-cols-2 gap-3">
+                      <div>
+                        <span className="text-slate-500 font-medium">Full Name:</span>
+                        <p className="text-white font-semibold mt-0.5">{selectedAmbassadorApplication.fullName}</p>
+                      </div>
+                      <div>
+                        <span className="text-slate-500 font-medium">Email Address:</span>
+                        <p className="text-white font-semibold mt-0.5 font-mono">{selectedAmbassadorApplication.email}</p>
+                      </div>
+                      <div>
+                        <span className="text-slate-500 font-medium">Phone Number:</span>
+                        <p className="text-white font-mono mt-0.5">{selectedAmbassadorApplication.phone || "(Not Provided)"}</p>
+                      </div>
+                      <div>
+                        <span className="text-slate-500 font-medium">Application Status:</span>
+                        <p className="mt-0.5">
+                          <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold ${
+                            selectedAmbassadorApplication.status === "APPROVED"
+                              ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                              : selectedAmbassadorApplication.status === "REJECTED"
+                              ? "bg-red-500/10 text-red-400 border border-red-500/20"
+                              : "bg-yellow-500/10 text-yellow-500 border border-yellow-500/20"
+                          }`}>
+                            {selectedAmbassadorApplication.status}
+                          </span>
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Academic Details */}
+                <div className="space-y-2">
+                  <h4 className="font-bold text-cyan-400 uppercase tracking-wider text-[10px] border-b border-white/5 pb-1">
+                    Academic Information
+                  </h4>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <span className="text-slate-500 font-medium">University / College:</span>
+                      <p className="text-white font-semibold mt-0.5">{selectedAmbassadorApplication.university}</p>
+                    </div>
+                    <div>
+                      <span className="text-slate-500 font-medium">City:</span>
+                      <p className="text-white font-semibold mt-0.5">{selectedAmbassadorApplication.city}</p>
+                    </div>
+                    <div>
+                      <span className="text-slate-500 font-medium">Degree / Major:</span>
+                      <p className="text-white mt-0.5">{selectedAmbassadorApplication.degree || "(Not Provided)"}</p>
+                    </div>
+                    <div>
+                      <span className="text-slate-500 font-medium">Current Semester:</span>
+                      <p className="text-white mt-0.5">{selectedAmbassadorApplication.semester} Semester</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Outreach & Reach Details */}
+                <div className="space-y-2">
+                  <h4 className="font-bold text-cyan-400 uppercase tracking-wider text-[10px] border-b border-white/5 pb-1">
+                    Reach & Availability Details
+                  </h4>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <span className="text-slate-500 font-medium">Estimated Reach:</span>
+                      <p className="text-white font-semibold mt-0.5">{selectedAmbassadorApplication.reachEstimate || "Not Provided"}</p>
+                    </div>
+                    <div>
+                      <span className="text-slate-500 font-medium">Weekly Availability:</span>
+                      <p className="text-white font-semibold mt-0.5">{selectedAmbassadorApplication.availability || "Not Provided"} Hours</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Social Links */}
+                <div className="space-y-2">
+                  <h4 className="font-bold text-cyan-400 uppercase tracking-wider text-[10px] border-b border-white/5 pb-1">
+                    Social Handles & Links
+                  </h4>
+                  <div className="grid grid-cols-2 gap-3">
+                    {selectedAmbassadorApplication.linkedin && (
+                      <div>
+                        <span className="text-slate-500 font-medium">LinkedIn Profile:</span>
+                        <p className="mt-0.5">
+                          <a
+                            href={selectedAmbassadorApplication.linkedin}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-cyan-400 hover:underline break-all"
+                          >
+                            {selectedAmbassadorApplication.linkedin}
+                          </a>
+                        </p>
+                      </div>
+                    )}
+                    {selectedAmbassadorApplication.instagram && (
+                      <div>
+                        <span className="text-slate-500 font-medium">Instagram Profile:</span>
+                        <p className="mt-0.5">
+                          <a
+                            href={selectedAmbassadorApplication.instagram}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-purple-400 hover:underline break-all"
+                          >
+                            {selectedAmbassadorApplication.instagram}
+                          </a>
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Motivation Statement */}
+                <div className="space-y-2">
+                  <h4 className="font-bold text-cyan-400 uppercase tracking-wider text-[10px] border-b border-white/5 pb-1">
+                    Motivation Statement (Why join as Ambassador?)
+                  </h4>
+                  <p className="text-slate-200 leading-relaxed bg-white/3 p-3 rounded-lg border border-white/5 italic">
+                    "{selectedAmbassadorApplication.whyAmbassador || "No statement provided."}"
+                  </p>
+                </div>
+
+                {/* Approve/Reject Actions inside modal if pending */}
+                {selectedAmbassadorApplication.status === "PENDING" && (
+                  <div className="pt-4 flex gap-3 justify-end border-t border-white/5">
+                    <button
+                      onClick={() => {
+                        handleRejectAmbassador(selectedAmbassadorApplication.id);
+                        setSelectedAmbassadorApplication(null);
+                      }}
+                      className="rounded-lg bg-red-500/10 border border-red-500/20 px-4 py-2 text-xs font-bold text-red-400 hover:bg-red-500/20 transition-all"
+                    >
+                      Reject Application
+                    </button>
+                    <button
+                      onClick={() => {
+                        handleApproveAmbassador(selectedAmbassadorApplication.id);
+                        setSelectedAmbassadorApplication(null);
+                      }}
+                      className="rounded-lg bg-emerald-500/25 border border-emerald-500/35 px-4 py-2 text-xs font-bold text-emerald-400 hover:bg-emerald-500/30 transition-all"
+                    >
+                      Approve Application
+                    </button>
                   </div>
                 )}
               </div>

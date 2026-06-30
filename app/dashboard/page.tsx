@@ -867,7 +867,7 @@ export default function DashboardPage() {
                   </div>
                   <div>
                     <h3 className="font-display text-base font-extrabold text-white">{t.title}</h3>
-                    <p className="text-[10px] font-semibold" style={{ color: t.color }}>{t.durationWeeks} Weeks ┬╖ Intensive Program</p>
+                    <p className="text-[10px] font-semibold" style={{ color: t.color }}>{t.durationWeeks} Weeks · Intensive Program</p>
                   </div>
                   <p className="text-xs text-slate-400 leading-normal line-clamp-3">{t.description}</p>
                   {/* Tags */}
@@ -1396,7 +1396,7 @@ export default function DashboardPage() {
               </h2>
               <p className="mt-1 flex items-center gap-2 text-xs text-slate-400">
                 <span className="inline-block h-2.5 w-2.5 rounded-full bg-emerald-400 animate-pulse" />
-                Active Ambassador ┬╖ {ambassadorDetails?.university || "FAST NUCES"}
+                Active Ambassador · {ambassadorDetails?.university || "FAST NUCES"}
               </p>
             </div>
             <div className="flex flex-col items-end gap-1.5 text-right">
@@ -1745,7 +1745,7 @@ export default function DashboardPage() {
               <div key={item.id} className="flex items-center justify-between p-3 rounded-xl border border-white/5 bg-black/20 text-xs gap-4">
                 <div className="min-w-0">
                   <h4 className="font-bold text-white truncate">{item.name}</h4>
-                  <p className="text-[10px] text-slate-500 mt-0.5 truncate">{item.desc} ┬╖ <span className="font-mono text-yellow-500 font-bold">{item.format}</span></p>
+                  <p className="text-[10px] text-slate-500 mt-0.5 truncate">{item.desc} · <span className="font-mono text-yellow-500 font-bold">{item.format}</span></p>
                 </div>
                 <a
                   href={item.url}
@@ -1793,7 +1793,7 @@ export default function DashboardPage() {
                   }`}>{amb.rank}</span>
                   <div>
                     <h4 className={`font-bold ${amb.isCurrent ? "text-yellow-400" : "text-white"}`}>{amb.name}</h4>
-                    <p className="text-[9px] text-slate-500 mt-0.5">{amb.uni} ┬╖ <span className="text-yellow-500/70 font-semibold">{amb.level}</span></p>
+                    <p className="text-[9px] text-slate-500 mt-0.5">{amb.uni} · <span className="text-yellow-500/70 font-semibold">{amb.level}</span></p>
                   </div>
                 </div>
                 <span className="font-mono font-black text-white">{amb.pts} PTS</span>
