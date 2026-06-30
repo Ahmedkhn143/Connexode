@@ -27,9 +27,9 @@ export function Logo({ size = "default", showTagline = false, alwaysShowText = f
   useEffect(() => {
     if (!mounted) return;
 
-    const isDark = resolvedTheme === "dark";
+    const isDark = resolvedTheme === "dark" || 
+      (typeof document !== "undefined" && document.documentElement.classList.contains("dark"));
     const img = new Image();
-    img.src = "/logo.png";
     img.onload = () => {
       try {
         const canvas = canvasRef.current || document.createElement("canvas");
@@ -74,6 +74,7 @@ export function Logo({ size = "default", showTagline = false, alwaysShowText = f
         console.error("Error processing logo image:", err);
       }
     };
+    img.src = "/logo.png";
   }, [resolvedTheme, mounted]);
 
   const sizes = {

@@ -659,11 +659,9 @@ export default function MentorDashboard() {
       {/* ── LEFT SIDEBAR ── */}
       <aside className="fixed top-0 left-0 h-screen w-[240px] bg-[#080f1e] border-r border-white/5 flex flex-col z-40 shrink-0 animate-fade-in">
         {/* Brand */}
-        <div className="px-5 py-5 border-b border-white/5">
-          <div className="flex flex-col gap-1">
-            <Logo size="sm" />
-            <p className="text-[9px] font-extrabold uppercase tracking-widest text-cyan-400 pl-8">Mentor Panel</p>
-          </div>
+        <div className="px-5 py-4 border-b border-white/5 flex flex-col">
+          <Logo size="sm" alwaysShowText />
+          <p className="text-[9px] font-extrabold uppercase tracking-widest text-cyan-400 pl-14 -mt-2">Mentor Panel</p>
         </div>
 
         {/* KPI mini stats */}

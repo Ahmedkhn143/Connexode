@@ -122,6 +122,22 @@ export const MOCK_USERS: User[] = [
     currentDay: 0,
     password: "admin123",
   } as any,
+  {
+    id: "usr_ambassador",
+    name: "Ali Raza",
+    username: "ali-raza",
+    email: "ambassador@connexode.pk",
+    role: "STUDENT",
+    points: 1550,
+    avatarInitials: "AR",
+    enrolledTrackId: "",
+    joinDate: "2026-03-01",
+    streak: 8,
+    rank: "Regional Lead",
+    currentWeek: 0,
+    currentDay: 0,
+    password: "ambassador123",
+  } as any,
 ];
 
 export interface MentorTrackAssignment {

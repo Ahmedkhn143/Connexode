@@ -251,9 +251,22 @@ export default function RegisterForm({ initialSignUp = false }: { initialSignUp?
           setSuccess("Welcome Mentor! Redirecting to Mentor Dashboard...");
           setTimeout(() => { router.push("/dashboard/mentor"); }, 900);
         } else {
-          // Student — check if enrolled
+          // Student — check if enrolled or is ambassador
           const enrolledTrackId = (staticUser as any).enrolledTrackId;
-          if (enrolledTrackId) {
+          let isAmbassador = false;
+          if (typeof window !== "undefined") {
+            const storedAmb = localStorage.getItem("connexode_ambassador_applications");
+            if (storedAmb) {
+              try {
+                const apps = JSON.parse(storedAmb);
+                isAmbassador = apps.some((a: any) => a.email.toLowerCase() === emailLower && a.status === "APPROVED");
+              } catch (e) {
+                console.error(e);
+              }
+            }
+          }
+
+          if (enrolledTrackId || isAmbassador || emailLower === "ambassador@connexode.pk") {
             setSuccess("Welcome back! Redirecting to your Dashboard...");
             setTimeout(() => { router.push("/dashboard"); }, 900);
           } else {

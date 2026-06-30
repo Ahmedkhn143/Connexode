@@ -2,10 +2,12 @@
 
 import { useState, useEffect } from "react";
 import StatsRow from "@/components/dashboard/StatsRow";
+import Logo from "@/components/ui/Logo";
 import PhaseProgress from "@/components/dashboard/PhaseProgress";
 import TaskList from "@/components/dashboard/TaskList";
 import TrackRoadmap from "@/components/dashboard/TrackRoadmap";
 import PaymentApprovedBanner from "@/components/dashboard/PaymentApprovedBanner";
+import { AICareerAdvisor } from "@/components/dashboard/AICareerAdvisor";
 import { getActiveUser, getPaymentStatus, getTrackMentor, TRACKS, SUBMISSIONS, WEEKLY_TASKS, type User } from "@/lib/mock-data";
 import { BadgeCheck, GitBranch, ArrowRight, MessageSquare, Send, User as UserIcon, Zap, Clock, CheckCircle2, ExternalLink, Copy, FileText, Download, Trophy, Award, MapPin } from "lucide-react";
 import Link from "next/link";
@@ -128,6 +130,9 @@ export default function DashboardPage() {
       return;
     }
     setActiveUser(user);
+    if (user.email === "ambassador@connexode.pk") {
+      setDashboardMode("AMBASSADOR");
+    }
     if (user.enrolledTrackId) {
       setPaymentStatusState(getPaymentStatus(user.enrolledTrackId, user.id));
     }
@@ -532,6 +537,174 @@ export default function DashboardPage() {
   const inputClsForm = (key: string) =>
     `w-full rounded-xl border ${formErrors[key] ? "border-red-500/50 bg-red-500/5" : "border-white/10 bg-[#0A1628]"} px-4 py-3 text-xs text-slate-200 placeholder-slate-600 outline-none focus:border-cyan-400/50 transition-colors`;
 
+  
+  const renderWithSidebar = (innerContent: React.ReactNode) => {
+    const totalPointsVal = outreachSubmissions
+      .filter((s) => s.status === "APPROVED")
+      .reduce((sum, curr) => sum + (curr.pointsEarned || 0), 0);
+
+    return (
+      <div className="min-h-screen bg-[var(--bg)] text-[var(--text-primary)] relative overflow-hidden flex transition-colors duration-300">
+        
+        {/* Background gradient blurs */}
+        <div className="pointer-events-none fixed top-[-10%] left-[-10%] w-[600px] h-[600px] bg-cyan-500/8 rounded-full blur-[150px] dark:bg-cyan-500/3 pointer-events-none" />
+        <div className="pointer-events-none fixed top-[20%] right-[-15%] w-[500px] h-[500px] bg-purple-600/10 rounded-full blur-[130px] dark:bg-purple-600/4 pointer-events-none" />
+        <div className="pointer-events-none fixed bottom-[-10%] left-[20%] w-[550px] h-[550px] bg-emerald-500/5 rounded-full blur-[150px] dark:bg-emerald-500/2 pointer-events-none" />
+
+        {/* ── LEFT SIDEBAR ── */}
+        <aside className="fixed top-0 left-0 h-screen w-[240px] bg-[#080f1e] border-r border-white/5 flex flex-col z-40 shrink-0">
+          
+          {/* Brand */}
+          <div className="px-5 py-4 border-b border-white/5 flex flex-col">
+            <Logo size="sm" alwaysShowText />
+            <p className="text-[9px] font-extrabold uppercase tracking-widest text-cyan-500 pl-14 -mt-2">
+              {dashboardMode === "INTERNSHIP" ? "Student Panel" : "Ambassador Panel"}
+            </p>
+          </div>
+
+          {/* Dynamic KPI Mini Stats */}
+          <div className="grid grid-cols-2 gap-2 px-4 py-4 border-b border-white/5">
+            {dashboardMode === "INTERNSHIP" ? (
+              <>
+                <div className="rounded-xl bg-white/5 border border-white/5 p-2 text-center">
+                  <p className="text-sm font-black text-yellow-500">{activeUser?.points || 0}</p>
+                  <p className="text-[8px] text-slate-400 font-semibold leading-none mt-0.5">Points</p>
+                </div>
+                <div className="rounded-xl bg-white/5 border border-white/5 p-2 text-center">
+                  <p className="text-sm font-black text-red-500">{activeUser?.streak || 0} Days</p>
+                  <p className="text-[8px] text-slate-400 font-semibold leading-none mt-0.5">Streak</p>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="rounded-xl bg-white/5 border border-white/5 p-2 text-center">
+                  <p className="text-sm font-black text-yellow-500">{totalPointsVal || 0}</p>
+                  <p className="text-[8px] text-slate-400 font-semibold leading-none mt-0.5">Points</p>
+                </div>
+                <div className="rounded-xl bg-white/5 border border-white/5 p-2 text-center">
+                  <p className="text-sm font-black text-cyan-500">{outreachSubmissions.length}</p>
+                  <p className="text-[8px] text-slate-400 font-semibold leading-none mt-0.5">Logs</p>
+                </div>
+              </>
+            )}
+          </div>
+
+          {/* Navigation */}
+          <nav className="flex-1 px-3 py-4 space-y-2 overflow-y-auto">
+            {/* Mode Switcher inside Sidebar */}
+            {isAmbassadorApproved && activeUser?.enrolledTrackId && (
+              <div className="flex flex-col gap-1.5 p-1.5 rounded-xl bg-black/20 border border-white/5 mb-4">
+                <span className="text-[8px] font-bold text-slate-400 uppercase tracking-wider px-1.5">Switch Mode</span>
+                <div className="grid grid-cols-2 gap-1">
+                  <button
+                    onClick={() => setDashboardMode("INTERNSHIP")}
+                    className={"py-1 rounded-lg text-[9px] font-black transition-all cursor-pointer text-center " + (dashboardMode === "INTERNSHIP" ? "bg-cyan-500 text-white shadow-sm" : "text-slate-400 hover:text-white")}
+                  >
+                    Intern
+                  </button>
+                  <button
+                    onClick={() => setDashboardMode("AMBASSADOR")}
+                    className={"py-1 rounded-lg text-[9px] font-black transition-all cursor-pointer text-center " + (dashboardMode === "AMBASSADOR" ? "bg-yellow-500 text-[#020B18] shadow-sm" : "text-slate-400 hover:text-white")}
+                  >
+                    Ambassador
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Menu options */}
+            {dashboardMode === "INTERNSHIP" ? (
+              <>
+                <button
+                  onClick={() => {
+                    const url = new URL(window.location.href);
+                    url.searchParams.delete('view');
+                    window.history.pushState({}, '', url.toString());
+                    window.dispatchEvent(new PopStateEvent('popstate'));
+                  }}
+                  className={"w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-semibold transition-all border border-transparent " + (!currentView ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-600 dark:text-cyan-400 font-bold" : "text-slate-400 hover:text-white")}
+                >
+                  Internship Dashboard
+                </button>
+                <button
+                  onClick={() => {
+                    const url = new URL(window.location.href);
+                    url.searchParams.set('view', 'roadmap');
+                    window.history.pushState({}, '', url.toString());
+                    window.dispatchEvent(new PopStateEvent('popstate'));
+                  }}
+                  className={"w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-semibold transition-all border border-transparent " + (currentView === "roadmap" ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-600 dark:text-cyan-400 font-bold" : "text-slate-400 hover:text-white")}
+                >
+                  8-Week Roadmap
+                </button>
+                <button
+                  onClick={() => {
+                    const url = new URL(window.location.href);
+                    url.searchParams.set('view', 'mentor');
+                    window.history.pushState({}, '', url.toString());
+                    window.dispatchEvent(new PopStateEvent('popstate'));
+                  }}
+                  className={"w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-semibold transition-all border border-transparent " + (currentView === "mentor" ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-600 dark:text-cyan-400 font-bold" : "text-slate-400 hover:text-white")}
+                >
+                  My Assigned Mentor
+                </button>
+              </>
+            ) : (
+              <button
+                className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-bold bg-yellow-500/10 border border-yellow-500/20 text-yellow-600 dark:text-yellow-400"
+              >
+                Ambassador Portal
+              </button>
+            )}
+          </nav>
+
+          {/* User profile bottom sidebar */}
+          <div className="p-3 border-t border-white/5 space-y-3">
+            <div className="flex items-center gap-2.5">
+              <div className="h-8 w-8 rounded-xl bg-cyan-500/10 flex items-center justify-center font-bold text-cyan-500 text-xs">
+                {activeUser?.name?.substring(0, 2).toUpperCase() || "US"}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs font-black text-white truncate">{activeUser?.name || "Student"}</p>
+                <p className="text-[9px] text-slate-400 font-semibold leading-none mt-0.5 truncate">{activeUser?.rank || "Intern"}</p>
+              </div>
+            </div>
+            <button
+              onClick={() => {
+                localStorage.removeItem("connexode_active_user");
+                sessionStorage.removeItem("connexode_active_user");
+                window.location.href = "/register";
+              }}
+              className="w-full flex items-center justify-center gap-1.5 rounded-xl border border-red-500/20 bg-red-500/5 py-2.5 text-xs font-extrabold text-red-400 hover:bg-red-500/10 transition-colors cursor-pointer"
+            >
+              Log Out
+            </button>
+          </div>
+
+        </aside>
+
+        {/* ── MAIN CONTENT AREA ── */}
+        <div className="flex-1 pl-[240px] min-h-screen flex flex-col">
+          {/* Dynamic top bar inside content area */}
+          <header className="h-14 border-b border-slate-200 dark:border-white/5 px-6 flex items-center justify-between bg-white/40 dark:bg-[#061020]/20 backdrop-blur-md sticky top-0 z-30">
+            <span className="text-xs font-extrabold uppercase tracking-widest text-slate-400">
+              {dashboardMode === "INTERNSHIP" ? "Internship Workspace" : "Ambassador Workspace"}
+            </span>
+            <span className="text-[10px] text-slate-500 font-medium">
+              Role: <span className="font-bold text-cyan-500">{activeUser?.role}</span>
+            </span>
+          </header>
+
+          <main className="flex-1 p-6 md:p-8 overflow-y-auto max-w-5xl w-full mx-auto pb-24">
+            {innerContent}
+          </main>
+        </div>
+
+      </div>
+    );
+  };
+
+
   if (dashboardMode === "AMBASSADOR" && ambassadorStatus === "NONE") {
     return (
       <div className="mx-auto max-w-3xl py-6 px-4 space-y-8 animate-fade-in">
@@ -915,18 +1088,12 @@ export default function DashboardPage() {
     ).length;
 
     if (currentView === "roadmap") {
-      return (
-        <div className="mx-auto max-w-5xl space-y-6 animate-fade-in">
-          <div className="flex items-center justify-between border-b border-white/5 pb-4">
+      return renderWithSidebar(
+        <div className="space-y-6 animate-fade-in">
+          <div className="flex items-center justify-between border-b border-slate-200 dark:border-white/5 pb-4">
             <div>
-              <Link
-                href="/dashboard"
-                className="mb-3 inline-flex items-center gap-1.5 text-xs text-slate-500 hover:text-cyan-400 transition-colors"
-              >
-                ΓåÉ Back to Dashboard
-              </Link>
-              <h1 className="font-display text-2xl font-extrabold text-white">8-Week Track Roadmap</h1>
-              <p className="text-xs text-slate-400 mt-1">Detailed phase progression and weekly learning goals for {track.title}</p>
+              <h1 className="font-display text-2xl font-extrabold text-slate-900 dark:text-white">8-Week Track Roadmap</h1>
+              <p className="text-xs text-slate-500 mt-1">Detailed phase progression and weekly learning goals for {track.title}</p>
             </div>
           </div>
           <TrackRoadmap />
@@ -935,18 +1102,12 @@ export default function DashboardPage() {
     }
 
     if (currentView === "mentor") {
-      return (
-        <div className="mx-auto max-w-xl space-y-6 animate-fade-in py-8">
-          <div className="flex items-center justify-between border-b border-white/5 pb-4">
+      return renderWithSidebar(
+        <div className="space-y-6 animate-fade-in max-w-xl mx-auto py-4">
+          <div className="flex items-center justify-between border-b border-slate-200 dark:border-white/5 pb-4">
             <div>
-              <Link
-                href="/dashboard"
-                className="mb-3 inline-flex items-center gap-1.5 text-xs text-slate-500 hover:text-cyan-400 transition-colors"
-              >
-                ΓåÉ Back to Dashboard
-              </Link>
-              <h1 className="font-display text-2xl font-extrabold text-white">My Mentor</h1>
-              <p className="text-xs text-slate-400 mt-1">Details about your assigned track advisor</p>
+              <h1 className="font-display text-2xl font-extrabold text-slate-900 dark:text-white">My Mentor</h1>
+              <p className="text-xs text-slate-500 mt-1">Details about your assigned track advisor</p>
             </div>
           </div>
 
@@ -967,31 +1128,39 @@ export default function DashboardPage() {
                     className="h-24 w-24 rounded-full object-cover border-2 border-cyan-400/20 shadow-[0_0_20px_rgba(34,211,238,0.2)]"
                   />
                 ) : (
-                  <div className="h-24 w-24 rounded-full bg-gradient-to-tr from-cyan-400 to-purple-500 p-[2px] shadow-[0_0_20px_rgba(34,211,238,0.2)]">
-                    <div className="flex h-full w-full items-center justify-center rounded-full bg-[#030c1c] text-2xl font-black text-white">
-                      {mentor.avatarInitials || mentor.name.substring(0, 2).toUpperCase()}
-                    </div>
+                  <div className="h-24 w-24 rounded-full bg-cyan-500/10 flex items-center justify-center font-black text-cyan-400 text-3xl">
+                    {mentor.name.substring(0, 2).toUpperCase()}
                   </div>
                 )}
-                
                 <div>
-                  <h3 className="text-xl font-bold text-white">{mentor.name}</h3>
-                  <p className="text-xs uppercase tracking-wider text-cyan-400 font-black mt-1">
-                    {mentor.rank || "Expert Mentor"}
-                  </p>
-                  <p className="text-xs text-slate-500 font-mono mt-1">{mentor.email}</p>
+                  <h3 className="font-display text-xl font-black text-white">{mentor.name}</h3>
+                  <p className="text-xs text-slate-400 font-semibold">{mentor.rank || "Track Mentor"}</p>
                 </div>
               </div>
 
-              <div className="space-y-4 pt-4 border-t border-white/5 text-xs leading-relaxed text-slate-400">
-                <div className="rounded-xl bg-white/2 border border-white/5 p-4 space-y-2">
-                  <span className="text-white font-bold block text-2xs uppercase tracking-wider text-cyan-400">How your mentor helps:</span>
-                  <ul className="list-disc pl-4 space-y-1">
-                    <li>Reviews and grades your weekly task submissions.</li>
-                    <li>Provides feedback and score boosts on approved tasks.</li>
-                    <li>Answers Q&A technical questions within 24 hours.</li>
-                  </ul>
+              <div className="grid gap-4 sm:grid-cols-2 pt-4 border-t border-white/5 text-xs leading-relaxed text-slate-400">
+                <div>
+                  <span className="text-slate-500 font-semibold">Specialization:</span>
+                  <p className="text-slate-200">{mentor.rank || "Expert Mentor"}</p>
                 </div>
+                <div>
+                  <span className="text-slate-500 font-semibold">Email Contact:</span>
+                  <p className="text-slate-200">{mentor.email}</p>
+                </div>
+                <div className="sm:col-span-2">
+                  <span className="text-slate-500 font-semibold">Experience:</span>
+                  <p className="text-slate-200">{profileDetails?.experience || "Expert professional with 5+ years tech experience."}</p>
+                </div>
+                {profileDetails?.projectsUrl && (
+                  <div>
+                    <span className="text-slate-500 font-semibold">LinkedIn / Projects:</span>
+                    <p className="text-slate-200 truncate">
+                      <a href={profileDetails.projectsUrl} target="_blank" rel="noopener noreferrer" className="text-cyan-400 hover:underline">
+                        View Profile
+                      </a>
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
           ) : (
@@ -1011,40 +1180,8 @@ export default function DashboardPage() {
       return audience === "ALL" || audience === "INTERN";
     });
 
-    return (
-      <div className="mx-auto max-w-5xl space-y-6">
-        {/* Mode Switcher */}
-        {isAmbassadorApproved && (
-          <div className="flex justify-between items-center bg-white/4 border border-white/8 rounded-2xl p-4 mb-6 backdrop-blur-xl">
-            <div>
-              <h3 className="text-sm font-bold text-white">Switch Dashboard Mode</h3>
-              <p className="text-[10px] text-slate-500">You are enrolled in both the Internship & Ambassador programs.</p>
-            </div>
-            <div className="flex gap-2">
-              <button
-                onClick={() => setDashboardMode("INTERNSHIP")}
-                className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                  (dashboardMode as string) === "INTERNSHIP"
-                    ? "bg-cyan-500 text-[#020B18]"
-                    : "bg-white/5 text-slate-400 hover:text-white"
-                }`}
-              >
-                Internship Workspace
-              </button>
-              <button
-                onClick={() => setDashboardMode("AMBASSADOR")}
-                className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                  (dashboardMode as string) === "AMBASSADOR"
-                    ? "bg-yellow-500 text-[#020B18]"
-                    : "bg-white/5 text-slate-400 hover:text-white"
-                }`}
-              >
-                Ambassador Portal
-              </button>
-            </div>
-          </div>
-        )}
-
+    return renderWithSidebar(
+      <div className="space-y-6">
         {/* Announcements notice board */}
         {relevantInternAnnouncements.length > 0 && (
           <div className="rounded-2xl border border-white/8 bg-gradient-to-r from-purple-900/10 via-[#080f1e]/85 to-cyan-900/10 p-5 backdrop-blur-xl space-y-4 animate-fade-in">
@@ -1303,6 +1440,22 @@ export default function DashboardPage() {
             </div>
           </div>
         </div>
+
+        {/* AI Career Advisor Widget */}
+        <div className="mt-6">
+          <AICareerAdvisor
+            user={{
+              role: "intern",
+              name: activeUser.name,
+              track: track.title,
+              tasksCompleted: SUBMISSIONS.filter(s => s.userId === activeUser.id && s.status === "APPROVED").length,
+              totalTasks: 8,
+              averageScore: activeUser.points ? Math.min(100, Math.round(activeUser.points / 30)) : 85,
+              weakAreas: ["Code Structure", "Tailwind styling responsiveness"],
+              completedTopics: ["Responsive Layouts", "State Management & React Hooks"]
+            }}
+          />
+        </div>
       </div>
     );
   }
@@ -1320,31 +1473,9 @@ export default function DashboardPage() {
     return ann.targetAudience === "ALL" || ann.targetAudience === "AMBASSADOR";
   });
 
-  return (
-    <div className="mx-auto max-w-5xl space-y-6">
-      {/* Mode Switcher */}
-      {isAmbassadorApproved && activeUser.enrolledTrackId && (
-        <div className="flex justify-between items-center bg-white/4 border border-white/8 rounded-2xl p-4 mb-6 backdrop-blur-xl">
-          <div>
-            <h3 className="text-sm font-bold text-white">Switch Dashboard Mode</h3>
-            <p className="text-[10px] text-slate-500">You are enrolled in both the Internship & Ambassador programs.</p>
-          </div>
-          <div className="flex gap-2">
-            <button
-              onClick={() => setDashboardMode("INTERNSHIP")}
-              className="px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer bg-white/5 text-slate-400 hover:text-white"
-            >
-              Internship Workspace
-            </button>
-            <button
-              onClick={() => setDashboardMode("AMBASSADOR")}
-              className="px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer bg-yellow-500 text-[#020B18]"
-            >
-              Ambassador Portal
-            </button>
-          </div>
-        </div>
-      )}
+  return renderWithSidebar(
+    <div className="space-y-6">
+      
       
       {/* Announcements Notice Board */}
       {relevantAnnouncements.length > 0 && (

@@ -57,7 +57,7 @@ export default function StatsRow() {
               <Icon size={16} style={{ color: stat.color }} />
             </div>
             <div>
-              <p className="text-xl font-extrabold text-white">{stat.value}</p>
+              <p className="text-xl font-extrabold text-slate-900 dark:text-white">{stat.value}</p>
               <p className="text-xs text-slate-500">{stat.label}</p>
             </div>
           </div>

@@ -140,7 +140,7 @@ export default function AmbassadorApplyPage() {
 
       // Check ambassador status
       let storedApps = localStorage.getItem("connexode_ambassador_applications");
-      if (!storedApps && userEmail.toLowerCase() === "alex@example.com") {
+      if (!storedApps) {
         const defaultApps = [
           {
             id: "amb_default",
@@ -157,6 +157,22 @@ export default function AmbassadorApplyPage() {
             avatarImage: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&h=150&q=80",
             status: "APPROVED",
             submittedAt: new Date().toISOString()
+          },
+          {
+            id: "amb_ali_raza",
+            fullName: "Ali Raza",
+            email: "ambassador@connexode.pk",
+            phone: "03219876543",
+            city: "Lahore",
+            university: "FAST NUCES",
+            degree: "BS Computer Science",
+            semester: "6th Semester",
+            linkedin: "https://linkedin.com/in/ali-raza",
+            reachEstimate: "500-1000",
+            availability: "8-12",
+            avatarImage: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=150&h=150&q=80",
+            status: "APPROVED",
+            submittedAt: new Date().toISOString()
           }
         ];
         localStorage.setItem("connexode_ambassador_applications", JSON.stringify(defaultApps));
@@ -167,6 +183,26 @@ export default function AmbassadorApplyPage() {
       if (storedApps && userEmail) {
         try {
           const apps = JSON.parse(storedApps);
+          if (userEmail.toLowerCase() === "ambassador@connexode.pk" && !apps.some((a: any) => a.email.toLowerCase() === "ambassador@connexode.pk")) {
+            const aliRazaApp = {
+              id: "amb_ali_raza",
+              fullName: "Ali Raza",
+              email: "ambassador@connexode.pk",
+              phone: "03219876543",
+              city: "Lahore",
+              university: "FAST NUCES",
+              degree: "BS Computer Science",
+              semester: "6th Semester",
+              linkedin: "https://linkedin.com/in/ali-raza",
+              reachEstimate: "500-1000",
+              availability: "8-12",
+              avatarImage: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=150&h=150&q=80",
+              status: "APPROVED",
+              submittedAt: new Date().toISOString()
+            };
+            apps.push(aliRazaApp);
+            localStorage.setItem("connexode_ambassador_applications", JSON.stringify(apps));
+          }
           const matched = apps.find((a: any) => a.email.toLowerCase() === userEmail.toLowerCase());
           if (matched) {
             appStatus = matched.status;
@@ -254,12 +290,12 @@ export default function AmbassadorApplyPage() {
     const hasError = !!errors[key];
     const isFilled = !!value?.trim();
     if (hasError) {
-      return `w-full rounded-xl border border-red-500/50 bg-red-500/5 shadow-[inset_0_2px_4px_rgba(239,68,68,0.1)] focus:border-red-400 focus:shadow-[inset_0_2px_4px_rgba(239,68,68,0.15),_0_0_15px_rgba(239,68,68,0.2)] px-4 py-3.5 text-xs text-slate-200 placeholder-slate-600 outline-none transition-all duration-300`;
+      return `w-full rounded-xl border border-red-500/50 bg-red-500/5 shadow-[inset_0_2px_4px_rgba(239,68,68,0.1)] focus:border-red-400 focus:shadow-[inset_0_2px_4px_rgba(239,68,68,0.15),_0_0_15px_rgba(239,68,68,0.2)] px-4 py-3.5 text-xs text-slate-900 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-600 outline-none transition-all duration-300`;
     }
     if (isFilled) {
-      return `w-full rounded-xl border border-emerald-500/35 bg-[#030914] shadow-[inset_0_2px_4px_rgba(0,0,0,0.6)] focus:border-emerald-400 focus:shadow-[inset_0_2px_4px_rgba(0,0,0,0.8),_0_0_15px_rgba(16,185,129,0.2)] px-4 py-3.5 text-xs text-slate-200 placeholder-slate-600 outline-none transition-all duration-300`;
+      return `w-full rounded-xl border border-emerald-500/35 bg-slate-100/50 dark:bg-[#030914] shadow-[inset_0_2px_4px_rgba(0,0,0,0.05)] dark:shadow-[inset_0_2px_4px_rgba(0,0,0,0.6)] focus:border-emerald-400 focus:shadow-[inset_0_2px_4px_rgba(0,0,0,0.08),_0_0_15px_rgba(16,185,129,0.2)] px-4 py-3.5 text-xs text-slate-900 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-600 outline-none transition-all duration-300`;
     }
-    return `w-full rounded-xl border border-white/8 bg-[#030914] shadow-[inset_0_2px_4px_rgba(0,0,0,0.6)] focus:border-cyan-400/80 focus:shadow-[inset_0_2px_4px_rgba(0,0,0,0.8),_0_0_15px_rgba(34,211,238,0.25)] px-4 py-3.5 text-xs text-slate-200 placeholder-slate-600 outline-none transition-all duration-300`;
+    return `w-full rounded-xl border border-slate-200 dark:border-white/8 bg-slate-100/50 dark:bg-[#030914] shadow-[inset_0_2px_4px_rgba(0,0,0,0.05)] dark:shadow-[inset_0_2px_4px_rgba(0,0,0,0.6)] focus:border-cyan-400/80 focus:shadow-[inset_0_2px_4px_rgba(0,0,0,0.08),_0_0_15px_rgba(34,211,238,0.25)] px-4 py-3.5 text-xs text-slate-900 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-600 outline-none transition-all duration-300`;
   };
 
   const isS1Done = !!(form.fullName.trim() && form.email.trim() && form.phone.trim() && form.city && form.avatarImage);
