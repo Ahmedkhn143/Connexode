@@ -47,8 +47,11 @@ Respond in this exact format:
     let advice;
     try {
       advice = JSON.parse(text);
+      if (!advice.headline || !advice.body || !Array.isArray(advice.actions)) {
+        throw new Error("Invalid advice structure");
+      }
     } catch {
-      // Fallback if JSON parse fails
+      // Fallback if JSON parse fails or structure is invalid
       advice = {
         headline: "Keep building momentum",
         body: "You are making progress. Focus on consistency — small daily improvements compound into big results over 8 weeks.",

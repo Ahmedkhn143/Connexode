@@ -217,7 +217,7 @@ export function AICareerAdvisor({ user }: { user: UserContext }) {
             </p>
 
             {/* Action items */}
-            {advice.actions.length > 0 && (
+            {advice.actions && Array.isArray(advice.actions) && advice.actions.length > 0 && (
               <div>
                 <p
                   style={{ color: "rgba(126,200,216,0.35)" }}
