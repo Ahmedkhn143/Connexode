@@ -1,65 +1,102 @@
 @import "tailwindcss";
 
-/* ── Connexode Design Tokens — Dark Theme (default) ─────────── */
-:root,
-[data-theme="dark"] {
-  --bg-primary:    #020B18;
-  --bg-nav:        rgba(2, 11, 24, 0.85);
-  --bg-surface:    rgba(255, 255, 255, 0.04);
-  --bg-card:       rgba(255, 255, 255, 0.04);
-  --accent-cyan:   #00F5FF;
-  --accent-teal:   #00BFA5;
-  --text-primary:  #F0F6FF;
-  --text-muted:    #8899AA;
-  --text-dim:      #4A6070;
-  --border-glass:  rgba(0, 245, 255, 0.10);
-  --border-subtle: rgba(255, 255, 255, 0.08);
-  --glow-cyan:     0 0 40px rgba(0, 245, 255, 0.20);
-  --shadow-card:   0 8px 32px rgba(0, 0, 0, 0.4);
-  --font-display:  "Space Grotesk", system-ui, sans-serif;
-  --font-body:     "Inter", system-ui, sans-serif;
+/* ══════════════════════════════════════════════════════════
+   CONNEXODE — GLASSMORPHISM DESIGN TOKENS
+   Light mode is DEFAULT (:root)
+   Dark mode overrides go in .dark (next-themes class mode)
+══════════════════════════════════════════════════════════ */
+
+:root {
+  /* ── Light mode (default) ── */
+  --bg:                 #F8FAFC;
+  --bg-gradient:        linear-gradient(135deg, #F8FAFC 0%, #EEF2FF 50%, #F0F9FF 100%);
+  --surface:            rgba(255, 255, 255, 0.65);
+  --surface-solid:      #FFFFFF;
+  --border:             rgba(15, 23, 42, 0.08);
+  --border-strong:      rgba(124, 58, 237, 0.22);
+  --text-primary:       #0F172A;
+  --text-secondary:     #64748B;
+  --text-muted:         #94A3B8;
+  --blur:               16px;
+  --shadow-sm:          0 2px 8px rgba(15, 23, 42, 0.04);
+  --shadow-md:          0 8px 32px rgba(15, 23, 42, 0.07);
+  --shadow-glow:        0 8px 28px rgba(124, 58, 237, 0.18);
+  --inset-highlight:    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  color-scheme: light;
+
+  /* ── Brand (same in both modes) ── */
+  --violet:             #7C3AED;
+  --violet-light:       #A855F7;
+  --cyan:               #06B6D4;
+  --gradient:           linear-gradient(135deg, #7C3AED 0%, #06B6D4 100%);
+
+  /* ── Legacy aliases (used by dashboard/admin — DO NOT REMOVE) ── */
+  --bg-primary:         #F8FAFC;
+  --bg-nav:             rgba(248, 250, 252, 0.88);
+  --bg-surface:         rgba(255, 255, 255, 0.65);
+  --bg-card:            rgba(255, 255, 255, 0.65);
+  --accent-cyan:        #06B6D4;
+  --accent-teal:        #0891B2;
+  --text-muted:         #94A3B8;
+  --text-dim:           #CBD5E1;
+  --border-glass:       rgba(15, 23, 42, 0.08);
+  --border-subtle:      rgba(15, 23, 42, 0.06);
+  --glow-cyan:          0 0 30px rgba(6, 182, 212, 0.2);
+  --shadow-card:        0 8px 32px rgba(15, 23, 42, 0.07);
+  --font-display:       "Inter", system-ui, sans-serif;
+  --font-body:          "Inter", system-ui, sans-serif;
+  --theme-bg:           #F8FAFC;
+  --theme-nav-bg:       rgba(248, 250, 252, 0.88);
+  --theme-surface:      rgba(255, 255, 255, 0.65);
+  --theme-border:       rgba(15, 23, 42, 0.08);
+  --theme-border-hover: rgba(124, 58, 237, 0.25);
+  --theme-text-primary: #0F172A;
+  --theme-text-secondary: #64748B;
+  --theme-text-muted:   #94A3B8;
+  --theme-logo-text:    #0F172A;
+  --theme-hover:        rgba(15, 23, 42, 0.04);
+}
+
+/* ── Dark mode overrides (.dark class set by next-themes) ── */
+.dark {
+  --bg:                 #050508;
+  --bg-gradient:        radial-gradient(ellipse 90% 60% at 50% 0%, rgba(124,58,237,0.10) 0%, #050508 65%);
+  --surface:            rgba(13, 13, 20, 0.7);
+  --surface-solid:      #0D0D14;
+  --border:             rgba(255, 255, 255, 0.07);
+  --border-strong:      rgba(124, 58, 237, 0.4);
+  --text-primary:       #FAFAFA;
+  --text-secondary:     #A1A1AA;
+  --text-muted:         #52525B;
+  --shadow-sm:          0 2px 8px rgba(0, 0, 0, 0.3);
+  --shadow-md:          0 8px 32px rgba(0, 0, 0, 0.45);
+  --shadow-glow:        0 8px 28px rgba(124, 58, 237, 0.35);
+  --inset-highlight:    inset 0 1px 0 rgba(255, 255, 255, 0.06);
   color-scheme: dark;
-  --theme-bg: #050508;
-  --theme-nav-bg: rgba(5, 5, 8, 0.85);
-  --theme-surface: #0D0D14;
-  --theme-border: #1A1A2E;
+
+  /* ── Legacy aliases ── */
+  --bg-primary:         #050508;
+  --bg-nav:             rgba(5, 5, 8, 0.88);
+  --bg-surface:         rgba(13, 13, 20, 0.7);
+  --bg-card:            rgba(13, 13, 20, 0.7);
+  --accent-cyan:        #06B6D4;
+  --accent-teal:        #0891B2;
+  --text-muted:         #52525B;
+  --text-dim:           #3F3F46;
+  --border-glass:       rgba(255, 255, 255, 0.07);
+  --border-subtle:      rgba(255, 255, 255, 0.05);
+  --glow-cyan:          0 0 40px rgba(6, 182, 212, 0.25);
+  --shadow-card:        0 8px 32px rgba(0, 0, 0, 0.45);
+  --theme-bg:           #050508;
+  --theme-nav-bg:       rgba(5, 5, 8, 0.88);
+  --theme-surface:      rgba(13, 13, 20, 0.7);
+  --theme-border:       rgba(255, 255, 255, 0.07);
   --theme-border-hover: rgba(124, 58, 237, 0.45);
   --theme-text-primary: #FAFAFA;
   --theme-text-secondary: #A1A1AA;
-  --theme-text-muted: #52525B;
-  --theme-logo-text: #FAFAFA;
-  --theme-hover: rgba(255, 255, 255, 0.08);
-}
-
-/* ── Light Theme Overrides ────────────────────────────────── */
-[data-theme="light"] {
-  --bg-primary:    #F0F4FF;
-  --bg-nav:        rgba(240, 244, 255, 0.92);
-  --bg-surface:    rgba(0, 0, 0, 0.03);
-  --bg-card:       rgba(255, 255, 255, 0.80);
-  --accent-cyan:   #0099CC;
-  --accent-teal:   #007A6A;
-  --text-primary:  #0A1628;
-  --text-muted:    #4A6080;
-  --text-dim:      #8899AA;
-  --border-glass:  rgba(0, 153, 204, 0.15);
-  --border-subtle: rgba(0, 0, 0, 0.08);
-  --glow-cyan:     0 0 30px rgba(0, 153, 204, 0.15);
-  --shadow-card:   0 4px 24px rgba(0, 0, 0, 0.08);
-  color-scheme: light;
-}
-
-.light {
-  --theme-bg: #F9FAFB;
-  --theme-nav-bg: rgba(249, 250, 251, 0.85);
-  --theme-surface: #FFFFFF;
-  --theme-border: #E4E4E7;
-  --theme-border-hover: rgba(124, 58, 237, 0.25);
-  --theme-text-primary: #09090B;
-  --theme-text-secondary: #71717A;
-  --theme-text-muted: #A1A1AA;
-  --theme-logo-text: #09090B;
-  --theme-hover: rgba(0, 0, 0, 0.05);
+  --theme-text-muted:   #52525B;
+  --theme-logo-text:    #FAFAFA;
+  --theme-hover:        rgba(255, 255, 255, 0.06);
 }
 
 /* ── Tailwind v4 Theme Extension ──────────────────────────── */
@@ -80,15 +117,32 @@ html {
 }
 
 body {
-  background-color: var(--bg-primary);
+  background: var(--bg-gradient);
   color: var(--text-primary);
   font-family: var(--font-body);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
-  cursor: auto; /* Standard cursor */
-  transition: background-color 0.3s ease, color 0.3s ease;
+  cursor: auto;
+  transition: background 0.4s ease, color 0.3s ease;
+}
+
+/* ── Glass utility class ── */
+.glass-card {
+  background: var(--surface);
+  backdrop-filter: blur(var(--blur));
+  -webkit-backdrop-filter: blur(var(--blur));
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-md), var(--inset-highlight);
+  border-radius: 16px;
+  transition: all 0.25s ease;
+}
+
+.glass-card:hover {
+  border-color: var(--border-strong);
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-glow), var(--inset-highlight);
 }
 
 /* ── Custom Cursor ───────────────────────────────────────── */

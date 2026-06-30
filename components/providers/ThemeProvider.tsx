@@ -1,42 +1,15 @@
 // components/providers/ThemeProvider.tsx
-// Manages light/dark theme via data-theme attribute on <html>
-// Persists preference in localStorage
-
+// Uses next-themes — light is default, dark toggle via .dark class on <html>
 "use client";
-
-import { createContext, useContext, useEffect, useState } from "react";
-
-type Theme = "dark" | "light";
-
-const ThemeContext = createContext<{
-  theme: Theme;
-  toggleTheme: () => void;
-}>({ theme: "dark", toggleTheme: () => {} });
+import { ThemeProvider as NextThemesProvider } from "next-themes";
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setTheme] = useState<Theme>("dark");
-
-  useEffect(() => {
-    const stored = localStorage.getItem("connexode_theme") as Theme | null;
-    const preferred = stored ?? "dark";
-    setTheme(preferred);
-    document.documentElement.setAttribute("data-theme", preferred);
-  }, []);
-
-  const toggleTheme = () => {
-    setTheme((prev) => {
-      const next: Theme = prev === "dark" ? "light" : "dark";
-      localStorage.setItem("connexode_theme", next);
-      document.documentElement.setAttribute("data-theme", next);
-      return next;
-    });
-  };
-
   return (
-    <ThemeContext.Provider value={{ theme, toggleTheme }}>
+    <NextThemesProvider attribute="class" defaultTheme="light" enableSystem={false}>
       {children}
-    </ThemeContext.Provider>
+    </NextThemesProvider>
   );
 }
 
-export const useTheme = () => useContext(ThemeContext);
+// Re-export useTheme from next-themes so existing imports still work
+export { useTheme } from "next-themes";

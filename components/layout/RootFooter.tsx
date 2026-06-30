@@ -1,29 +1,35 @@
 // components/layout/RootFooter.tsx
-// Shared footer — all pages
-// Update social hrefs with your real URLs before deploying
+// Glassmorphism footer — light/dark via CSS vars
 
 import Link from "next/link";
 import Logo from "@/components/ui/Logo";
 
 const footerLinks = {
-  Platform: [
-    { label: "Ambassador Program", href: "/join/ambassador" },
+  Services: [
+    { label: "Full-Stack Apps", href: "/services#fullstack" },
+    { label: "AI Automation", href: "/services#ai" },
+    { label: "SEO", href: "/services#seo" },
+    { label: "Social Media", href: "/services#social" },
+    { label: "Design & Video", href: "/services#design" },
+  ],
+  Programs: [
     { label: "Internship Program", href: "/join/internship" },
-    { label: "Services",           href: "/services" },
-    { label: "Leaderboard",        href: "/community/leaderboard" },
-    { label: "Project Showcase",   href: "/community/showcase" },
+    { label: "Ambassador Program", href: "/join/ambassador" },
+    { label: "Leaderboard", href: "/community/leaderboard" },
+    { label: "Project Showcase", href: "/community/showcase" },
     { label: "Verify Certificate", href: "/verify" },
   ],
   Company: [
-    { label: "About",   href: "/about" },
+    { label: "About", href: "/about" },
     { label: "Contact", href: "/contact" },
+    { label: "Careers", href: "/join" },
   ],
 };
 
 const socials = [
-  { label: "Instagram", href: "https://instagram.com/connexode" },   // ← update
-  { label: "LinkedIn",  href: "https://linkedin.com/company/connexode" },
-  { label: "Facebook",  href: "https://facebook.com/connexode" },
+  { label: "Instagram", href: "https://instagram.com/connexode" },
+  { label: "LinkedIn", href: "https://linkedin.com/company/connexode" },
+  { label: "Facebook", href: "https://facebook.com/connexode" },
 ];
 
 export function RootFooter() {
@@ -32,28 +38,28 @@ export function RootFooter() {
   return (
     <footer
       style={{
-        backgroundColor: "#061020",
-        borderTop: "1px solid rgba(126,200,216,0.06)",
+        background: "var(--surface)",
+        backdropFilter: "blur(20px)",
+        WebkitBackdropFilter: "blur(20px)",
+        borderTop: "1px solid var(--border)",
       }}
     >
-      {/* Main footer content */}
       <div className="mx-auto max-w-6xl px-6 py-14">
         <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-4">
 
           {/* Brand column */}
-          <div className="lg:col-span-2">
+          <div className="lg:col-span-1">
             <Link href="/" className="mb-5 flex items-center gap-2.5">
               <Logo size="default" showTagline />
             </Link>
             <p
-              style={{ color: "rgba(126,200,216,0.4)" }}
-              className="mb-6 max-w-xs text-sm leading-relaxed"
+              style={{ color: "var(--text-secondary)", fontSize: "13px", lineHeight: "1.75" }}
+              className="mb-6 max-w-xs"
             >
-              Training campus ambassadors and interns through mentorship,
-              AI-skill workshops, and structured tracks — while delivering
-              real client services through a dedicated team.
+              Connexode trains campus talent and delivers practical tech systems —
+              full-stack development, AI automation, SEO, and growth — for teams
+              and businesses worldwide.
             </p>
-            {/* Social links */}
             <div className="flex items-center gap-3">
               {socials.map((s) => (
                 <a
@@ -62,11 +68,12 @@ export function RootFooter() {
                   target="_blank"
                   rel="noopener noreferrer"
                   style={{
-                    border: "1px solid rgba(126,200,216,0.12)",
-                    color: "rgba(126,200,216,0.45)",
-                    backgroundColor: "rgba(8,32,56,0.5)",
+                    border: "1px solid var(--border)",
+                    color: "var(--text-muted)",
+                    background: "var(--surface)",
+                    backdropFilter: "blur(8px)",
                   }}
-                  className="rounded-lg px-3 py-1.5 text-xs font-medium transition-all hover:border-[rgba(126,200,216,0.35)] hover:text-[#7EC8D8]"
+                  className="rounded-lg px-3 py-1.5 text-xs font-medium transition-all hover:border-[var(--border-strong)] hover:text-[var(--text-primary)]"
                 >
                   {s.label}
                 </a>
@@ -78,8 +85,14 @@ export function RootFooter() {
           {Object.entries(footerLinks).map(([group, links]) => (
             <div key={group}>
               <p
-                style={{ color: "rgba(126,200,216,0.35)" }}
-                className="mb-4 text-[10px] font-semibold uppercase tracking-widest"
+                style={{
+                  color: "var(--violet)",
+                  fontSize: "11px",
+                  fontWeight: 700,
+                  letterSpacing: "0.18em",
+                  textTransform: "uppercase",
+                  marginBottom: "14px",
+                }}
               >
                 {group}
               </p>
@@ -88,8 +101,8 @@ export function RootFooter() {
                   <li key={link.href}>
                     <Link
                       href={link.href}
-                      style={{ color: "rgba(126,200,216,0.5)" }}
-                      className="text-sm transition-colors hover:text-[#7EC8D8]"
+                      style={{ color: "var(--text-secondary)", fontSize: "14px" }}
+                      className="transition-colors hover:text-[var(--text-primary)]"
                     >
                       {link.label}
                     </Link>
@@ -103,25 +116,23 @@ export function RootFooter() {
 
       {/* Bottom bar */}
       <div
-        style={{ borderTop: "1px solid rgba(126,200,216,0.06)" }}
+        style={{ borderTop: "1px solid var(--border)" }}
         className="mx-auto max-w-6xl px-6 py-5"
       >
         <div className="flex flex-col items-center justify-between gap-3 sm:flex-row">
-          <p style={{ color: "rgba(126,200,216,0.2)" }} className="text-xs">
+          <p style={{ color: "var(--text-muted)", fontSize: "12px" }}>
             © {year} Connexode. All rights reserved.
           </p>
+          <p style={{ color: "var(--text-muted)", fontSize: "12px" }}>
+            Remote-first, serving clients worldwide
+          </p>
           <div className="flex items-center gap-5">
-            <Link
-              href="/verify"
-              style={{ color: "rgba(126,200,216,0.25)" }}
-              className="text-xs transition-colors hover:text-[#7EC8D8]"
-            >
-              Verify Certificate
+            <Link href="/privacy" style={{ color: "var(--text-muted)", fontSize: "12px" }} className="transition-colors hover:text-[var(--text-secondary)]">
+              Privacy Policy
             </Link>
-            <span style={{ color: "rgba(126,200,216,0.1)" }}>·</span>
-            <p style={{ color: "rgba(126,200,216,0.2)" }} className="text-xs">
-              Campus Talent Network · Pakistan
-            </p>
+            <Link href="/terms" style={{ color: "var(--text-muted)", fontSize: "12px" }} className="transition-colors hover:text-[var(--text-secondary)]">
+              Terms
+            </Link>
           </div>
         </div>
       </div>

@@ -1,202 +1,106 @@
 import Link from "next/link";
+import Logo from "@/components/ui/Logo";
 
 const InstagramIcon = ({ size = 18 }: { size?: number }) => (
-  <svg
-    width={size}
-    height={size}
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
-    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
-    <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="2" y="2" width="20" height="20" rx="5" ry="5" /><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" /><line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
   </svg>
 );
-
 const LinkedinIcon = ({ size = 18 }: { size?: number }) => (
-  <svg
-    width={size}
-    height={size}
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" />
-    <rect x="2" y="9" width="4" height="12" />
-    <circle cx="4" cy="4" r="2" />
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" /><rect x="2" y="9" width="4" height="12" /><circle cx="4" cy="4" r="2" />
   </svg>
 );
-
 const FacebookIcon = ({ size = 18 }: { size?: number }) => (
-  <svg
-    width={size}
-    height={size}
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
   </svg>
 );
-
-import Logo from "@/components/ui/Logo";
 
 export default function PublicFooter() {
   return (
     <footer
       style={{
-        backgroundColor: "var(--theme-surface)",
-        borderTop: "1px solid var(--theme-border)",
+        background: "var(--surface)",
+        backdropFilter: "blur(20px)",
+        WebkitBackdropFilter: "blur(20px)",
+        borderTop: "1px solid var(--border)",
       }}
-      className="py-16 px-6 font-sans"
+      className="pt-16 pb-8 px-6 font-sans"
     >
       <div className="mx-auto max-w-7xl">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-10 mb-12">
-          {/* Brand */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-10 mb-14">
+
+          {/* Col 1 — Brand */}
           <div className="flex flex-col gap-4">
             <Logo size="default" />
-            <p style={{ color: "var(--theme-text-secondary)" }} className="text-sm">
-              Build. Connect. Grow.
+            <p style={{ color: "var(--text-secondary)", fontSize: "13px", lineHeight: "1.75" }} className="max-w-[240px]">
+              Connexode trains campus talent and delivers practical tech systems —
+              full-stack development, AI automation, SEO, and growth — worldwide.
             </p>
-            <div className="flex items-center gap-4 mt-2">
-              <a
-                href="https://instagram.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{ color: "var(--theme-text-muted)" }}
-                className="hover:text-[var(--theme-text-primary)] transition-colors"
-              >
-                <InstagramIcon size={18} />
-              </a>
-              <a
-                href="https://linkedin.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{ color: "var(--theme-text-muted)" }}
-                className="hover:text-[var(--theme-text-primary)] transition-colors"
-              >
-                <LinkedinIcon size={18} />
-              </a>
-              <a
-                href="https://facebook.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{ color: "var(--theme-text-muted)" }}
-                className="hover:text-[var(--theme-text-primary)] transition-colors"
-              >
-                <FacebookIcon size={18} />
-              </a>
+            <div className="flex items-center gap-4 mt-1">
+              {[
+                { href: "https://instagram.com", icon: <InstagramIcon size={17} /> },
+                { href: "https://linkedin.com", icon: <LinkedinIcon size={17} /> },
+                { href: "https://facebook.com", icon: <FacebookIcon size={17} /> },
+              ].map((s, i) => (
+                <a key={i} href={s.href} target="_blank" rel="noopener noreferrer"
+                  style={{ color: "var(--text-muted)" }}
+                  className="hover:text-[var(--text-primary)] transition-colors">
+                  {s.icon}
+                </a>
+              ))}
             </div>
           </div>
 
-          {/* Platform */}
-          <div className="flex flex-col gap-3">
-            <span style={{ color: "#06B6D4" }} className="text-[11px] font-semibold tracking-[0.2em] uppercase mb-1">
-              Platform
-            </span>
-            <Link
-              href="/join/ambassador"
-              style={{ color: "var(--theme-text-secondary)" }}
-              className="text-sm hover:text-[var(--theme-text-primary)] transition-colors"
-            >
-              Ambassador Program
-            </Link>
-            <Link
-              href="/join/internship"
-              style={{ color: "var(--theme-text-secondary)" }}
-              className="text-sm hover:text-[var(--theme-text-primary)] transition-colors"
-            >
-              Internship Program
-            </Link>
-            <Link
-              href="/services"
-              style={{ color: "var(--theme-text-secondary)" }}
-              className="text-sm hover:text-[var(--theme-text-primary)] transition-colors"
-            >
-              Services
-            </Link>
-            <Link
-              href="/leaderboard"
-              style={{ color: "var(--theme-text-secondary)" }}
-              className="text-sm hover:text-[var(--theme-text-primary)] transition-colors"
-            >
-              Leaderboard
-            </Link>
-            <Link
-              href="/verify"
-              style={{ color: "var(--theme-text-secondary)" }}
-              className="text-sm hover:text-[var(--theme-text-primary)] transition-colors"
-            >
-              Verify Certificate
-            </Link>
+          {/* Col 2 — Services */}
+          <div className="flex flex-col gap-2.5">
+            <span style={{ color: "var(--violet)", fontSize: "11px", fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", display: "block", marginBottom: "10px" }}>Services</span>
+            {[
+              { label: "Full-Stack Apps", href: "/services#fullstack" },
+              { label: "AI Automation", href: "/services#ai" },
+              { label: "SEO", href: "/services#seo" },
+              { label: "Social Media", href: "/services#social" },
+              { label: "Design & Video", href: "/services#design" },
+            ].map((l) => (
+              <Link key={l.href} href={l.href} style={{ color: "var(--text-secondary)", fontSize: "14px" }} className="hover:text-[var(--text-primary)] transition-colors">{l.label}</Link>
+            ))}
           </div>
 
-          {/* Company */}
-          <div className="flex flex-col gap-3">
-            <span style={{ color: "#06B6D4" }} className="text-[11px] font-semibold tracking-[0.2em] uppercase mb-1">
-              Company
-            </span>
-            <Link
-              href="/about"
-              style={{ color: "var(--theme-text-secondary)" }}
-              className="text-sm hover:text-[var(--theme-text-primary)] transition-colors"
-            >
-              About
-            </Link>
-            <Link
-              href="/contact"
-              style={{ color: "var(--theme-text-secondary)" }}
-              className="text-sm hover:text-[var(--theme-text-primary)] transition-colors"
-            >
-              Contact
-            </Link>
+          {/* Col 3 — Programs */}
+          <div className="flex flex-col gap-2.5">
+            <span style={{ color: "var(--violet)", fontSize: "11px", fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", display: "block", marginBottom: "10px" }}>Programs</span>
+            {[
+              { label: "Internship Program", href: "/join/internship" },
+              { label: "Ambassador Program", href: "/join/ambassador" },
+              { label: "Leaderboard", href: "/leaderboard" },
+              { label: "Verify Certificate", href: "/verify" },
+            ].map((l) => (
+              <Link key={l.href} href={l.href} style={{ color: "var(--text-secondary)", fontSize: "14px" }} className="hover:text-[var(--text-primary)] transition-colors">{l.label}</Link>
+            ))}
           </div>
 
-          {/* Connect */}
-          <div className="flex flex-col gap-3">
-            <span style={{ color: "#06B6D4" }} className="text-[11px] font-semibold tracking-[0.2em] uppercase mb-1">
-              Connect
-            </span>
-            <span style={{ color: "var(--theme-text-secondary)" }} className="text-sm">
-              info@connexode.com
-            </span>
-            <span style={{ color: "var(--theme-text-secondary)" }} className="text-sm">
-              +92 (300) 000-0000
-            </span>
+          {/* Col 4 — Company */}
+          <div className="flex flex-col gap-2.5">
+            <span style={{ color: "var(--violet)", fontSize: "11px", fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", display: "block", marginBottom: "10px" }}>Company</span>
+            {[
+              { label: "About", href: "/about" },
+              { label: "Contact", href: "/contact" },
+              { label: "Careers", href: "/join" },
+            ].map((l) => (
+              <Link key={l.href} href={l.href} style={{ color: "var(--text-secondary)", fontSize: "14px" }} className="hover:text-[var(--text-primary)] transition-colors">{l.label}</Link>
+            ))}
           </div>
         </div>
 
-        {/* Divider */}
-        <div
-          style={{
-            height: "1px",
-            background: "linear-gradient(90deg, transparent, var(--theme-border), transparent)",
-          }}
-          className="mb-8"
-        />
+        <div style={{ height: 1, background: "linear-gradient(90deg, transparent, var(--border), transparent)" }} className="mb-7" />
 
-        {/* Bottom Bar */}
-        <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-          <p style={{ color: "var(--theme-text-muted)" }} className="text-xs">
-            &copy; 2026 Connexode &middot; Build. Connect. Grow.
-          </p>
-          <div className="flex items-center gap-6">
-            <Link href="/privacy" style={{ color: "var(--theme-text-muted)" }} className="text-xs hover:text-[var(--theme-text-secondary)] transition-colors">
-              Privacy Policy
-            </Link>
-            <Link href="/terms" style={{ color: "var(--theme-text-muted)" }} className="text-xs hover:text-[var(--theme-text-secondary)] transition-colors">
-              Terms of Service
-            </Link>
+        <div className="flex flex-col md:flex-row items-center justify-between gap-3 text-center md:text-left">
+          <p style={{ color: "var(--text-muted)", fontSize: "12px" }}>&copy; 2026 Connexode. All rights reserved.</p>
+          <p style={{ color: "var(--text-muted)", fontSize: "12px" }}>Remote-first, serving clients worldwide</p>
+          <div className="flex items-center gap-5">
+            <Link href="/privacy" style={{ color: "var(--text-muted)", fontSize: "12px" }} className="hover:text-[var(--text-secondary)] transition-colors">Privacy Policy</Link>
+            <Link href="/terms" style={{ color: "var(--text-muted)", fontSize: "12px" }} className="hover:text-[var(--text-secondary)] transition-colors">Terms</Link>
           </div>
         </div>
       </div>
