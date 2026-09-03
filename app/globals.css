@@ -750,6 +750,34 @@ spline-viewer::part(logo) {
   background: rgba(168, 85, 247, 0.4);
 }
 
+/* Social Icon Brand Hover States */
+.btn-linkedin {
+  transition: all 0.2s ease;
+}
+.btn-linkedin:hover {
+  background-color: #0A66C2 !important;
+  border-color: #0A66C2 !important;
+  color: #FFFFFF !important;
+  box-shadow: 0 4px 16px rgba(10, 102, 194, 0.45) !important;
+}
+
+.btn-gmail {
+  transition: all 0.2s ease;
+}
+.btn-gmail:hover {
+  background-color: #EA4335 !important;
+  border-color: #EA4335 !important;
+  color: #FFFFFF !important;
+  box-shadow: 0 4px 16px rgba(234, 67, 53, 0.45) !important;
+}
+
+.btn-connect:hover {
+  border-color: #0A66C2 !important;
+  color: #0A66C2 !important;
+  box-shadow: 0 4px 14px rgba(10, 102, 194, 0.25) !important;
+}
+
+
 
 
 

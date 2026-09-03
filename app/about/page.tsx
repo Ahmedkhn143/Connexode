@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Heart, Users, Zap, Shield, Briefcase, BookOpen } from "lucide-react";
 import PublicNav from "@/components/layout/PublicNav";
 import PublicFooter from "@/components/layout/PublicFooter";
+import LeadershipSection from "@/components/landing/LeadershipSection";
 
 export default function AboutPage() {
   const values = [
@@ -96,13 +97,13 @@ export default function AboutPage() {
           </blockquote>
           <div className="flex items-center gap-4 mt-6">
             <img
-              src="/founder.jpg"
-              alt="Ahmad Khan"
+              src="/team/muhammad-ahmad.png"
+              alt="Muhammad Ahmad"
               className="w-12 h-12 rounded-full object-cover border border-cyan-500/30"
             />
             <div className="flex flex-col gap-1">
               <span style={{ color: "var(--theme-text-primary)" }} className="text-sm font-bold">
-                Ahmad Khan
+                Muhammad Ahmad
               </span>
               <span style={{ color: "#06B6D4" }} className="text-xs">
                 Founder & CEO, Connexode
@@ -270,7 +271,8 @@ export default function AboutPage() {
         </div>
       </section>
 
-
+      {/* Executive Leadership */}
+      <LeadershipSection />
 
       {/* CTA Section */}
       <section className="py-16 px-6 max-w-5xl mx-auto w-full mb-12">

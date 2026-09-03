@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import {
   ArrowRight,
@@ -17,6 +18,7 @@ import {
 } from "lucide-react";
 import PublicNav from "@/components/layout/PublicNav";
 import PublicFooter from "@/components/layout/PublicFooter";
+import LeadershipSection from "@/components/landing/LeadershipSection";
 
 /* ─── Helpers ─── */
 const Grad = ({
@@ -231,6 +233,58 @@ export default function Home() {
           >
             Explore Services
           </Link>
+        </div>
+
+        {/* Direct Leadership Trust Pill */}
+        <div className="relative z-10 -mt-6 mb-12 flex items-center justify-center">
+          <a
+            href="#leadership"
+            className="group inline-flex items-center gap-3 px-4 py-2 rounded-full transition-all duration-300 hover:scale-[1.03] hover:border-[var(--border-strong)]"
+            style={{
+              background: "var(--surface)",
+              backdropFilter: "blur(16px)",
+              WebkitBackdropFilter: "blur(16px)",
+              border: "1px solid var(--border)",
+              boxShadow: "var(--shadow-sm), var(--inset-highlight)",
+            }}
+          >
+            {/* Overlapping circular photos */}
+            <div className="flex items-center -space-x-2">
+              <div
+                className="relative w-7 h-7 rounded-full overflow-hidden border-2 shadow-sm"
+                style={{ borderColor: "var(--surface-solid)" }}
+              >
+                <Image
+                  src="/Founder.png"
+                  alt="Muhammad Ahmad - Founder & CEO"
+                  fill
+                  className="object-cover object-[center_12%]"
+                  sizes="28px"
+                />
+              </div>
+              <div
+                className="relative w-7 h-7 rounded-full overflow-hidden border-2 shadow-sm"
+                style={{ borderColor: "var(--surface-solid)" }}
+              >
+                <Image
+                  src="/COO.jpeg"
+                  alt="Muhammad Nadeem - COO"
+                  fill
+                  className="object-cover object-[center_12%]"
+                  sizes="28px"
+                />
+              </div>
+            </div>
+            <span style={{ fontSize: "12px", color: "var(--text-secondary)", fontWeight: 600 }}>
+              Steered directly by Executive Leadership
+            </span>
+            <span
+              className="inline-flex items-center justify-center w-5 h-5 rounded-full transition-transform duration-200 group-hover:translate-x-0.5"
+              style={{ background: "rgba(124, 58, 237, 0.12)", color: "var(--violet)" }}
+            >
+              <ArrowRight size={11} />
+            </span>
+          </a>
         </div>
 
         {/* Capability cards */}
@@ -552,6 +606,9 @@ export default function Home() {
           ))}
         </div>
       </section>
+
+      {/* ═══ LEADERSHIP & EXECUTIVE TEAM ═══ */}
+      <LeadershipSection />
 
       {/* ═══ FINAL CTA ═══ */}
       <section className="py-16 px-6 max-w-4xl mx-auto w-full pb-24">
