@@ -10,9 +10,48 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://connexode.com"),
   title: "Connexode — Build. Connect. Grow.",
   description:
     "Global tech services + campus internships + ambassador program. Pakistan-based, world-delivered.",
+  icons: {
+    icon: [
+      { url: "/icon.png", sizes: "512x512", type: "image/png" },
+      { url: "/favicon.ico" },
+    ],
+    shortcut: "/icon.png",
+    apple: "/icon.png",
+  },
+  openGraph: {
+    title: "Connexode — Build. Connect. Grow.",
+    description:
+      "Global tech services + campus internships + ambassador program. Pakistan-based, world-delivered.",
+    url: "https://connexode.com",
+    siteName: "Connexode",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "Connexode — Build. Connect. Grow.",
+      },
+      {
+        url: "/icon.png",
+        width: 512,
+        height: 512,
+        alt: "Connexode Logo",
+      },
+    ],
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Connexode — Build. Connect. Grow.",
+    description:
+      "Global tech services + campus internships + ambassador program. Pakistan-based, world-delivered.",
+    images: ["/og-image.png"],
+  },
 };
 
 const organizationSchema = {
@@ -20,7 +59,7 @@ const organizationSchema = {
   "@type": "Organization",
   name: "Connexode",
   url: "https://connexode.com",
-  logo: "https://connexode.com/logo.png",
+  logo: "https://connexode.com/icon.png",
   description:
     "Global tech services + campus internships + ambassador program. Pakistan-based, world-delivered.",
   founder: {
