@@ -98,7 +98,7 @@ export default function AboutPage() {
           <div className="flex items-center gap-4 mt-6">
             <img
               src="/team/muhammad-ahmad.png"
-              alt="Muhammad Ahmad"
+              alt="Muhammad Ahmad - Founder & CEO of Connexode"
               className="w-12 h-12 rounded-full object-cover border border-cyan-500/30"
             />
             <div className="flex flex-col gap-1">

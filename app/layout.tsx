@@ -54,39 +54,88 @@ export const metadata: Metadata = {
   },
 };
 
-const organizationSchema = {
+const structuredData = {
   "@context": "https://schema.org",
-  "@type": "Organization",
-  name: "Connexode",
-  url: "https://connexode.com",
-  logo: "https://connexode.com/icon.png",
-  description:
-    "Global tech services + campus internships + ambassador program. Pakistan-based, world-delivered.",
-  founder: {
-    "@type": "Person",
-    name: "Muhammad Ahmad",
-    jobTitle: "Founder & Chief Executive Officer",
-    url: "https://www.linkedin.com/in/muhamad-ahmd/",
-    email: "ahmadkhn8143@gmail.com",
-  },
-  employee: [
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": "https://connexode.com/#organization",
+      name: "Connexode",
+      url: "https://connexode.com",
+      logo: {
+        "@type": "ImageObject",
+        "@id": "https://connexode.com/#logo",
+        url: "https://connexode.com/icon.png",
+        contentUrl: "https://connexode.com/icon.png",
+        caption: "Connexode Logo",
+      },
+      image: "https://connexode.com/og-image.png",
+      description:
+        "Global tech services + campus internships + ambassador program. Pakistan-based, world-delivered.",
+      founder: {
+        "@id": "https://connexode.com/#founder",
+      },
+      employee: [
+        {
+          "@id": "https://connexode.com/#founder",
+        },
+        {
+          "@id": "https://connexode.com/#coo",
+        },
+      ],
+      sameAs: [
+        "https://www.linkedin.com/company/connexode",
+        "https://www.linkedin.com/in/muhamad-ahmd/",
+        "https://www.linkedin.com/in/muhammad-nadeem404",
+      ],
+    },
     {
       "@type": "Person",
+      "@id": "https://connexode.com/#founder",
       name: "Muhammad Ahmad",
-      jobTitle: "Founder & CEO",
-      url: "https://www.linkedin.com/in/muhamad-ahmd/",
+      givenName: "Muhammad",
+      familyName: "Ahmad",
+      jobTitle: "Founder & Chief Executive Officer",
+      alternateName: ["Muhammad Ahmad Connexode", "Founder of Connexode"],
+      image: "https://connexode.com/Founder.png",
+      url: "https://connexode.com/about",
+      email: "ahmadkhn8143@gmail.com",
+      worksFor: {
+        "@id": "https://connexode.com/#organization",
+      },
+      sameAs: [
+        "https://www.linkedin.com/in/muhamad-ahmd/",
+      ],
     },
     {
       "@type": "Person",
+      "@id": "https://connexode.com/#coo",
       name: "Muhammad Nadeem",
+      givenName: "Muhammad",
+      familyName: "Nadeem",
       jobTitle: "Chief Operating Officer",
-      url: "https://www.linkedin.com/in/muhammad-nadeem404",
+      alternateName: ["Muhammad Nadeem Connexode", "COO of Connexode"],
+      image: "https://connexode.com/COO.jpeg",
+      url: "https://connexode.com/about",
       email: "muhammadnadeem2848@gmail.com",
+      worksFor: {
+        "@id": "https://connexode.com/#organization",
+      },
+      sameAs: [
+        "https://www.linkedin.com/in/muhammad-nadeem404",
+      ],
     },
-  ],
-  sameAs: [
-    "https://www.linkedin.com/in/muhamad-ahmd/",
-    "https://www.linkedin.com/in/muhammad-nadeem404",
+    {
+      "@type": "WebSite",
+      "@id": "https://connexode.com/#website",
+      url: "https://connexode.com",
+      name: "Connexode",
+      description:
+        "Global tech services + campus internships + ambassador program. Pakistan-based, world-delivered.",
+      publisher: {
+        "@id": "https://connexode.com/#organization",
+      },
+    },
   ],
 };
 
@@ -101,7 +150,7 @@ export default function RootLayout({
         <link rel="apple-touch-icon" href="/icon.png" />
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
         />
       </head>
       <body

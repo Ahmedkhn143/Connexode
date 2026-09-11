@@ -239,7 +239,7 @@ export default function LeadershipSection() {
                     >
                       <Image
                         src={leader.image}
-                        alt={leader.name}
+                        alt={`${leader.name} - ${leader.role} of Connexode`}
                         fill
                         sizes="(max-width: 768px) 192px, 208px"
                         className={`object-cover ${leader.imgPosition} transition-transform duration-700 group-hover/photo:scale-105`}
